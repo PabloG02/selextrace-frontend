@@ -1,0 +1,138 @@
+<section class="page-header">
+  <div class="title-group">
+    <h1>Experiments</h1>
+    <p class="subtitle">Manage SELEX runs, monitor status, and jump into recent results.</p>
+  </div>
+  <button mat-flat-button color="primary" type="button" (click)="goToCreate()">
+    <mat-icon aria-hidden="true">add</mat-icon>
+    New experiment
+  </button>
+</section>
+
+<section class="controls" aria-label="Experiment controls">
+  <div class="control-row">
+    <mat-form-field appearance="outline" class="control-field search-field">
+      <mat-label>Search experiments</mat-label>
+      <input
+        matInput
+        type="search"
+        #searchInput
+        [value]="searchTerm()"
+        (input)="updateSearch(searchInput.value)"
+        aria-label="Search experiments"
+      />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="control-field">
+      <mat-label>Status</mat-label>
+      <mat-select [value]="statusFilter()" (selectionChange)="statusFilter.set($event.value)">
+        <mat-option value="all">All statuses</mat-option>
+        @for (status of statusOptions; track status) {
+          <mat-option [value]="status">{{ status | titlecase }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="control-field">
+      <mat-label>Date range</mat-label>
+      <mat-select [value]="dateRangeFilter()" (selectionChange)="dateRangeFilter.set($event.value)">
+        @for (option of dateRangeOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="control-field">
+      <mat-label>Sort by</mat-label>
+      <mat-select [value]="sortOption()" (selectionChange)="sortOption.set($event.value)">
+        @for (option of sortOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (hasSelection()) {
+    <div class="bulk-actions" role="region" aria-label="Bulk actions">
+      <span>{{ selectedIds().size }} selected</span>
+      <div class="bulk-buttons">
+        <button mat-button type="button" (click)="selectAll()">Select all</button>
+        <button mat-button type="button" (click)="clearSelection()">Clear</button>
+        <button mat-flat-button color="warn" type="button" (click)="deleteSelected()">
+          <mat-icon aria-hidden="true">delete</mat-icon>
+          Delete
+        </button>
+      </div>
+    </div>
+  }
+</section>
+
+@if (filteredExperiments().length) {
+  <section class="experiment-grid" role="list" aria-label="Experiments">
+    @for (experiment of filteredExperiments(); track experiment.id) {
+      <mat-card
+        appearance="outlined"
+        class="experiment-card"
+        role="article"
+        tabindex="0"
+        [attr.aria-label]="'Experiment ' + experiment.name"
+        (click)="toggleSelection($event, experiment.id)"
+        [class.selected]="selectedIds().has(experiment.id)"
+      >
+        <mat-card-header>
+          <div mat-card-avatar class="avatar">
+            @if (selectedIds().has(experiment.id)) {
+              <mat-icon aria-hidden="true">check</mat-icon>
+            } @else {
+              {{ avatarInitials(experiment.name) }}
+            }
+          </div>
+          <mat-card-title>{{ experiment.name }}</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div>{{ experiment.description }}</div>
+          <div class="meta-row">
+            <span class="label">Created</span>
+            <span>{{ experiment.createdAt | date: 'mediumDate' }}</span>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <mat-chip-set>
+            <mat-chip
+              [class.status-draft]="experiment.status === 'draft'"
+              [class.status-running]="experiment.status === 'running'"
+              [class.status-completed]="experiment.status === 'completed'"
+              [class.status-error]="experiment.status === 'error'"
+              aria-label="Status {{ experiment.status }}"
+            >
+              {{ experiment.status | titlecase }}
+            </mat-chip>
+          </mat-chip-set>
+          <span class="action-spacer"></span>
+          <button mat-button type="button" (click)="openExperiment(experiment.id)">
+            Open
+          </button>
+<!--          <button mat-button type="button" (click)="duplicateExperiment(experiment)">-->
+<!--            Duplicate-->
+<!--          </button>-->
+          <button mat-icon-button type="button" color="warn" matTooltip="Delete" (click)="deleteExperiment(experiment)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </section>
+} @else {
+  <section class="empty-state" role="region" aria-live="polite">
+    <img
+      ngSrc="/assets/empty-state.svg"
+      width="240"
+      height="160"
+      alt="No experiments"
+    />
+    <h2>No experiments yet</h2>
+    <p>Get started by creating your first experiment and tracking sequencing progress.</p>
+    <button mat-flat-button color="primary" type="button" (click)="goToCreate()">
+      Create your first experiment
+    </button>
+  </section>
+}
