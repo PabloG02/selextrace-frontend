@@ -48,3 +48,17 @@ body {
   box-sizing: border-box;
 }
 
+/* Shared component styles */
+.title-group {
+  h1 {
+    margin: 0;
+    font: var(--mat-sys-headline-large);
+    font-weight: 500;
+  }
+
+  .subtitle {
+    margin: 8px 0 0;
+    font: var(--mat-sys-label-large);
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
