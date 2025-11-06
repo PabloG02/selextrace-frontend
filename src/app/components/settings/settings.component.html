@@ -1,0 +1,29 @@
+<div class="title-group">
+  <h1>Settings</h1>
+</div>
+
+<div class="settings-section">
+  <h2>Appearance</h2>
+
+  <div class="setting-item">
+    <label>Theme</label>
+    <mat-button-toggle-group
+      [value]="currentTheme()"
+      (change)="onThemeChange($event.value)"
+      [hideSingleSelectionIndicator]="true"
+      aria-label="Theme selection">
+      <mat-button-toggle value="light">
+        <mat-icon>light_mode</mat-icon>
+        <span>Light</span>
+      </mat-button-toggle>
+      <mat-button-toggle value="dark">
+        <mat-icon>dark_mode</mat-icon>
+        <span>Dark</span>
+      </mat-button-toggle>
+      <mat-button-toggle value="auto">
+        <mat-icon>brightness_auto</mat-icon>
+        <span>Auto</span>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+</div>

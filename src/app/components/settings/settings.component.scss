@@ -1,0 +1,28 @@
+.title-group {
+  margin-bottom: 24px;
+}
+
+.settings-section {
+  h2 {
+    margin: 0 0 16px;
+    font: var(--mat-sys-title-large);
+    font-weight: 500;
+  }
+}
+
+.setting-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.setting-item > label {
+  font: var(--mat-sys-body-large);
+  font-weight: 500;
+}
+
+mat-button-toggle-group mat-icon {
+  margin-right: 8px;
+}
