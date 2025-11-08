@@ -5,6 +5,8 @@
 // Learn more about theming and how to use it for your application's
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+// Import Material Symbols rounded icon font
+@import 'material-symbols/rounded';
 
 html {
   @include mat.theme((
@@ -32,6 +34,11 @@ body {
 
   // Reset the user agent margin.
   margin: 0;
+}
+
+// Icon font settings for Material Symbols Rounded
+.material-symbols-rounded {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
 /* Global styles */
