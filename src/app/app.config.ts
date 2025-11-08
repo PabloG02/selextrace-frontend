@@ -11,6 +11,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import * as echarts from 'echarts';
 
 import { routes } from './app.routes';
+import { ThemeService } from './services/theme.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -20,6 +21,9 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch()),
     provideEchartsCore({ echarts }),
     provideAppInitializer(() => {
+      // Initialize ThemeService to apply stored theme on app startup
+      const themeService = inject(ThemeService);
+      // Set up Material Icon component to use "Material Symbols Rounded" by default
       const initializerFn = ((iconRegistry: MatIconRegistry) => () => {
         const defaultFontSetClasses = iconRegistry.getDefaultFontSetClass();
         const outlinedFontSetClasses = defaultFontSetClasses
