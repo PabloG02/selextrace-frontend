@@ -3,6 +3,8 @@
 }
 
 .settings-section {
+  margin-bottom: 24px;
+
   h2 {
     margin: 0 0 16px;
     font: var(--mat-sys-title-large);
@@ -25,4 +27,15 @@
 
 mat-button-toggle-group mat-icon {
   margin-right: 8px;
+}
+
+.backend-url-field {
+  width: 100%;
+  max-width: 400px;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }

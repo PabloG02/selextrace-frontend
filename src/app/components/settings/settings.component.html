@@ -27,3 +27,35 @@
     </mat-button-toggle-group>
   </div>
 </div>
+
+<div class="settings-section">
+  <h2>Backend Configuration</h2>
+
+  <div class="setting-item">
+    <label>Backend URL</label>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="backend-url-field">
+      <input
+        matInput
+        [(ngModel)]="backendUrl"
+        (input)="onBackendUrlInput()"
+        placeholder="http://localhost:8080"
+        type="url" />
+      <mat-icon matIconPrefix>dns</mat-icon>
+    </mat-form-field>
+    <div class="button-group">
+      <button
+        matButton="filled"
+        (click)="saveBackendUrl()"
+        [disabled]="!isBackendUrlModified()">
+        <mat-icon>save</mat-icon>
+        Save
+      </button>
+      <button
+        matButton="outlined"
+        (click)="resetBackendUrl()">
+        <mat-icon>restore</mat-icon>
+        Reset to Default
+      </button>
+    </div>
+  </div>
+</div>
