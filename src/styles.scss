@@ -1,13 +1,14 @@
-
+/* ——— Imports and forwards ——— */
 // Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
+// This Sass mixin will define CSS variables that are used for styling Angular Material components according to Material 3.
+// Learn more at: https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
-// Import Material Symbols rounded icon font
+// Align Angular Material tabs with the Material 3 design system
+@forward 'styles/tabs';
+// Import Material Symbols Rounded icon font
 @import 'material-symbols/rounded';
 
+/* ——— Angular Material Theming ——— */
 html {
   @include mat.theme((
     color: (
@@ -17,6 +18,18 @@ html {
     typography: Geist,
     density: 0,
   ));
+}
+
+/* ——— Icon Fonts ——— */
+// Settings for Material Symbols Rounded
+.material-symbols-rounded {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+
+/* ——— Global Resets & Base Styles ——— */
+html, body {
+  height: 100%;
 }
 
 body {
@@ -34,29 +47,16 @@ body {
 
   // Reset the user agent margin.
   margin: 0;
-}
 
-// Icon font settings for Material Symbols Rounded
-.material-symbols-rounded {
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
-/* Global styles */
-html, body {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: Geist, sans-serif;
-  //scrollbar-color: var(--mat-sys-outline) var(--mat-sys-surface-container);
+  // Optional scrollbar customization
+  // scrollbar-color: var(--mat-sys-outline) var(--mat-sys-surface-container);
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* Shared component styles */
+/* ——— Shared Component Styles ——— */
 .title-group {
   h1 {
     margin: 0;
