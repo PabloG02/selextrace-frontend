@@ -1,0 +1,413 @@
+<div class="title-group">
+  <h1>Create a New Experiment</h1>
+  <p class="subtitle">
+    This wizard will guide you through the steps required to set up a new experiment,
+    set the experimental details of the selection, and import your data into AptaSuite.
+  </p>
+</div>
+<div class="wizard-layout">
+  <section class="wizard" aria-label="Create experiment wizard">
+    <mat-stepper linear orientation="vertical">
+      <mat-step [completed]="generalForm.valid">
+        <ng-template matStepLabel>General & Sequencing Info</ng-template>
+        <div class="step">
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-card-title>General Information</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="field-stack">
+                <mat-form-field appearance="outline">
+                  <mat-label>Name</mat-label>
+                  <input matInput [formControl]="generalForm.controls.name" required autocomplete="off"/>
+                  @if (generalForm.controls.name.invalid && generalForm.controls.name.touched) {
+                    <mat-error>Experiment name is required.</mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput rows="3" [formControl]="generalForm.controls.description"></textarea>
+                </mat-form-field>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-card-title>Sequencing Information</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="question-block">
+                <h3 class="mt-0">Has your data previously been demultiplexed?</h3>
+                <p class="help">
+                  If you're unsure: demultiplexed data are stored as one file per sequenced selection round (or per sample). If your sequencing data are contained in a single file for multiple samples, select <strong>IS NOT Demultiplexed</strong>. Otherwise select <strong>IS Demultiplexed</strong>.
+                </p>
+                <mat-radio-group [formControl]="generalForm.controls.isDemultiplexed" class="radio-row">
+                  <mat-radio-button [value]="true">IS Demultiplexed</mat-radio-button>
+                  <mat-radio-button [value]="false">IS NOT Demultiplexed</mat-radio-button>
+                </mat-radio-group>
+              </div>
+
+              <div class="question-block">
+                <h3>Is your data paired-end?</h3>
+                <p class="help">
+                  Paired-end datasets include two sequencing files per sample: a forward file (usually ending with <code>_1.fastq</code> or <code>_1.fastq.gz</code>) and a reverse file (usually ending with <code>_2.fastq</code> or <code>_2.fastq.gz</code>).
+                </p>
+                <div class="input-row">
+                  <mat-radio-group [formControl]="generalForm.controls.readType" class="radio-row">
+                    <mat-radio-button value="single-end">Single End</mat-radio-button>
+                    <mat-radio-button value="paired-end">Paired End</mat-radio-button>
+                  </mat-radio-group>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>File format</mat-label>
+                    <mat-select [formControl]="generalForm.controls.fileFormat">
+                      <mat-option value="fastq">FASTQ</mat-option>
+                      <mat-option value="fasta">FASTA</mat-option>
+                    </mat-select>
+                    <mat-hint>.gz compressed files are supported.</mat-hint>
+                  </mat-form-field>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <footer class="step-actions">
+            <span></span>
+            <button mat-flat-button color="primary" type="button" [disabled]="generalForm.invalid" matStepperNext>
+              Next
+            </button>
+          </footer>
+        </div>
+      </mat-step>
+
+      <mat-step [completed]="structureForm.valid && cyclesForm.valid && cyclesForm.length > 0">
+        <ng-template matStepLabel>Selection Cycle Input</ng-template>
+        <div class="step">
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-card-title>Primary Structure Information</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="help mt-0">
+                Specify the primer sequences as used during the selection. Note that the primers are to be specified in 5' to 3' orientation of the original aptamer as present during the selection, not based on the orientation in the sequencing data.
+              </p>
+              <div class="input-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>5' Primer</mat-label>
+                  <input matInput [formControl]="structureForm.controls.fivePrime" required pattern="[ACGTacgt]+"/>
+                  <mat-hint>A, C, G, or T only</mat-hint>
+                  @if (structureForm.controls.fivePrime.invalid && structureForm.controls.fivePrime.touched) {
+                    <mat-error>5' primer is required.</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>3' Primer</mat-label>
+                  <input matInput [formControl]="structureForm.controls.threePrime" pattern="[ACGTacgt]+"/>
+                  <mat-hint>A, C, G, or T only</mat-hint>
+                </mat-form-field>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-card-title>Randomized Region Size</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="help mt-0">
+                Optionally, specify the randomized region size. Either select and specify an exact value (mandatory if you do not specify a 3' primer) or a range (inclusive) for the length of the randomized region. If specified, all sequences differing in length from the selected condition will be filtered out. If none of the checkboxes are selected, all aptamers regardless of their randomized region size will be accepted.
+              </p>
+              <div class="field-stack">
+                <mat-radio-group [formControl]="structureForm.controls.randomizedRegionType" class="radio-row">
+                  <mat-radio-button value="exact">Exact length</mat-radio-button>
+                  <mat-radio-button value="range">Range</mat-radio-button>
+                </mat-radio-group>
+
+                @if (structureForm.controls.randomizedRegionType.value === 'exact') {
+                  <mat-form-field appearance="outline">
+                    <mat-label>Exact length (bases)</mat-label>
+                    <input matInput type="number" [formControl]="structureForm.controls.randomizedExactLength" min="1"/>
+                    @if (structureForm.controls.randomizedExactLength.invalid && structureForm.controls.randomizedExactLength.touched) {
+                      <mat-error>Provide a positive integer.</mat-error>
+                    }
+                  </mat-form-field>
+                } @else {
+                  <div class="input-row">
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Minimum</mat-label>
+                      <input matInput type="number" [formControl]="structureForm.controls.randomizedRangeMin" min="1"/>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Maximum</mat-label>
+                      <input matInput type="number" [formControl]="structureForm.controls.randomizedRangeMax" min="1"/>
+                    </mat-form-field>
+                  </div>
+                }
+              </div>
+
+              @if (structureForm.hasError('requiresExactLength')) {
+                <p class="error">Exact length is required when no 3' primer is provided.</p>
+              }
+              @if (structureForm.hasError('invalidRange')) {
+                <p class="error">Provide a valid minimum and maximum range.</p>
+              }
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card appearance="outlined">
+            <mat-card-header class="cycle-header">
+              <mat-card-title>Selection cycles</mat-card-title>
+              <button mat-stroked-button type="button" (click)="addCycle()" aria-label="Add selection cycle">
+                <mat-icon>add</mat-icon>
+                Add selection cycle
+              </button>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="help mt-0">
+                Add the selection cycles for which you have data. For each dataset, click the Add Selection Cycle button and enter the required information. Make sure each Round Name is unique and contains only letters and numbers with no spaces or special characters.
+              </p>
+
+              @if (!cyclesForm.length) {
+                <p class="note">Add at least one selection cycle to continue.</p>
+              }
+
+              <div
+                cdkDropList
+                class="cycles-list"
+                (cdkDropListDropped)="reorderCycles($event)"
+                [cdkDropListDisabled]="cyclesForm.length < 2"
+              >
+                @for (cycle of cyclesForm.controls; track cycle; let index = $index) {
+                  <section class="cycle" cdkDrag>
+                    <header class="cycle-title">
+                      <button mat-icon-button type="button" cdkDragHandle aria-label="Reorder cycle">
+                        <mat-icon>drag_indicator</mat-icon>
+                      </button>
+                      <h3>Round {{ cycle.controls.roundNumber.value }}</h3>
+                      <div class="cycle-actions">
+                        <button mat-icon-button type="button" color="warn" (click)="removeCycle(index)" aria-label="Delete cycle">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    </header>
+
+                    <div class="input-row">
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Round name</mat-label>
+                        <input matInput [formControl]="cycle.controls.roundName" required />
+                        @if (cycle.controls.roundName.hasError('duplicateRoundName')) {
+                          <mat-error>Round name must be unique.</mat-error>
+                        }
+                      </mat-form-field>
+
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Round number</mat-label>
+                        <input matInput type="number" [formControl]="cycle.controls.roundNumber" min="1" />
+                      </mat-form-field>
+                    </div>
+
+                    <div class="file-controls">
+                      <label class="file-label">Forward reads</label>
+                      <app-file-upload-dropzone
+                        [formControl]="cycle.controls.forwardFiles"
+                        [accept]="acceptedFileExtensions()"
+                      />
+                    </div>
+
+                    @if (generalForm.controls.readType.value === 'paired-end') {
+                      <div class="file-controls">
+                        <label class="file-label">Reverse reads</label>
+                        <app-file-upload-dropzone
+                          [formControl]="cycle.controls.reverseFiles"
+                          [accept]="acceptedFileExtensions()"
+                        />
+                      </div>
+                    }
+
+                    <div class="radio-row">
+                      <mat-checkbox [formControl]="cycle.controls.isControl">Is control?</mat-checkbox>
+                      <mat-checkbox [formControl]="cycle.controls.isCounterSelection">Counter-selection?</mat-checkbox>
+                    </div>
+                  </section>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <footer class="step-actions">
+            <button mat-button type="button" matStepperPrevious>Back</button>
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              [disabled]="structureForm.invalid || cyclesForm.invalid || !cyclesForm.length"
+              matStepperNext
+            >
+              Next
+            </button>
+          </footer>
+        </div>
+      </mat-step>
+
+      <mat-step>
+        <ng-template matStepLabel>Summary & Create</ng-template>
+        <div class="step">
+          <mat-card appearance="outlined">
+            <mat-card-header class="card-header-with-button">
+              <mat-card-title>General Information</mat-card-title>
+              <button mat-icon-button type="button" (click)="goToStep(0)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </mat-card-header>
+            <mat-card-content>
+              <ul class="simple-list">
+                <li><strong>Name:</strong> {{ generalForm.value.name }}</li>
+                <li><strong>Description:</strong> {{ generalForm.value.description || 'No description' }}</li>
+                <li><strong>Read type:</strong> {{ generalForm.value.readType | titlecase }}</li>
+                <li><strong>File format:</strong> {{ generalForm.value.fileFormat?.toUpperCase() }}</li>
+              </ul>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card appearance="outlined">
+            <mat-card-header class="card-header-with-button">
+              <mat-card-title>Primers & Randomized Region</mat-card-title>
+              <button mat-icon-button type="button" (click)="goToStep(1)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </mat-card-header>
+            <mat-card-content>
+              <ul class="simple-list">
+                <li><strong>5' primer:</strong> {{ structureForm.value.fivePrime }}</li>
+                <li><strong>3' primer:</strong> {{ structureForm.value.threePrime || 'Not provided' }}</li>
+                <li><strong>Randomized:</strong> {{ randomizedSummary() }}</li>
+              </ul>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card appearance="outlined">
+            <mat-card-header class="card-header-with-button">
+              <mat-card-title>Selection Cycles</mat-card-title>
+              <button mat-icon-button type="button" (click)="goToStep(1)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </mat-card-header>
+            <mat-card-content>
+              <table class="summary-table" aria-label="Selection cycles summary">
+                <thead>
+                <tr>
+                  <th scope="col">Round</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Forward file</th>
+                  <th scope="col">Reverse file</th>
+                  <th scope="col">Flags</th>
+                </tr>
+                </thead>
+                <tbody>
+                  @for (cycle of cyclesForm.controls; track cycle.controls.roundName.value; let i = $index) {
+                    <tr>
+                      <td>{{ i + 1 }}</td>
+                      <td>{{ cycle.controls.roundName.value }}</td>
+                      <td>{{ cycle.controls.forwardFiles.value?.name || '—' }}</td>
+                      <td>{{ cycle.controls.reverseFiles.value?.name || '—' }}</td>
+                      <td>
+                        @if (cycle.controls.isControl.value) {
+                          <mat-chip appearance="outlined">Control</mat-chip>
+                        }
+                        @if (cycle.controls.isCounterSelection.value) {
+                          <mat-chip appearance="outlined">Counter-selection</mat-chip>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </mat-card-content>
+          </mat-card>
+
+          <footer class="step-actions">
+            <button mat-button type="button" matStepperPrevious>Back</button>
+            <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="isSubmitting()">
+              @if (isSubmitting()) {
+                <mat-icon class="spin">refresh</mat-icon>
+              }
+              Create Experiment
+            </button>
+          </footer>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  </section>
+
+  <aside class="summary" aria-label="Experiment summary">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>General</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <dl>
+          <div>
+            <dt>Name</dt>
+            <dd>{{ generalForm.value.name || 'Untitled' }}</dd>
+          </div>
+          <div>
+            <dt>Description</dt>
+            <dd>{{ generalForm.value.description || 'No description yet' }}</dd>
+          </div>
+          <div>
+            <dt>Read type</dt>
+            <dd>{{ (generalForm.value.readType | titlecase) ?? 'Single-end' }}</dd>
+          </div>
+          <div>
+            <dt>File format</dt>
+            <dd>{{ generalForm.value.fileFormat?.toUpperCase() }}</dd>
+          </div>
+        </dl>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Primers & Randomized</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <dl>
+          <div>
+            <dt>5' primer</dt>
+            <dd>{{ structureForm.value.fivePrime || '—' }}</dd>
+          </div>
+          <div>
+            <dt>3' primer</dt>
+            <dd>{{ structureForm.value.threePrime || 'Not provided' }}</dd>
+          </div>
+          <div>
+            <dt>Randomized region</dt>
+            <dd>{{ randomizedSummary() }}</dd>
+          </div>
+        </dl>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Selection cycles</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (cyclesForm.length) {
+          <ol>
+            @for (cycle of cyclesForm.controls; track cycle.value.roundName) {
+              <li>
+                <strong>{{ cycle.value.roundName || 'Unnamed cycle' }}</strong>
+                <span>Round {{ cycle.value.roundNumber }}</span>
+              </li>
+            }
+          </ol>
+        } @else {
+          <p>No cycles added yet.</p>
+        }
+      </mat-card-content>
+    </mat-card>
+  </aside>
+</div>
