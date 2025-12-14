@@ -13,21 +13,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { DatePipe, NgOptimizedImage, TitleCasePipe } from '@angular/common';
 import { take } from 'rxjs';
-import { ExperimentsStore } from '../../stores/experiments.store';
-import { Experiment, ExperimentStatus } from '../../models/experiment';
+import {DateRangeFilter, ExperimentsStore, SortOption} from '../../stores/experiments.store';
+import { ExperimentStatus } from '../../models/experiment';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
-
-/** Sort option configuration for experiment list */
-interface SortOption {
-  value: 'name' | 'createdAt';
-  label: string;
-}
-
-/** Date range filter configuration for experiment list */
-interface DateRangeOption {
-  value: 'all' | '7' | '30' | '90';
-  label: string;
-}
+import {ExperimentSummary} from '../../models/experiment-summary';
 
 @Component({
   selector: 'app-experiments-list',
@@ -64,7 +53,7 @@ export class ExperimentsListComponent {
   readonly statusOptions: ExperimentStatus[] = ['draft', 'running', 'completed', 'error'];
 
   /** Available date range filter options */
-  readonly dateRangeOptions: DateRangeOption[] = [
+  readonly dateRangeOptions: { value: DateRangeFilter; label: string }[] = [
     { value: 'all', label: 'Any time' },
     { value: '7', label: 'Last 7 days' },
     { value: '30', label: 'Last 30 days' },
@@ -72,44 +61,21 @@ export class ExperimentsListComponent {
   ];
 
   /** Available sort options for the experiment list */
-  readonly sortOptions: SortOption[] = [
+  readonly sortOptions: { value: SortOption; label: string }[] = [
     { value: 'createdAt', label: 'Creation date' },
     { value: 'name', label: 'Name' },
   ];
 
-  /** Current status filter selection */
-  readonly statusFilter = signal<'all' | ExperimentStatus>('all');
-  /** Current date range filter selection */
-  readonly dateRangeFilter = signal<DateRangeOption['value']>('all');
-  /** Current sort option selection */
-  readonly sortOption = signal<SortOption['value']>('createdAt');
   /** Set of currently selected experiment IDs */
   readonly selectedIds = signal<Set<string>>(new Set());
 
-  /** Current search term from the global store */
-  readonly searchTerm = computed(() => this.experimentsStore.globalSearchTerm());
-
   /** Filtered and sorted experiments based on current filters and search term */
-  readonly filteredExperiments = computed(() => {
-    const experiments = [...this.experimentsStore.experiments()];
-    const search = this.searchTerm().toLocaleLowerCase();
-    const status = this.statusFilter();
-    const dateRange = this.dateRangeFilter();
-    const sort = this.sortOption();
+  readonly filteredExperiments = this.experimentsStore.filteredExperiments;
 
-    let filtered = experiments.filter((experiment) => {
-      const matchesSearch = !search
-        || experiment.name.toLocaleLowerCase().includes(search)
-        || experiment.description.toLocaleLowerCase().includes(search);
-      const matchesStatus = status === 'all' || experiment.status === status;
-      const matchesDate = filterByDateRange(experiment, dateRange);
-      return matchesSearch && matchesStatus && matchesDate;
-    });
-
-    filtered = sortExperiments(filtered, sort);
-
-    return filtered;
-  });
+  readonly searchTerm = this.experimentsStore.globalSearchTerm;
+  readonly statusFilter = this.experimentsStore.statusFilter;
+  readonly dateRangeFilter = this.experimentsStore.dateRangeFilter;
+  readonly sortOption = this.experimentsStore.sortOption;
 
   /** Whether any experiments are currently selected */
   readonly hasSelection = computed(() => this.selectedIds().size > 0);
@@ -117,14 +83,6 @@ export class ExperimentsListComponent {
   /** Navigate to the new experiment creation page */
   goToCreate(): void {
     this.router.navigate(['/experiments', 'new']);
-  }
-
-  /**
-   * Update the global search term
-   * @param value - The new search term
-   */
-  updateSearch(value: string): void {
-    this.experimentsStore.setGlobalSearchTerm(value);
   }
 
   /**
@@ -177,24 +135,11 @@ export class ExperimentsListComponent {
     this.router.navigate(['/experiments', id]);
   }
 
-  // duplicateExperiment(experiment: Experiment): void {
-  //   const duplicateId = this.experimentsStore.duplicateExperiment(experiment.id);
-  //   if (duplicateId) {
-  //     const ref = this.snackBar.open('Experiment duplicated', 'View', {
-  //       duration: 3500,
-  //     });
-  //     ref
-  //       .onAction()
-  //       .pipe(take(1))
-  //       .subscribe(() => this.router.navigate(['/experiments', duplicateId]));
-  //   }
-  // }
-
   /**
    * Delete a single experiment after confirmation
    * @param experiment - The experiment to delete
    */
-  deleteExperiment(experiment: Experiment): void {
+  deleteExperiment(experiment: ExperimentSummary): void {
     this.confirmDeletion(
       'Delete experiment?',
       `This will permanently delete "${experiment.name}"`,
@@ -247,35 +192,4 @@ export class ExperimentsListComponent {
         }
       });
   }
-}
-
-/**
- * Filter experiments by date range
- * @param experiment - The experiment to check
- * @param range - The date range filter value
- * @returns Whether the experiment matches the date range
- */
-function filterByDateRange(experiment: Experiment, range: DateRangeOption['value']): boolean {
-  if (range === 'all') {
-    return true;
-  }
-  const days = Number(range);
-  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-  return new Date(experiment.createdAt).getTime() >= cutoff;
-}
-
-/**
- * Sort experiments by the specified criteria
- * @param experiments - The experiments to sort
- * @param sort - The sort option to apply
- * @returns The sorted experiments array
- */
-function sortExperiments(experiments: Experiment[], sort: SortOption['value']): Experiment[] {
-  const compareBy = {
-    name: (a: Experiment, b: Experiment) => a.name.localeCompare(b.name),
-    createdAt: (a: Experiment, b: Experiment) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  };
-
-  return experiments.sort(compareBy[sort]);
 }
