@@ -1,0 +1,104 @@
+@if (experimentReportRes.error()) {
+  <mat-card appearance="outlined" class="state-card">
+    <mat-card-content>
+      <mat-icon>error</mat-icon>
+      <h2>Error loading experiment</h2>
+      <p>{{ experimentReportRes.error()?.message }}</p>
+      <button matButton="filled" type="button" (click)="router.navigate(['/experiments'])">
+        Back to experiments
+      </button>
+    </mat-card-content>
+  </mat-card>
+} @else if (isLoading() || experimentReportRes.isLoading()) {
+  <div class="loading-container">
+    <mat-spinner />
+    <p>Loading experiment details...</p>
+  </div>
+} @else if (experimentReportRes.hasValue()) {
+  <mat-card appearance="outlined" class="experiment-summary-card">
+    <mat-card-header>
+      <div mat-card-avatar class="avatar">{{ avatarInitials(experimentReportRes.value()!.experimentDetails.generalInformation.name) }}</div>
+      <mat-card-title>{{ experimentReportRes.value()!.experimentDetails.generalInformation.name }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div>{{ experimentReportRes.value()!.experimentDetails.generalInformation.description }}</div>
+<!--      <dl class="meta-list">-->
+<!--        <div>-->
+<!--          <dt>Created</dt>-->
+<!--          <dd>{{ experiment()!.createdAt | date: 'medium' }}</dd>-->
+<!--        </div>-->
+<!--      </dl>-->
+    </mat-card-content>
+    <mat-card-actions align="end">
+<!--      <mat-chip-set>-->
+<!--        <mat-chip-->
+<!--          [class.status-draft]="experiment()!.status === 'draft'"-->
+<!--          [class.status-running]="experiment()!.status === 'running'"-->
+<!--          [class.status-completed]="experiment()!.status === 'completed'"-->
+<!--          [class.status-error]="experiment()!.status === 'error'"-->
+<!--          aria-label="Status {{ experiment()!.status }}"-->
+<!--        >-->
+<!--          {{ experiment()!.status | titlecase }}-->
+<!--        </mat-chip>-->
+<!--      </mat-chip-set>-->
+      <span class="action-spacer"></span>
+      <button mat-icon-button type="button" color="warn" matTooltip="Delete" (click)="deleteExperiment()">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <section aria-live="polite">
+    <mat-tab-group fitInkBarToContent dynamicHeight
+      [selectedIndex]="activeTab()"
+      (selectedIndexChange)="activeTab.set($event)"
+    >
+      <mat-tab label="Experiment Overview">
+        <app-experiment-overview-tab [experimentReport]="experimentReport()!" class="tab-content"/>
+      </mat-tab>
+
+      <mat-tab label="Sequencing Data">
+        <app-sequencing-data-tab [experimentReport]="experimentReport()!" class="tab-content"/>
+      </mat-tab>
+
+      <mat-tab label="Aptamer Pool">
+        <div class="tab-content">
+          <app-aptamer-pool-tab [experimentReport]="experimentReport()!"/>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Aptamer Family Analysis">
+        <div class="tab-content">
+          <mat-card appearance="outlined">
+            <mat-card-content>
+              <p>Family level motif alignment and similarity scoring results will be available soon.</p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Motif Analysis">
+        <div class="tab-content">
+          <mat-card appearance="outlined">
+            <mat-card-content>
+              <p>
+                Motif discovery outputs, consensus logos, and enrichment heatmaps will show up here when
+                generated.
+              </p>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </section>
+} @else {
+  <mat-card appearance="outlined" class="state-card">
+    <mat-card-content>
+      <h2>Experiment not found</h2>
+      <p>The experiment you are looking for does not exist or has been removed.</p>
+      <button matButton="filled" type="button" (click)="router.navigate(['/experiments'])">
+        Back to experiments
+      </button>
+    </mat-card-content>
+  </mat-card>
+}
