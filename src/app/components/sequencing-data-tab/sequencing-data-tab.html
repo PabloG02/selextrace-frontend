@@ -1,0 +1,99 @@
+<mat-card appearance="outlined" class="region-size-settings-card">
+  <mat-card-content>
+    <div class="settings-grid">
+      <!-- Column 1: Axis Units -->
+      <div class="settings-column">
+        <p class="settings-label">
+          To change the default units of the Number Axis, select one of the options below:
+        </p>
+        <mat-radio-group [field]="sequencingForm.axisUnit" class="radio-row" aria-label="Number Axis Units">
+          <mat-radio-button value="count">Count</mat-radio-button>
+          <mat-radio-button value="percentage">Percentage</mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <mat-divider vertical/>
+
+      <!-- Column 2: Randomized Region Size -->
+      <div class="settings-column">
+        <p class="settings-label">
+          To view the randomized region size distribution for different lengths, select the desired value below.
+          By default, the randomized region size with the most reads is displayed.
+        </p>
+        <mat-form-field appearance="outline" class="size-select">
+          <mat-label>Randomized Region Size</mat-label>
+          <mat-select [field]="sequencingForm.selectedRegionSize">
+            @for (size of randomizedRegionSizes(); track size) {
+              <mat-option [value]="size">{{ size }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <mat-divider vertical></mat-divider>
+
+      <!-- Column 3: Axis Scale -->
+      <div class="settings-column">
+        <p class="settings-label">
+          To change the default scale of the randomized region size bar chart, select one of the options below:
+        </p>
+        <mat-radio-group [field]="sequencingForm.axisScale" class="radio-row" aria-label="Number Axis Scale">
+          <mat-radio-button value="linear">Linear</mat-radio-button>
+          <mat-radio-button value="logarithmic">Logarithmic</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>Selection Cycle {{ experimentReport()!.selectionCycleResponse.round }}: {{ experimentReport()!.selectionCycleResponse.name }} (Positive Selection)</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-card appearance="filled">
+      <mat-card-header>
+        <mat-card-title>Cycle Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <dl class="meta-list">
+          <div>
+            <dt>Round Number</dt>
+            <dd>{{ experimentReport()!.selectionCycleResponse.round }}</dd>
+          </div>
+          <div>
+            <dt>Cycle Id</dt>
+            <dd>{{ experimentReport()!.selectionCycleResponse.name }}</dd>
+          </div>
+          <div>
+            <dt>Type of Selection</dt>
+            <dd>{{ experimentReport()!.selectionCycleResponse.isControlSelection ? 'Control' : experimentReport()!.selectionCycleResponse.isCounterSelection ? 'Negative' : 'Positive' }}</dd>
+          </div>
+          <div>
+            <dt>5' Barcode</dt>
+            <dd>{{ experimentReport()!.selectionCycleResponse.barcode5Prime ?? 'N/A' }}</dd>
+          </div>
+          <div>
+            <dt>3' Barcode</dt>
+            <dd>{{ experimentReport()!.selectionCycleResponse.barcode3Prime ?? 'N/A' }}</dd>
+          </div>
+          <div>
+            <dt>Pool Size</dt>
+            <dd>{{ experimentReport()!.selectionCycleResponse.totalSize }}</dd>
+          </div>
+          <div>
+            <dt>Unique Fraction</dt>
+            <dd>{{ experimentReport()!.selectionCycleResponse.uniqueSize }}</dd>
+          </div>
+          <div>
+            <dt>Base Distribution (%)</dt>
+            <dd>TODO</dd>
+          </div>
+        </dl>
+      </mat-card-content>
+    </mat-card>
+    <div echarts [options]="forwardReadsNucleotideDistributionRawChartOptions()" class="chart-container" [autoResize]="true"></div>
+    <div echarts [options]="reverseReadsNucleotideDistributionRawChartOptions()" class="chart-container" [autoResize]="true"></div>
+    <div echarts [options]="acceptedReadsNucleotideDistributionChartOptions()" class="chart-container" [autoResize]="true"></div>
+  </mat-card-content>
+</mat-card>

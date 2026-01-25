@@ -1,0 +1,41 @@
+.settings-grid {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.settings-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.settings-label {
+  margin: 0;
+}
+
+.radio-row {
+  display: flex;
+  gap: 16px;
+}
+
+.meta-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.meta-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+dt {
+  font-weight: 600;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+dd {
+  margin: 0;
+  text-align: right;
+}
