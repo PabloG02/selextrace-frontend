@@ -1,0 +1,53 @@
+.meta-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.meta-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+dt {
+  font-weight: 600;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+dd {
+  margin: 0;
+  text-align: right;
+}
+
+.experiment-details-card {
+  mat-card-header {
+    padding: 16px;
+  }
+
+  > mat-card-content {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  mat-card {
+    flex: 1;
+  }
+}
+
+.randomize-region-size-dist-card mat-card-content {
+  display: grid;
+  grid-template-columns: 280px 1px minmax(200px, 1fr);
+  gap: 2rem;
+}
+
+.radio-row {
+  display: flex;
+  gap: 16px;
+}
+
+.randomize-region-size-dist-card mat-divider {
+  margin-top: 1rem;
+}

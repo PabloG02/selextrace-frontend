@@ -1,0 +1,146 @@
+<mat-card appearance="outlined" class="experiment-details-card">
+  <mat-card-header>
+    <mat-card-title>Experiment Details</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-card appearance="filled">
+      <mat-card-header>
+        <mat-card-title>General Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <dl class="meta-list">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ experimentReport()!.experimentDetails.generalInformation.name }}</dd>
+          </div>
+          <div>
+            <dt>Description</dt>
+            <dd>{{ experimentReport()!.experimentDetails.generalInformation.description }}</dd>
+          </div>
+          <div>
+            <dt>Aptamer Size</dt>
+            <dd>{{ experimentReport()!.experimentDetails.generalInformation.aptamerSize }}</dd>
+          </div>
+          <div>
+            <dt>Five Prime Primer</dt>
+            <dd>{{ experimentReport()!.experimentDetails.generalInformation.fivePrimePrimer }}</dd>
+          </div>
+          <div>
+            <dt>Three Prime Primer</dt>
+            <dd>{{ experimentReport()!.experimentDetails.generalInformation.threePrimePrimer }}</dd>
+          </div>
+        </dl>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="filled">
+      <mat-card-header>
+        <mat-card-title>Sequence Import Statistics</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <dl class="meta-list">
+          <div>
+            <dt>Total Processed Reads</dt>
+            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.totalProcessedReads }}</dd>
+          </div>
+          <div>
+            <dt>Total Accepted Reads</dt>
+            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.totalAcceptedReads }}</dd>
+          </div>
+          <div>
+            <dt>Contig Assembly Failure</dt>
+            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.contigAssemblyFailure }}</dd>
+          </div>
+          <div>
+            <dt>Invalid Alphabet</dt>
+            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.invalidAlphabet }}</dd>
+          </div>
+          <div>
+            <dt>5' Primer Error</dt>
+            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.fivePrimeError }}</dd>
+          </div>
+          <div>
+            <dt>3' Primer Error</dt>
+            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.threePrimeError }}</dd>
+          </div>
+          <div>
+            <dt>Invalid Cycle</dt>
+            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.invalidCycle }}</dd>
+          </div>
+          <div>
+            <dt>Total Primer Overlaps</dt>
+            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.totalPrimerOverlaps }}</dd>
+          </div>
+        </dl>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="filled">
+      <mat-card-header>
+        <mat-card-title>Selection Cycle Percentages</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <dl class="meta-list">
+          @for (cycle of selectionCyclePercentagesEntries(); track cycle[0]) {
+            <div>
+              <dt>{{ cycle[0] }}</dt>
+              <dd>{{ cycle[1] }}%</dd>
+            </div>
+          }
+        </dl>
+      </mat-card-content>
+    </mat-card>
+  </mat-card-content>
+</mat-card>
+
+<mat-card appearance="outlined" class="randomize-region-size-dist-card">
+  <mat-card-header>
+    <mat-card-title>Randomize Region Size Distribution</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div>
+      <p>Histogram of the sizes of all randomized regions identified during parsing</p>
+      <p>
+        The sizes are computed by matching both 3" and 5" primers
+        to the sequence and extracting the region between them.
+      </p>
+      <mat-divider/>
+      <div>
+        <p>To change the default units of the Number Axis, select one of the options below:</p>
+        <mat-radio-group [field]="experimentForm.axisUnit" class="radio-row" aria-label="Number Axis Units">
+          <mat-radio-button value="count">Count</mat-radio-button>
+          <mat-radio-button value="percentage">Percentage</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <mat-divider/>
+      <div>
+        <p>To change the default scale of the Number Axis, select one of the options below:</p>
+        <mat-radio-group [field]="experimentForm.axisScale" class="radio-row" aria-label="Number Axis Scale">
+          <mat-radio-button value="linear">Linear</mat-radio-button>
+          <mat-radio-button value="logarithmic">Logarithmic</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+    <mat-divider vertical/>
+    <div echarts [options]="randomizedRegionSizeDistributionChartOptions()" class="chart-container" [autoResize]="true"></div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>Selection Cycle Composition</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p>Pool composition of the selection cycles for all imported rounds.</p>
+    <p>
+      Singletons are defined as sequences with counts smaller than the cutoff specifiable below.
+      Change the cutoff and press 'Update Graph' if you wish to modify the definition of a singleton.
+    </p>
+    <mat-form-field appearance="outline">
+      <mat-label>Cutoff Value</mat-label>
+      <input matInput type="number" [field]="experimentForm.singletonCutoff" />
+    </mat-form-field>
+    <button matButton="tonal">Update charts</button>
+    <div echarts [options]="positiveSelectionCyclesChartOptions()" class="chart-container" [autoResize]="true"></div>
+  </mat-card-content>
+</mat-card>
