@@ -11,7 +11,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
 import {take} from 'rxjs';
 import {ExperimentsStore} from '../../stores/experiments.store';
-import {ConfirmDialogComponent} from '../shared/confirm-dialog.component';
+import {ConfirmDialogComponent} from '../shared/confirm-dialog/confirm-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
 import {ExperimentsApiService} from '../../services/experiments-api.service';
 import {AptamerPoolTabComponent} from '../aptamer-pool-tab/aptamer-pool-tab.component';
@@ -94,9 +94,9 @@ export class ExperimentDetailComponent {
           title: 'Delete experiment?',
           message: `Deleting "${experiment.experimentDetails.generalInformation.name}" cannot be undone.`,
           confirmLabel: 'Delete',
-          confirmColor: 'warn',
-          icon: 'delete_forever',
+          variant: 'warning',
         },
+        autoFocus: false
       })
       .afterClosed()
       .pipe(take(1))

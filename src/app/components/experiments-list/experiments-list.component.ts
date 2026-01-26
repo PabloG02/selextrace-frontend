@@ -15,7 +15,7 @@ import { DatePipe, NgOptimizedImage, TitleCasePipe } from '@angular/common';
 import { take } from 'rxjs';
 import {DateRangeFilter, ExperimentsStore, SortOption} from '../../stores/experiments.store';
 import { ExperimentStatus } from '../../models/experiment';
-import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
 import {ExperimentSummary} from '../../models/experiment-summary';
 
 @Component({
@@ -180,9 +180,9 @@ export class ExperimentsListComponent {
           title,
           message,
           confirmLabel: 'Delete',
-          confirmColor: 'warn',
-          icon: 'delete_forever',
+          variant: 'warning',
         },
+        autoFocus: false
       })
       .afterClosed()
       .pipe(take(1))
