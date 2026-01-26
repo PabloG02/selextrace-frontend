@@ -5,7 +5,12 @@ import {
   provideZonelessChangeDetection
 } from '@angular/core';
 import { provideHttpClient, withFetch } from '@angular/common/http';
-import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
+import {
+  provideRouter,
+  withComponentInputBinding,
+  withExperimentalPlatformNavigation,
+  withViewTransitions
+} from '@angular/router';
 import { provideEchartsCore } from 'ngx-echarts';
 import { MatIconRegistry } from '@angular/material/icon';
 import * as echarts from 'echarts';
@@ -17,7 +22,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
-    provideRouter(routes, withComponentInputBinding(), withViewTransitions()),
+    provideRouter(routes, withComponentInputBinding(), withExperimentalPlatformNavigation(), withViewTransitions()),
     provideHttpClient(withFetch()),
     provideEchartsCore({ echarts }),
     provideAppInitializer(() => {
