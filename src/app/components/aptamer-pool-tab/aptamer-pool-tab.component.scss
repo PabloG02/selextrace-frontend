@@ -1,0 +1,89 @@
+:host {
+  display: block;
+}
+
+/* Nucleotide Colors */
+.nuc-a { color: #1b7b1b; }
+.nuc-t { color: #c62828; }
+.nuc-c { color: #1565c0; }
+.nuc-g { color: #f9a825; }
+
+.sequence {
+  letter-spacing: 0.1em;
+}
+
+.header-card {
+  margin-bottom: 12px;
+  overflow-x: auto;
+}
+
+.header-grid {
+  display: flex;
+  gap: 12px;
+}
+
+.header-column {
+  max-width: 300px;
+  flex: 0 0 auto;
+}
+
+.radio-row {
+  display: flex;
+  gap: 8px;
+}
+
+.items-per-page-row,
+.max-items-row,
+.sort-row,
+.search-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.search-column {
+  min-width: 420px;
+}
+
+.split-root {
+  display: flex;
+  gap: 16px;
+}
+
+.table-pane {
+  flex: 2;
+  overflow: auto;
+}
+
+.details-pane {
+  flex: 1;
+}
+
+.table-card {
+  flex: 1;
+  overflow: auto;
+}
+
+//.aptamer-table tr:nth-child(2n) {
+//  background-color: var(--mat-sys-surface-container-low);
+//}
+
+.aptamer-table .selected {
+  font-weight: 600;
+  background-color: var(--mat-sys-surface-container);
+}
+
+.chart-container {
+  height: 240px;
+}
+
+.varna-placeholder {
+  border: 1px dashed var(--mat-divider-color);
+  min-height: 160px;
+}
+
+
+.not-available {
+  padding: 1rem;
+  color: var(--mat-color-tertiary, #666);
+}
