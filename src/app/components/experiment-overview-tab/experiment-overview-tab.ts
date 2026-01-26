@@ -7,7 +7,7 @@ import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
 import {NgxEchartsDirective} from "ngx-echarts";
 import {ExperimentChartService} from '../../services/experiment-chart.service';
 import {ExperimentReport} from '../../models/experiment-report';
-import {Field, form, max, min, required} from '@angular/forms/signals';
+import {FormField, form, max, min, required} from '@angular/forms/signals';
 
 @Component({
   selector: 'app-experiment-overview-tab',
@@ -24,7 +24,7 @@ import {Field, form, max, min, required} from '@angular/forms/signals';
     MatRadioButton,
     MatRadioGroup,
     NgxEchartsDirective,
-    Field
+    FormField
   ],
   templateUrl: './experiment-overview-tab.html',
   styleUrl: './experiment-overview-tab.scss'

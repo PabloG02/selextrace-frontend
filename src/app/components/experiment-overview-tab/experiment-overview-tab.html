@@ -107,7 +107,7 @@
       <mat-divider/>
       <div>
         <p>To change the default units of the Number Axis, select one of the options below:</p>
-        <mat-radio-group [field]="experimentForm.axisUnit" class="radio-row" aria-label="Number Axis Units">
+        <mat-radio-group [formField]="experimentForm.axisUnit" class="radio-row" aria-label="Number Axis Units">
           <mat-radio-button value="count">Count</mat-radio-button>
           <mat-radio-button value="percentage">Percentage</mat-radio-button>
         </mat-radio-group>
@@ -115,7 +115,7 @@
       <mat-divider/>
       <div>
         <p>To change the default scale of the Number Axis, select one of the options below:</p>
-        <mat-radio-group [field]="experimentForm.axisScale" class="radio-row" aria-label="Number Axis Scale">
+        <mat-radio-group [formField]="experimentForm.axisScale" class="radio-row" aria-label="Number Axis Scale">
           <mat-radio-button value="linear">Linear</mat-radio-button>
           <mat-radio-button value="logarithmic">Logarithmic</mat-radio-button>
         </mat-radio-group>
@@ -138,7 +138,7 @@
     </p>
     <mat-form-field appearance="outline">
       <mat-label>Cutoff Value</mat-label>
-      <input matInput type="number" [field]="experimentForm.singletonCutoff" />
+      <input matInput type="number" [formField]="experimentForm.singletonCutoff" />
     </mat-form-field>
     <button matButton="tonal">Update charts</button>
     <div echarts [options]="positiveSelectionCyclesChartOptions()" class="chart-container" [autoResize]="true"></div>

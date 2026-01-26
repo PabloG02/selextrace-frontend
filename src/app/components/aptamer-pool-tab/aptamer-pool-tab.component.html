@@ -4,7 +4,7 @@
       <!-- Show/Hide Primers -->
       <div class="header-column">
         <p class="header-label">To show or hide the primer regions in the table:</p>
-        <mat-slide-toggle [field]="poolForm.showPrimers" labelPosition="before">
+        <mat-slide-toggle [formField]="poolForm.showPrimers" labelPosition="before">
           Show Primers
         </mat-slide-toggle>
       </div>
@@ -14,7 +14,7 @@
       <!-- Use CPM -->
       <div class="header-column">
         <p class="header-label">Toggle between counts per million (CPM) and raw counts</p>
-        <mat-radio-group class="radio-row" aria-label="Count format" [field]="poolForm.useCPM">
+        <mat-radio-group class="radio-row" aria-label="Count format" [formField]="poolForm.useCPM">
           <mat-radio-button [value]="true">CPM</mat-radio-button>
           <mat-radio-button [value]="false">Raw Counts</mat-radio-button>
         </mat-radio-group>
@@ -27,7 +27,7 @@
         <p class="header-label">Change number of items per page</p>
         <mat-form-field appearance="outline">
           <mat-label>Items per page:</mat-label>
-          <input matInput type="number" [field]="poolForm.itemsPerPage" />
+          <input matInput type="number" [formField]="poolForm.itemsPerPage" />
         </mat-form-field>
       </div>
 
@@ -39,7 +39,7 @@
         <div class="sort-row">
           <label>Sort by</label>
           <mat-form-field appearance="outline">
-            <mat-select [field]="poolForm.sortBy">
+            <mat-select [formField]="poolForm.sortBy">
               <mat-option value="enrichment">Enrichment</mat-option>
               <mat-option value="count">Count</mat-option>
               <mat-option value="unique">Unique fraction</mat-option>
@@ -48,7 +48,7 @@
 
           <label>on cycle</label>
           <mat-form-field appearance="outline" class="on-cycle-select">
-            <mat-select [field]="poolForm.onCycle">
+            <mat-select [formField]="poolForm.onCycle">
               <mat-option [value]="null">(current)</mat-option>
               <mat-option value="1">1</mat-option>
               <mat-option value="2">2</mat-option>
@@ -65,9 +65,9 @@
         <p class="header-label">Search the pool (regex supported). For IDs, check the box and use comma-separated ids.</p>
         <div class="search-row">
           <mat-form-field appearance="outline" class="search-field">
-            <input matInput placeholder="Query" [field]="poolForm.query" />
+            <input matInput placeholder="Query" [formField]="poolForm.query" />
           </mat-form-field>
-          <mat-checkbox [field]="poolForm.searchIds">Search IDs</mat-checkbox>
+          <mat-checkbox [formField]="poolForm.searchIds">Search IDs</mat-checkbox>
           <button mat-button (click)="resetSearch()">Reset</button>
         </div>
       </div>

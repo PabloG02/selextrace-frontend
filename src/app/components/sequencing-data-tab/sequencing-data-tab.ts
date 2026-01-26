@@ -8,7 +8,7 @@ import {MatDivider} from '@angular/material/list';
 import {MatFormField, MatLabel} from '@angular/material/input';
 import {MatOption, MatSelect} from '@angular/material/select';
 import {NgxEchartsDirective} from 'ngx-echarts';
-import {Field, form, required} from '@angular/forms/signals';
+import {FormField, form, required} from '@angular/forms/signals';
 
 @Component({
   selector: 'app-sequencing-data-tab',
@@ -25,7 +25,7 @@ import {Field, form, required} from '@angular/forms/signals';
     MatCardHeader,
     MatCardTitle,
     NgxEchartsDirective,
-    Field,
+    FormField,
     MatOption
   ],
   templateUrl: './sequencing-data-tab.html',

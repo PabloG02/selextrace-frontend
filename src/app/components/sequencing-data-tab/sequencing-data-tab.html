@@ -6,7 +6,7 @@
         <p class="settings-label">
           To change the default units of the Number Axis, select one of the options below:
         </p>
-        <mat-radio-group [field]="sequencingForm.axisUnit" class="radio-row" aria-label="Number Axis Units">
+        <mat-radio-group [formField]="sequencingForm.axisUnit" class="radio-row" aria-label="Number Axis Units">
           <mat-radio-button value="count">Count</mat-radio-button>
           <mat-radio-button value="percentage">Percentage</mat-radio-button>
         </mat-radio-group>
@@ -22,7 +22,7 @@
         </p>
         <mat-form-field appearance="outline" class="size-select">
           <mat-label>Randomized Region Size</mat-label>
-          <mat-select [field]="sequencingForm.selectedRegionSize">
+          <mat-select [formField]="sequencingForm.selectedRegionSize">
             @for (size of randomizedRegionSizes(); track size) {
               <mat-option [value]="size">{{ size }}</mat-option>
             }
@@ -37,7 +37,7 @@
         <p class="settings-label">
           To change the default scale of the randomized region size bar chart, select one of the options below:
         </p>
-        <mat-radio-group [field]="sequencingForm.axisScale" class="radio-row" aria-label="Number Axis Scale">
+        <mat-radio-group [formField]="sequencingForm.axisScale" class="radio-row" aria-label="Number Axis Scale">
           <mat-radio-button value="linear">Linear</mat-radio-button>
           <mat-radio-button value="logarithmic">Logarithmic</mat-radio-button>
         </mat-radio-group>

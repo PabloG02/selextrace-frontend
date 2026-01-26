@@ -15,7 +15,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { NgxEchartsDirective } from 'ngx-echarts';
-import {Field, form, min, required} from '@angular/forms/signals';
+import {FormField, form, min, required} from '@angular/forms/signals';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
 import {ExperimentReport} from '../../models/experiment-report';
 import {ExperimentChartService} from '../../services/experiment-chart.service';
@@ -40,7 +40,7 @@ import {ExperimentChartService} from '../../services/experiment-chart.service';
     MatSortModule,
     MatExpansionModule,
     NgxEchartsDirective,
-    Field,
+    FormField,
     MatSlideToggle
   ],
   templateUrl: './aptamer-pool-tab.component.html',
