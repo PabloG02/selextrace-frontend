@@ -19,7 +19,7 @@ import { Router } from '@angular/router';
 import { TitleCasePipe } from '@angular/common';
 import { ExperimentsStore } from '../../stores/experiments.store';
 import { FileFormat, ReadType } from '../../models/experiment';
-import { ProgressDialogComponent } from '../shared/progress-dialog.component';
+import { ProgressDialogComponent } from '../shared/progress-dialog/progress-dialog.component';
 import { FileUploadDropzoneComponent } from '../shared/file-upload-dropzone/file-upload-dropzone.component';
 import { catchError, of } from 'rxjs';
 import {CreateExperimentDto, SelectionCycle} from '../../models/create-experiment-dto';

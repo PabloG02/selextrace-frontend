@@ -1,0 +1,17 @@
+<h2 mat-dialog-title>{{ data.title ?? 'Processing' }}</h2>
+<mat-dialog-content aria-busy="true">
+  <div class="progress-row">
+    <mat-progress-spinner mode="indeterminate" diameter="36"/>
+    <div class="status">
+      <p class="headline">Working on your request</p>
+      <p class="subhead">This may take a moment. You can review the steps below.</p>
+    </div>
+  </div>
+  <div class="log-window" aria-live="polite" role="log" aria-relevant="additions">
+    <ul>
+      @for (log of logs(); track $index) {
+        <li>{{ log }}</li>
+      }
+    </ul>
+  </div>
+</mat-dialog-content>
