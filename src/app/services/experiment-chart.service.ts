@@ -402,6 +402,174 @@ export class ExperimentChartService {
     });
   }
 
+  getContextProbabilitySequenceLogoChart(sequence: Signal<string | null>) {
+    const contextProbabilities = this.predictionsApiService.getContextProbabilities(sequence);
+
+    return computed<EChartsOption>(() => {
+      if (!sequence() || !contextProbabilities.hasValue()) {
+        return {};
+      }
+
+      // 1) DATA INPUT
+      const data = contextProbabilities.value();
+
+      const seriesConfigs = [
+        { key: 'paired', name: 'Paired', color: '#c8c8c8', imageUrl: 'assets/P.png' },
+        { key: 'hairpin', name: 'Hairpin', color: '#ff7070', imageUrl: 'assets/H.png' },
+        { key: 'bulge', name: 'Bulge', color: '#fa9600', imageUrl: 'assets/B.png' },
+        { key: 'internal', name: 'Internal', color: '#a0a0ff', imageUrl: 'assets/I.png' },
+        { key: 'multi', name: 'Multi', color: '#00ffff', imageUrl: 'assets/M.png' },
+        { key: 'dangling', name: 'Dangling', color: '#ffc0cb', imageUrl: 'assets/D.png' },
+      ] as const;
+
+      const rawData = seriesConfigs.reduce<Record<string, number[]>>((acc, config) => {
+        acc[config.name] = data[config.key] ?? [];
+        return acc;
+      }, {});
+
+      const categories = seriesConfigs.map(config => config.name);
+      const sequenceLength = Math.max(...categories.map(cat => rawData[cat].length));
+      if (!sequenceLength) {
+        return {};
+      }
+
+      const colorMap = seriesConfigs.reduce<Record<string, string>>((acc, config) => {
+        acc[config.name] = config.color;
+        return acc;
+      }, {});
+
+      // 2) PREPARE DATA FOR CUSTOM SERIES (SORTING LOGIC)
+      const xAxisData: string[] = [];
+
+      for (let i = 0; i < sequenceLength; i += 1) {
+        xAxisData.push(`${i + 1}`);
+
+        const stackForPosition = categories.map(category => ({
+          name: category,
+          value: rawData[category][i]
+        }));
+
+        stackForPosition.sort((a, b) => a.value - b.value);
+      }
+
+      return {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          formatter: (params: unknown) => {
+            if (!Array.isArray(params) || params.length === 0) {
+              return '';
+            }
+
+            const entries = params
+              .map(item => {
+                const entry = item as {
+                  seriesName?: string;
+                  value?: unknown;
+                };
+
+                const rawValue = Array.isArray(entry.value) ? entry.value[2] : entry.value;
+                const value = typeof rawValue === 'number' ? rawValue : 0;
+                const name = entry.seriesName ?? '';
+                return {
+                  color: colorMap[name] ?? '#6d6e73',
+                  name,
+                  value
+                };
+              })
+              .sort((a, b) => {
+                if (b.value !== a.value) {
+                  return b.value - a.value; // sort by value (desc)
+                }
+                return a.name.localeCompare(b.name); // then by name (asc)
+              });
+
+            const rows = entries
+              .map(entry =>
+                `<tr>
+                  <td><strong style="display:inline-block;color:${entry.color};margin-right:4px;">${entry.name.charAt(0)}</strong></td>
+                  <td>${entry.name}</td>
+                  <td style="padding-left: 16px; text-align: right;"><strong>${entry.value}</strong></td>
+                </tr>`
+              )
+              .join('');
+
+            return `<table>${rows}</table>`;
+          }
+        },
+        legend: { bottom: 0 },
+        dataZoom: [
+          { type: 'slider', show: sequenceLength > 30, start: 0, end: 50 },
+          { type: 'inside' }
+        ],
+        xAxis: {
+          type: 'category',
+          name: 'Sequence Position',
+          data: xAxisData,
+          axisLabel: {
+            interval: 0
+          }
+        },
+        yAxis: {
+          type: 'value',
+          name: 'Probability',
+          min: 0,
+          max: 1
+        },
+        series: seriesConfigs.map(config => ({
+          name: config.name,
+          type: 'custom',
+          itemStyle: {
+            color: config.color
+          },
+          renderItem: (params, api) => {
+            const xIndex = api.value(0) as number;
+            const yStart = api.value(1) as number;
+            const valHeight = api.value(2) as number;
+
+            const start = api.coord([xIndex, yStart]);
+            const end = api.coord([xIndex, yStart + valHeight]);
+            const height = Math.abs(start[1] - end[1]);
+            // TODO: fix ts-ignore
+            // @ts-ignore
+            const width = api.size([1, 0])[0] * 0.98;
+
+            return {
+              type: 'image',
+              style: {
+                image: config.imageUrl,
+                x: start[0] - width / 2,
+                y: end[1],
+                width,
+                height
+              }
+            };
+          },
+          data: (() => {
+            const seriesData: Array<[number, number, number]> = [];
+            for (let i = 0; i < sequenceLength; i++) {
+              const stackForPosition = categories.map(cat => ({
+                name: cat,
+                value: rawData[cat][i]
+              }));
+              stackForPosition.sort((a, b) => a.value - b.value);
+
+              let yStart = 0;
+              for (let j = 0; j < stackForPosition.length; j++) {
+                if (stackForPosition[j].name === config.name) {
+                  seriesData.push([i, yStart, stackForPosition[j].value]);
+                  break;
+                }
+                yStart += stackForPosition[j].value;
+              }
+            }
+            return seriesData;
+          })(),
+        }))
+      };
+    });
+  }
+
 }
 
 interface SelectionCycleResponse {
