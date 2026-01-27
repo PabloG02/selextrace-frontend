@@ -10,4 +10,19 @@ export class PredictionsApiService {
   getBppm(sequence: Signal<string | null>) {
     return httpResource<{ matrix: number[][] }>(() => sequence() ? `${this.baseUrl()}/bppm?sequence=${sequence()}` : undefined);
   }
+
+  getContextProbabilities(sequence: Signal<string | null>) {
+    return httpResource<ContextProbabilityResponse>(() =>
+      sequence() ? `${this.baseUrl()}/context-probabilities?sequence=${sequence()}` : undefined
+    );
+  }
+}
+
+interface ContextProbabilityResponse {
+  hairpin: number[];
+  bulge: number[];
+  internal: number[];
+  multi: number[];
+  dangling: number[];
+  paired: number[];
 }

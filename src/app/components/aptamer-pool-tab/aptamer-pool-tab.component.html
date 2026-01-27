@@ -168,7 +168,17 @@
         <mat-expansion-panel-header>
           <mat-panel-title>Structural Context Distribution</mat-panel-title>
         </mat-expansion-panel-header>
-        <div class="context-block">Structural context plots / legends go here</div>
+        @if (selectedSequence()) {
+          <div
+            echarts
+            [options]="contextProbabilitySequenceLogoChartOptions()"
+            class="chart-container"
+            [autoResize]="true"
+            aria-label="Structural context sequence logo">
+          </div>
+        } @else {
+          <div class="not-available">Structure Prediction not available</div>
+        }
       </mat-expansion-panel>
     </mat-accordion>
   </div>

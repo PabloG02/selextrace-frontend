@@ -402,6 +402,157 @@ export class ExperimentChartService {
     });
   }
 
+  getContextProbabilitySequenceLogoChart(sequence: Signal<string | null>) {
+    const contextProbabilities = this.predictionsApiService.getContextProbabilities(sequence);
+
+    return computed<EChartsOption>(() => {
+      if (!sequence() || !contextProbabilities.hasValue()) {
+        return {};
+      }
+
+      const data = contextProbabilities.value();
+      const length = Math.max(
+        data.hairpin.length,
+        data.bulge.length,
+        data.internal.length,
+        data.multi.length,
+        data.dangling.length,
+        data.paired.length
+      );
+
+      if (!length) {
+        return {};
+      }
+
+      const xAxisData = Array.from({ length }, (_, index) => `${index + 1}`);
+
+      const seriesConfigs = [
+        { name: 'Paired', color: '#c8c8c8', values: data.paired },
+        { name: 'Hairpin', color: '#ff7070', values: data.hairpin },
+        { name: 'Bulge', color: '#fa9600', values: data.bulge },
+        { name: 'Internal', color: '#a0a0ff', values: data.internal },
+        { name: 'Multi', color: '#00ffff', values: data.multi },
+        { name: 'Dangling', color: '#ffc0cb', values: data.dangling },
+      ];
+
+      const rowData = Array.from({ length }, (_, index) => ({
+        value: [
+          index,
+          ...seriesConfigs.map(config => config.values[index] ?? 0)
+        ],
+        sequence: xAxisData[index]
+      }));
+
+      const showZoom = length > 30;
+
+      const tooltipFormatter = (params: unknown) => {
+        const payload = Array.isArray(params) ? params[0] : params;
+        const dataPayload = payload as { dataIndex: number; data?: { value?: number[] } } | undefined;
+        const values = dataPayload?.data?.value;
+        if (!values) {
+          return '';
+        }
+
+        const segments = seriesConfigs
+          .map((config, idx) => ({
+            name: config.name,
+            color: config.color,
+            value: values[idx + 1] ?? 0
+          }))
+          .sort((a, b) => b.value - a.value);
+
+        const label = xAxisData[dataPayload.dataIndex] ?? `${dataPayload.dataIndex + 1}`;
+        const lines = segments.map(segment =>
+          `<span style="display:inline-block;margin-right:6px;border-radius:50%;width:8px;height:8px;background:${segment.color}"></span>${segment.name}: ${segment.value.toFixed(3)}`
+        );
+
+        return `${label}<br/>${lines.join('<br/>')}`;
+      };
+
+      return {
+        aria: { enabled: true },
+        legend: {
+          top: 0,
+          type: 'scroll',
+          selectedMode: false,
+          data: seriesConfigs.map(config => ({
+            name: config.name,
+            itemStyle: { color: config.color }
+          }))
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' },
+          formatter: (params: unknown) => tooltipFormatter(params)
+        },
+        grid: { left: '6%', right: '4%', top: '18%', bottom: showZoom ? '18%' : '10%' },
+        xAxis: {
+          type: 'category',
+          name: 'Sequence Position',
+          data: xAxisData,
+          axisLabel: {
+            interval: 0
+          }
+        },
+        yAxis: {
+          type: 'value',
+          name: 'Probability',
+          min: 0,
+          max: 1
+        },
+        dataZoom: showZoom ? [
+          { type: 'inside', start: 0, end: 40 },
+          { type: 'slider', start: 0, end: 40 }
+        ] : undefined,
+        series: [
+          {
+            name: 'Context',
+            type: 'custom',
+            renderItem: (params, api) => {
+              const xIndex = api.value(0) as number;
+              const values = seriesConfigs.map((_, idx) => Number(api.value(idx + 1)) || 0);
+              const segments = seriesConfigs
+                .map((config, idx) => ({ value: values[idx], color: config.color }))
+                .sort((a, b) => a.value - b.value);
+
+              const size = api.size ? api.size([1, 0]) : [0, 0];
+              const bandBase = Array.isArray(size) ? size[0] : size;
+              const bandWidth = bandBase * 0.8;
+              const x = api.coord([xIndex, 0])[0] - bandWidth / 2;
+              let cumulative = 0;
+              const children = segments
+                .filter(segment => segment.value > 0)
+                .map(segment => {
+                  const yStart = api.coord([xIndex, cumulative])[1];
+                  cumulative += segment.value;
+                  const yEnd = api.coord([xIndex, cumulative])[1];
+                  const height = Math.max(0, yStart - yEnd);
+                  return {
+                    type: 'rect' as const,
+                    shape: {
+                      x,
+                      y: yEnd,
+                      width: bandWidth,
+                      height
+                    },
+                    style: {
+                      fill: segment.color
+                    }
+                  };
+                });
+
+              return {
+                type: 'group' as const,
+                children
+              };
+            },
+            data: rowData
+          }
+        ]
+      };
+    });
+  }
+
 }
 
 interface SelectionCycleResponse {

@@ -87,6 +87,7 @@ export class AptamerPoolTabComponent {
   readonly selectedSequence = signal<string | null>(null);
 
   readonly basePairProbabilityMatrixHeatmapChartOptions = this.chartService.getBasePairProbabilityMatrixHeatmapChart(this.selectedSequence);
+  readonly contextProbabilitySequenceLogoChartOptions = this.chartService.getContextProbabilitySequenceLogoChart(this.selectedSequence);
 
   resetSearch() {
     this.poolForm.query().value.set('');
