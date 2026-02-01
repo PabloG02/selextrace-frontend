@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, effect, inject, input, linkedSignal, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -19,6 +19,8 @@ import {FormField, form, min, required} from '@angular/forms/signals';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
 import {ExperimentReport} from '../../models/experiment-report';
 import {ExperimentChartService} from '../../services/experiment-chart.service';
+import {PredictionsApiService} from '../../services/predictions-api.service';
+import {FornacVisualizationComponent} from '../shared/fornac-visualization/fornac-visualization.component';
 
 @Component({
   selector: 'app-aptamer-pool-tab',
@@ -41,7 +43,8 @@ import {ExperimentChartService} from '../../services/experiment-chart.service';
     MatExpansionModule,
     NgxEchartsDirective,
     FormField,
-    MatSlideToggle
+    MatSlideToggle,
+    FornacVisualizationComponent
   ],
   templateUrl: './aptamer-pool-tab.component.html',
   styleUrl: './aptamer-pool-tab.component.scss',
@@ -52,6 +55,7 @@ export class AptamerPoolTabComponent {
 
   /* Services */
   private readonly chartService = inject(ExperimentChartService);
+  private readonly predictionsApiService = inject(PredictionsApiService);
 
   /* Reactive Signal Form Model */
   readonly poolFormModel = signal({
@@ -86,6 +90,7 @@ export class AptamerPoolTabComponent {
   // Selection & details
   readonly selectedSequence = signal<string | null>(null);
 
+  readonly mfeResource = this.predictionsApiService.getMfe(this.selectedSequence);
   readonly basePairProbabilityMatrixHeatmapChartOptions = this.chartService.getBasePairProbabilityMatrixHeatmapChart(this.selectedSequence);
   readonly contextProbabilitySequenceLogoChartOptions = this.chartService.getContextProbabilitySequenceLogoChart(this.selectedSequence);
 
@@ -98,6 +103,4 @@ export class AptamerPoolTabComponent {
   onSelectRow(row: any) {
     this.selectedSequence.set(row?.sequence ?? null);
   }
-
-  protected readonly console = console;
 }

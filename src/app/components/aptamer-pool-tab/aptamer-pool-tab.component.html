@@ -142,16 +142,24 @@
 
       <mat-expansion-panel>
         <mat-expansion-panel-header>
-          <mat-panel-title>Secondary Structure (RNAfold/Varna)</mat-panel-title>
+          <mat-panel-title>Secondary Structure (RNAfold/Fornac)</mat-panel-title>
         </mat-expansion-panel-header>
         @if (selectedSequence()) {
-          <div class="structure-block">
-            <pre class="monospace">Sequence: {{ selectedSequence() }}</pre>
-            <pre class="monospace">...((...(((((((.......)))))))...)) (((.....(((((((((.....)))))))..))))))).</pre>
-            <pre class="monospace">Binding Free Energy: -12.30 kcal/mol</pre>
-              <!-- If you have a Varna or canvas renderer, insert it here -->
-            <div class="varna-placeholder">Varna / SVG rendering goes here</div>
-          </div>
+          @if (mfeResource.isLoading()) {
+            <div class="not-available">Loading structure prediction...</div>
+          } @else if (mfeResource.hasValue()) {
+            <div>
+              <pre class="monospace">{{ selectedSequence() }}</pre>
+              <pre class="monospace">{{ mfeResource.value().structure }}</pre>
+              <pre class="monospace">Binding Free Energy: {{ mfeResource.value().mfe }} kcal/mol</pre>
+              <app-fornac-visualization
+                [sequence]="selectedSequence()"
+                [structure]="mfeResource.value().structure">
+              </app-fornac-visualization>
+            </div>
+          } @else {
+            <div class="not-available">Error</div>
+          }
         } @else {
           <div class="not-available">Structure Prediction not available</div>
         }

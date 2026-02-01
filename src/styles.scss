@@ -7,6 +7,8 @@
 @forward 'styles/tabs';
 // Import Material Symbols Rounded icon font
 @import 'material-symbols/rounded';
+// Import d3 Fornac visualization styles
+@import '@pablog02/fornac/style.css';
 
 /* ——— Angular Material Theming ——— */
 html {
