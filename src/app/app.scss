@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 :host {
 	display: block;
 	min-height: 100vh;
@@ -10,7 +12,7 @@
 }
 
 .layout-sidenav {
-  width: 264px;
+  width: min-content;
   background: var(--mat-sys-surface-container);
   padding: 16px;
 }
@@ -91,8 +93,33 @@
 .nav-header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 24px;
   margin-bottom: 24px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.layout-sidenav.collapsed .nav-brand {
+  display: none;
+}
+
+.nav-toggle {
+  @include mat.icon-button-overrides((
+    state-layer-size: 48px, // Match the size of the button to the size of the touch target
+  ));
+}
+
+.layout-sidenav.collapsed a[mat-list-item] span[matListItemTitle] {
+  display: none;
+}
+
+.layout-sidenav.collapsed a[mat-list-item] {
+  padding-right: 0;
 }
 
 .nav-title {
@@ -109,6 +136,7 @@
 .subtitle {
   font-size: 12px;
   color: var(--mat-sys-on-surface-variant);
+  white-space: nowrap;
 }
 
 .active-link {

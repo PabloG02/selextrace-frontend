@@ -1,21 +1,33 @@
-<mat-sidenav-container class="layout-container">
+<mat-sidenav-container class="layout-container" autosize>
   <mat-sidenav
     class="layout-sidenav"
+    [class.collapsed]="drawerState() === 'collapsed'"
     [mode]="isMobileView() ? 'over' : 'side'"
-    [opened]="drawerOpened()"
+    [opened]="drawerState() !== 'closed'"
     (closedStart)="onDrawerClosed()"
   >
     <div class="nav-header">
-      <img
-        ngSrc="assets/logo.svg"
-        width="48"
-        height="48"
-        alt="Aptasuite logo"
-      />
-      <div class="nav-title">
-        <span class="brand">Aptasuite</span>
-        <span class="subtitle">Experiment Manager</span>
+      <div class="nav-brand">
+        <img
+          ngSrc="assets/logo.svg"
+          width="48"
+          height="48"
+          alt="Aptasuite logo"
+        />
+        <div class="nav-title">
+          <span class="brand">Aptasuite</span>
+          <span class="subtitle">Experiment Manager</span>
+        </div>
       </div>
+      <button
+        mat-icon-button
+        type="button"
+        class="nav-toggle"
+        [attr.aria-label]="navToggleLabel()"
+        (click)="toggleDrawer()"
+      >
+        <mat-icon>{{ navToggleIcon() }}</mat-icon>
+      </button>
     </div>
     <mat-nav-list>
       @for (link of navLinks; track link.route) {

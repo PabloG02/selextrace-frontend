@@ -63,7 +63,17 @@ export class App {
     { initialValue: false },
   );
 
-  readonly drawerOpened = signal(true);
+  readonly drawerState = signal<'opened' | 'collapsed' | 'closed'>('opened');
+  readonly navToggleIcon = computed(() => ({
+    opened: 'menu_open',
+    collapsed: 'menu',
+    closed: 'menu_open',
+  }[this.drawerState()]));
+  readonly navToggleLabel = computed(() => ({
+    opened: 'Collapse navigation menu',
+    collapsed: 'Expand navigation menu',
+    closed: 'Open navigation menu',
+  }[this.drawerState()]));
 
   // readonly searchTerm = computed(() => this.experimentsStore.globalSearchTerm());
 
@@ -71,25 +81,29 @@ export class App {
     effect(
       () => {
         const handset = this.isMobileView();
-        this.drawerOpened.set(!handset);
+        this.drawerState.set(handset ? 'closed' : 'opened');
       },
       { allowSignalWrites: true },
     );
   }
 
   toggleDrawer(): void {
-    this.drawerOpened.update((opened) => !opened);
+    this.drawerState.update((state) => {
+      if (state === 'opened') {
+        return this.isMobileView() ? 'closed' : 'collapsed';
+      } else {
+        return 'opened';
+      }
+    });
   }
 
   onDrawerClosed(): void {
-    if (this.isMobileView()) {
-      this.drawerOpened.set(false);
-    }
+    this.drawerState.set(this.isMobileView() ? 'closed' : 'collapsed');
   }
 
   onNavigate(): void {
     if (this.isMobileView()) {
-      this.drawerOpened.set(false);
+      this.drawerState.set('closed');
     }
   }
 
