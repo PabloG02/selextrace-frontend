@@ -80,7 +80,13 @@
   <div class="table-pane">
     <mat-card appearance="outlined" class="table-card">
 
-        <table mat-table [dataSource]="filteredAptamerData()" class="aptamer-table" matSort>
+         <table mat-table
+                [dataSource]="paginatedData()"
+                class="aptamer-table"
+                matSort
+                [matSortActive]="sortState().active"
+                [matSortDirection]="sortState().direction"
+                (matSortChange)="onSortChange($event)">
 
           <!-- ID Column -->
           <ng-container matColumnDef="id">
@@ -137,8 +143,9 @@
           </tr>
         </table>
 
-        <mat-paginator [length]="totalItems()"
+        <mat-paginator [length]="filteredData().length"
                        [pageSize]="poolForm.itemsPerPage().value()"
+                       (page)="onPageChange($event)"
                        showFirstLastButtons/>
 
     </mat-card>
