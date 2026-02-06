@@ -92,11 +92,17 @@
           <ng-container matColumnDef="sequence">
             <th mat-header-cell *matHeaderCellDef>Randomized Region</th>
             <td mat-cell *matCellDef="let row" class="sequence monospace">
-              @for (base of row.sequence! | slice: 0; track $index) {
+              @if (poolForm.showPrimers().value()) {
+                <span class="primer">{{ row.sequence! | slice: 0 : row.bounds.startIndex }}</span>
+              }
+              @for (base of row.sequence! | slice: row.bounds.startIndex : row.bounds.endIndex; track $index) {
                 <span [class.nuc-a]="base === 'A'"
                       [class.nuc-t]="base === 'T'"
                       [class.nuc-c]="base === 'C'"
                       [class.nuc-g]="base === 'G'">{{ base }}</span>
+              }
+              @if (poolForm.showPrimers().value()) {
+                <span class="primer">{{ row.sequence! | slice: row.bounds.endIndex }}</span>
               }
             </td>
           </ng-container>

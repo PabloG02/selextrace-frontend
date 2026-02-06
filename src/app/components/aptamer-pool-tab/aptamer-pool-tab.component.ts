@@ -75,10 +75,11 @@ export class AptamerPoolTabComponent {
 
   // Table state
   readonly totalAptamerData = linkedSignal(() => {
-    const record = this.experimentReport().idToAptamer;
-    return Object.entries(record).map(([id, sequence]) => ({
+    const { idToAptamer, idToBounds } = this.experimentReport();
+    return Object.entries(idToAptamer).map(([id, sequence]) => ({
       id: Number(id),
       sequence,
+      bounds: idToBounds[Number(id)],
       count: 0, // or 0 if not applicable
       cpm: 0,   // optional
     }));

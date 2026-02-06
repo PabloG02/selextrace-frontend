@@ -63,6 +63,7 @@ export interface ExperimentReport {
     nucleotideDistributionAccepted: Record<string, Record<number, Record<number, Record<number, number>>>>;
   },
   idToAptamer: Record<number, string>,
+  idToBounds: Record<number, AptamerBounds>;
 }
 
 interface Accumulator {
@@ -70,4 +71,13 @@ interface Accumulator {
   mean: number;
   stddev: number;
   variance: number;
+}
+
+/**
+ * Represents the start index (inclusive) and
+ * end index (exclusive) of the randomized region of an aptamer
+ */
+export interface AptamerBounds {
+  startIndex: number;
+  endIndex: number;
 }
