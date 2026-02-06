@@ -75,13 +75,14 @@ export class AptamerPoolTabComponent {
 
   // Table state
   readonly totalAptamerData = linkedSignal(() => {
-    const { idToAptamer, idToBounds } = this.experimentReport();
+    const { idToAptamer, idToBounds, selectionCycleResponse } = this.experimentReport();
     return Object.entries(idToAptamer).map(([id, sequence]) => ({
       id: Number(id),
       sequence,
       bounds: idToBounds[Number(id)],
-      count: 0, // or 0 if not applicable
-      cpm: 0,   // optional
+      count: selectionCycleResponse.counts[Number(id)],
+      cpm: selectionCycleResponse.counts[Number(id)] / selectionCycleResponse.totalSize * 1_000_000,
+      frequency: selectionCycleResponse.counts[Number(id)] / selectionCycleResponse.totalSize
     }));
   });
   readonly totalItems = linkedSignal(() => this.totalAptamerData().length);

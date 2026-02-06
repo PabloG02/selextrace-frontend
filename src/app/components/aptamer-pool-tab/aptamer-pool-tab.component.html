@@ -84,13 +84,13 @@
 
           <!-- ID Column -->
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header [attr.rowspan]="2">ID</th>
             <td mat-cell *matCellDef="let row">{{ row.id }}</td>
           </ng-container>
 
           <!-- Sequence Column -->
           <ng-container matColumnDef="sequence">
-            <th mat-header-cell *matHeaderCellDef>Randomized Region</th>
+            <th mat-header-cell *matHeaderCellDef [attr.rowspan]="2">Randomized Region</th>
             <td mat-cell *matCellDef="let row" class="sequence monospace">
               @if (poolForm.showPrimers().value()) {
                 <span class="primer">{{ row.sequence! | slice: 0 : row.bounds.startIndex }}</span>
@@ -107,23 +107,30 @@
             </td>
           </ng-container>
 
-          <!-- Count Column -->
+          <ng-container matColumnDef="selectionCycleGroup">
+            <th mat-header-cell *matHeaderCellDef [attr.colspan]="2">
+              Round nº {{ experimentReport().selectionCycleResponse.round }}, {{ experimentReport().selectionCycleResponse.name }}
+            </th>
+          </ng-container>
+
+          <!-- Selection Cycle: Count Column -->
           <ng-container matColumnDef="count">
-            <th mat-header-cell *matHeaderCellDef>Count</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Count</th>
             <td mat-cell *matCellDef="let row">
-              {{ poolForm.useCPM().value() ? row.cpm : row.count }}
+              {{ poolForm.useCPM().value() ? (row.cpm | number) : row.count }}
             </td>
           </ng-container>
 
-          <!-- Frequency Column -->
+          <!-- Selection Cycle: Frequency Column -->
           <ng-container matColumnDef="frequency">
-            <th mat-header-cell *matHeaderCellDef>Count</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Frequency</th>
             <td mat-cell *matCellDef="let row">
-              {{ poolForm.useCPM().value() ? row.cpm : row.count }}
+              {{ row.frequency | number: '1.1-5' }}
             </td>
           </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="['id', 'sequence', 'count', 'frequency']; sticky: true"></tr>
+          <tr mat-header-row *matHeaderRowDef="['id', 'sequence', 'selectionCycleGroup']; sticky: true"></tr>
+          <tr mat-header-row *matHeaderRowDef="['count', 'frequency']; sticky: true"></tr>
           <tr mat-row *matRowDef="let row; columns: ['id', 'sequence', 'count', 'frequency'];"
               (click)="onSelectRow(row)"
               [class.selected]="selectedSequence() === row.sequence">
