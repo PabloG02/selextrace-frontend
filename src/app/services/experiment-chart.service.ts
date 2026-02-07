@@ -138,7 +138,6 @@ export class ExperimentChartService {
 
   // --- Sequencing Data tab ---
 
-  selectedCycleName: string = 'r14'; // TODO: get from backend
   getForwardReadsNucleotideDistributionRawChart(experimentReport: Signal<ExperimentReport | undefined>, showPercentage: Signal<boolean>) {
     return computed<EChartsOption>(() => {
       const exp = experimentReport();
@@ -146,30 +145,30 @@ export class ExperimentChartService {
         return {};
       }
 
-      const distribution = exp.metadata.nucleotideDistributionForward[this.selectedCycleName];
+      const distribution = exp.metadata.nucleotideDistributionForward[exp.selectionCycleResponse.name]; // TODO: In the future, there may be multiple cycles to choose from
       const positions = Object.keys(distribution).map(Number).sort((a, b) => a - b);
 
       const seriesA = positions.map(pos => {
         let val = distribution[pos][65] ?? 0; // 'A' = 65
-        if (showPercentage()) val = (val / this.getCycleSize(exp, 'forward')) * 100;
+        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100; // TODO: In the future, there may be multiple cycles to choose from
         return val;
       });
 
       const seriesC = positions.map(pos => {
         let val = distribution[pos][67] ?? 0; // 'C' = 67
-        if (showPercentage()) val = (val / this.getCycleSize(exp, 'forward')) * 100;
+        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
         return val;
       });
 
       const seriesG = positions.map(pos => {
         let val = distribution[pos][71] ?? 0; // 'G' = 71
-        if (showPercentage()) val = (val / this.getCycleSize(exp, 'forward')) * 100;
+        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
         return val;
       });
 
       const seriesT = positions.map(pos => {
         let val = distribution[pos][84] ?? 0; // 'T' = 84
-        if (showPercentage()) val = (val / this.getCycleSize(exp, 'forward')) * 100;
+        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
         return val;
       });
 
@@ -204,7 +203,7 @@ export class ExperimentChartService {
       const exp = experimentReport();
       if (!exp?.metadata?.nucleotideDistributionReverse) return {};
 
-      const distribution = exp.metadata.nucleotideDistributionReverse[this.selectedCycleName];
+      const distribution = exp.metadata.nucleotideDistributionReverse[exp.selectionCycleResponse.name]; // TODO: In the future, there may be multiple cycles to choose from
       if (!distribution || Object.keys(distribution).length === 0) {
         // No paired-end data
         return {};
@@ -214,25 +213,25 @@ export class ExperimentChartService {
 
       const seriesA = positions.map(pos => {
         let val = distribution[pos][65] ?? 0; // 'A' = 65
-        if (showPercentage()) val = (val / this.getCycleSize(exp, 'reverse')) * 100;
+        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100; // TODO: In the future, there may be multiple cycles to choose from
         return val;
       });
 
       const seriesC = positions.map(pos => {
         let val = distribution[pos][67] ?? 0; // 'C' = 67
-        if (showPercentage()) val = (val / this.getCycleSize(exp, 'reverse')) * 100;
+        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
         return val;
       });
 
       const seriesG = positions.map(pos => {
         let val = distribution[pos][71] ?? 0; // 'G' = 71
-        if (showPercentage()) val = (val / this.getCycleSize(exp, 'reverse')) * 100;
+        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
         return val;
       });
 
       const seriesT = positions.map(pos => {
         let val = distribution[pos][84] ?? 0; // 'T' = 84
-        if (showPercentage()) val = (val / this.getCycleSize(exp, 'reverse')) * 100;
+        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
         return val;
       });
 
@@ -268,7 +267,7 @@ export class ExperimentChartService {
       const exp = experimentReport();
       if (!exp?.metadata?.nucleotideDistributionAccepted) return {};
 
-      const distributionByCycle = exp.metadata.nucleotideDistributionAccepted[this.selectedCycleName];
+      const distributionByCycle = exp.metadata.nucleotideDistributionAccepted[exp.selectionCycleResponse.name]; // TODO: In the future, there may be multiple cycles to choose from
       if (!distributionByCycle) return {};
 
       const regionSize = selectedRegionSize();
@@ -279,25 +278,25 @@ export class ExperimentChartService {
 
       const seriesA = positions.map(pos => {
         let val = distribution[pos][65] ?? 0; // 'A' = 65
-        if (showPercentage()) val = (val / this.getCycleSize(exp, 'accepted')) * 100;
+        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100; // TODO: In the future, there may be multiple cycles to choose from
         return val;
       });
 
       const seriesC = positions.map(pos => {
         let val = distribution[pos][67] ?? 0; // 'C' = 67
-        if (showPercentage()) val = (val / this.getCycleSize(exp, 'accepted')) * 100;
+        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
         return val;
       });
 
       const seriesG = positions.map(pos => {
         let val = distribution[pos][71] ?? 0; // 'G' = 71
-        if (showPercentage()) val = (val / this.getCycleSize(exp, 'accepted')) * 100;
+        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
         return val;
       });
 
       const seriesT = positions.map(pos => {
         let val = distribution[pos][84] ?? 0; // 'T' = 84
-        if (showPercentage()) val = (val / this.getCycleSize(exp, 'accepted')) * 100;
+        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
         return val;
       });
 
@@ -324,18 +323,6 @@ export class ExperimentChartService {
         ]
       };
     });
-  }
-
-  private getCycleSize(exp: ExperimentReport, type: 'forward' | 'reverse' | 'accepted'): number {
-    // calculate total reads for selected cycle, e.g. sum of position 0 counts
-    const distribution =
-      type === 'forward' ? exp.metadata.nucleotideDistributionForward[this.selectedCycleName]
-      : type === 'reverse' ? exp.metadata.nucleotideDistributionReverse[this.selectedCycleName]
-          : exp.metadata.nucleotideDistributionAccepted[this.selectedCycleName][40]; // TODO: fix hardcoded size
-    if (!distribution) return 1;
-    const pos0 = distribution[0];
-    if (!pos0) return 1;
-    return (pos0[65] ?? 0) + (pos0[67] ?? 0) + (pos0[71] ?? 0) + (pos0[84] ?? 0);
   }
 
   // --- Aptamer Pool tab ---
