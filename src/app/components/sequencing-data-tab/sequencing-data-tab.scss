@@ -18,24 +18,26 @@
   gap: 16px;
 }
 
-.meta-list {
+.meta-grid {
   display: grid;
-  gap: 8px;
-  margin: 0;
-}
-
-.meta-list div {
-  display: flex;
-  justify-content: space-between;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
 }
 
-dt {
-  font-weight: 600;
+.meta-card mat-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meta-label {
+  font: var(--mat-sys-title-small);
+  letter-spacing: var(--mat-sys-title-small-tracking);
   color: var(--mat-sys-on-surface-variant);
 }
 
-dd {
-  margin: 0;
-  text-align: right;
+.meta-value {
+  font: var(--mat-sys-emphasized-body-large);
+  letter-spacing: var(--mat-sys-emphasized-body-large-tracking);
+  color: var(--mat-sys-on-surface);
 }

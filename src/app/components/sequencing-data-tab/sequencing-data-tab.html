@@ -56,40 +56,56 @@
         <mat-card-title>Cycle Information</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <dl class="meta-list">
-          <div>
-            <dt>Round Number</dt>
-            <dd>{{ experimentReport()!.selectionCycleResponse.round }}</dd>
-          </div>
-          <div>
-            <dt>Cycle Id</dt>
-            <dd>{{ experimentReport()!.selectionCycleResponse.name }}</dd>
-          </div>
-          <div>
-            <dt>Type of Selection</dt>
-            <dd>{{ experimentReport()!.selectionCycleResponse.isControlSelection ? 'Control' : experimentReport()!.selectionCycleResponse.isCounterSelection ? 'Negative' : 'Positive' }}</dd>
-          </div>
-          <div>
-            <dt>5' Barcode</dt>
-            <dd>{{ experimentReport()!.selectionCycleResponse.barcode5Prime ?? 'N/A' }}</dd>
-          </div>
-          <div>
-            <dt>3' Barcode</dt>
-            <dd>{{ experimentReport()!.selectionCycleResponse.barcode3Prime ?? 'N/A' }}</dd>
-          </div>
-          <div>
-            <dt>Pool Size</dt>
-            <dd>{{ experimentReport()!.selectionCycleResponse.totalSize }}</dd>
-          </div>
-          <div>
-            <dt>Unique Fraction</dt>
-            <dd>{{ experimentReport()!.selectionCycleResponse.uniqueSize }}</dd>
-          </div>
-          <div>
-            <dt>Base Distribution (%)</dt>
-            <dd>TODO</dd>
-          </div>
-        </dl>
+        <div class="meta-grid">
+          <mat-card appearance="outlined" class="meta-card">
+            <mat-card-content>
+              <div class="meta-label">Round Number</div>
+              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.round }}</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card appearance="outlined" class="meta-card">
+            <mat-card-content>
+              <div class="meta-label">Cycle Id</div>
+              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.name }}</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card appearance="outlined" class="meta-card">
+            <mat-card-content>
+              <div class="meta-label">Type of Selection</div>
+              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.isControlSelection ? 'Control' : experimentReport()!.selectionCycleResponse.isCounterSelection ? 'Negative' : 'Positive' }}</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card appearance="outlined" class="meta-card">
+            <mat-card-content>
+              <div class="meta-label">5' Barcode</div>
+              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.barcode5Prime ?? 'N/A' }}</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card appearance="outlined" class="meta-card">
+            <mat-card-content>
+              <div class="meta-label">3' Barcode</div>
+              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.barcode3Prime ?? 'N/A' }}</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card appearance="outlined" class="meta-card">
+            <mat-card-content>
+              <div class="meta-label">Pool Size</div>
+              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.totalSize }}</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card appearance="outlined" class="meta-card">
+            <mat-card-content>
+              <div class="meta-label">Unique Fraction</div>
+              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.uniqueSize }}</div>
+            </mat-card-content>
+          </mat-card>
+          <mat-card appearance="outlined" class="meta-card">
+            <mat-card-content>
+              <div class="meta-label">Base Distribution (%)</div>
+              <div class="meta-value">TODO</div>
+            </mat-card-content>
+          </mat-card>
+        </div>
       </mat-card-content>
     </mat-card>
     <div echarts [options]="forwardReadsNucleotideDistributionRawChartOptions()" class="chart-container" [autoResize]="true"></div>
