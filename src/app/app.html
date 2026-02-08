@@ -29,6 +29,17 @@
         <mat-icon>{{ navToggleIcon() }}</mat-icon>
       </button>
     </div>
+    <button
+      matFab
+      class="sidenav-fab"
+      [extended]="drawerState() !== 'collapsed'"
+      routerLink="/experiments/new"
+      aria-label="Create new experiment"
+      (click)="onNavigate()"
+    >
+      <mat-icon>add</mat-icon>
+      @if (drawerState() !== 'collapsed') { New Experiment }
+    </button>
     <mat-nav-list>
       @for (link of navLinks; track link.route) {
         <a

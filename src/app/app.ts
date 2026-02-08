@@ -49,7 +49,6 @@ export class App {
 
   readonly navLinks: NavLink[] = [
     { label: 'Experiments', icon: 'science', route: '/experiments', exact: true },
-    { label: 'Create New', icon: 'add_circle', route: '/experiments/new' },
     { label: 'Settings', icon: 'settings', route: '/settings' },
   ];
 
