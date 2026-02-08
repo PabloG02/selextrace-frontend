@@ -3,6 +3,8 @@
 // This Sass mixin will define CSS variables that are used for styling Angular Material components according to Material 3.
 // Learn more at: https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+// Import custom M3 expressive type definition
+@use 'styles/m3-expressive-type' as m3-expressive;
 // Align Angular Material tabs with the Material 3 design system
 @forward 'styles/tabs';
 // Import Material Symbols Rounded icon font
@@ -21,6 +23,9 @@ html {
     density: 0,
   ));
 }
+
+// Include M3 Expressive emphasized type styles
+@include m3-expressive.generate-tokens($font-family: Geist);
 
 /* ——— Icon Fonts ——— */
 // Settings for Material Symbols Rounded

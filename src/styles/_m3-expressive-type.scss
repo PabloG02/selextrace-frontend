@@ -1,0 +1,50 @@
+@use 'sass:map';
+
+// Material 3 Expressive Typescale
+// Emphasized type styles
+$emphasized-typescale: (
+  // Display
+  display-large: (weight: 500, size: 57px, line-height: 64px, tracking: -0.25px),
+  display-medium: (weight: 500, size: 45px, line-height: 52px, tracking: 0px),
+  display-small: (weight: 500, size: 36px, line-height: 44px, tracking: 0px),
+  
+  // Headline
+  headline-large: (weight: 500, size: 32px, line-height: 40px, tracking: 0px),
+  headline-medium: (weight: 500, size: 28px, line-height: 36px, tracking: 0px),
+  headline-small: (weight: 500, size: 24px, line-height: 32px, tracking: 0px),
+  
+  // Title
+  title-large: (weight: 500, size: 22px, line-height: 28px, tracking: 0px),
+  title-medium: (weight: 700, size: 16px, line-height: 24px, tracking: 0.15px),
+  title-small: (weight: 700, size: 14px, line-height: 20px, tracking: 0.1px),
+  
+  // Body
+  body-large: (weight: 500, size: 16px, line-height: 24px, tracking: 0.5px),
+  body-medium: (weight: 500, size: 14px, line-height: 20px, tracking: 0.25px),
+  body-small: (weight: 500, size: 12px, line-height: 16px, tracking: 0.4px),
+  
+  // Label
+  label-large: (weight: 700, size: 14px, line-height: 20px, tracking: 0.1px),
+  label-medium: (weight: 700, size: 12px, line-height: 16px, tracking: 0.5px),
+  label-small: (weight: 700, size: 11px, line-height: 16px, tracking: 0.5px),
+);
+
+// Mixin to generate the variables
+// Defaults font-family to the system variable defined by Angular Material
+@mixin generate-tokens($font-family) {
+  :root {
+    @each $name, $props in $emphasized-typescale {
+      $prefix: --mat-sys-emphasized-#{$name};
+
+      #{$prefix}-font: #{$font-family};
+      #{$prefix}-line-height: #{map.get($props, line-height)};
+      #{$prefix}-size: #{map.get($props, size)};
+      #{$prefix}-tracking: #{map.get($props, tracking)};
+      #{$prefix}-weight: #{map.get($props, weight)};
+      
+      // Composite shorthand
+      // usage: font: var(--mat-sys-emphasized-label-large);
+      #{$prefix}: #{map.get($props, weight)} #{map.get($props, size)}/#{map.get($props, line-height)} #{$font-family};
+    }
+  }
+}
