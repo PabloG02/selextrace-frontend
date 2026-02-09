@@ -140,7 +140,6 @@
       <mat-label>Cutoff Value</mat-label>
       <input matInput type="number" [formField]="experimentForm.singletonCutoff" />
     </mat-form-field>
-    <button matButton="tonal">Update charts</button>
     <div echarts [options]="positiveSelectionCyclesChartOptions()" class="chart-container" [autoResize]="true"></div>
   </mat-card-content>
 </mat-card>
