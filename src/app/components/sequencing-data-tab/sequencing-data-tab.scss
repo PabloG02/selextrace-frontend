@@ -41,3 +41,12 @@
   letter-spacing: var(--mat-sys-emphasized-body-large-tracking);
   color: var(--mat-sys-on-surface);
 }
+
+.base-distribution {
+  grid-column: span 2;
+
+  .meta-value {
+    display: flex;
+    gap: 16px;
+  }
+}

@@ -99,10 +99,14 @@
               <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.uniqueSize }}</div>
             </mat-card-content>
           </mat-card>
-          <mat-card appearance="outlined" class="meta-card">
+          <mat-card appearance="outlined" class="meta-card base-distribution">
             <mat-card-content>
               <div class="meta-label">Base Distribution (%)</div>
-              <div class="meta-value">TODO</div>
+              <div class="meta-value">
+                @for (baseEntry of baseDistributionPercentages() | keyvalue; track baseEntry.key) {
+                  <span>{{ baseEntry.key }}: {{ baseEntry.value | number: '1.2-2' }}</span>
+                }
+              </div>
             </mat-card-content>
           </mat-card>
         </div>
