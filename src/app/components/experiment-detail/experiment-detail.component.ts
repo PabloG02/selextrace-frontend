@@ -57,7 +57,7 @@ export class ExperimentDetailComponent {
   constructor() {
     effect(
       () => {
-        document.title = `${this.experimentReport()?.experimentDetails.generalInformation.name} • Aptasuite`;
+        document.title = `${this.experimentReport()?.experimentDetails.generalInformation.name} • SELEXTrace`;
       }
     );
   }

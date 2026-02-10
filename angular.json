@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "aptasuite-frontend": {
+    "selextrace-frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -64,10 +64,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "aptasuite-frontend:build:production"
+              "buildTarget": "selextrace-frontend:build:production"
             },
             "development": {
-              "buildTarget": "aptasuite-frontend:build:development"
+              "buildTarget": "selextrace-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"

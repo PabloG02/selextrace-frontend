@@ -16,24 +16,24 @@ export const routes: Routes = [
 			{
 				path: '',
 				component: ExperimentsListComponent,
-				title: 'Experiments • Aptasuite',
+				title: 'Experiments • SELEXTrace',
 			},
 			{
 				path: 'new',
 				component: NewExperimentWizardComponent,
-				title: 'Create Experiment • Aptasuite',
+				title: 'Create Experiment • SELEXTrace',
 			},
 			{
 				path: ':experimentId',
 				component: ExperimentDetailComponent,
-				title: 'Experiment Details • Aptasuite',
+				title: 'Experiment Details • SELEXTrace',
 			},
 		],
 	},
 	{
 		path: 'settings',
 		component: SettingsComponent,
-		title: 'Settings • Aptasuite',
+		title: 'Settings • SELEXTrace',
 	},
 	{
 		path: '**',
