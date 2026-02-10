@@ -46,6 +46,7 @@
             </mat-select>
           </mat-form-field>
 
+          <!-- TODO -->
           <label>on cycle</label>
           <mat-form-field appearance="outline" class="on-cycle-select">
             <mat-select [formField]="poolForm.onCycle">
@@ -115,7 +116,8 @@
 
           <ng-container matColumnDef="selectionCycleGroup">
             <th mat-header-cell *matHeaderCellDef [attr.colspan]="2">
-              Round nº {{ experimentReport().selectionCycleResponse.round }}, {{ experimentReport().selectionCycleResponse.name }}
+              <!-- TODO: Adapt to multiple cycles-->
+              Round nº {{ experimentReport().selectionCycleResponse[0].round }}, {{ experimentReport().selectionCycleResponse[0].name }}
             </th>
           </ng-container>
 

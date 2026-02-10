@@ -1,5 +1,5 @@
 import {computed, inject, Injectable, Signal} from '@angular/core';
-import {ExperimentReport} from '../models/experiment-report';
+import {ExperimentReport, SelectionCycleResponse} from '../models/experiment-report';
 import {EChartsOption} from 'echarts';
 import {PredictionsApiService} from './predictions-api.service';
 
@@ -59,13 +59,18 @@ export class ExperimentChartService {
   getPositiveSelectionCyclesChart(experimentReport: Signal<ExperimentReport | undefined>, singletonCutoff: Signal<number>) {
     return computed<EChartsOption>(() => {
       const exp = experimentReport();
-      if (!exp?.selectionCycleResponse) {
+      if (!exp?.selectionCycleResponse?.length) {
         return {};
       }
 
-      const cycle = exp.selectionCycleResponse;
+      const cycles = exp.selectionCycleResponse
+        .filter(cycle => !cycle.isControlSelection && !cycle.isCounterSelection)
+        .sort((a, b) => (a.round - b.round));
+      if (cycles.length === 0) {
+        return {};
+      }
 
-      const stats = this.computeSelectionCycleStats(cycle, singletonCutoff());
+      const stats = cycles.map(cycle => this.computeSelectionCycleStats(cycle, singletonCutoff()));
 
       return {
         title: { text: 'Positive Selection Cycles' },
@@ -75,7 +80,7 @@ export class ExperimentChartService {
           type: 'category',
           name: 'Cycle Number/Name',
           nameLocation: 'middle',
-          data: [stats.label],
+          data: stats.map(entry => entry.label),
         },
         yAxis: {
           type: 'value',
@@ -90,19 +95,19 @@ export class ExperimentChartService {
           {
             type: 'bar',
             name: 'Singletons',
-            data: [stats.singletonFrequency],
+            data: stats.map(entry => entry.singletonFrequency),
             itemStyle: { color: '#f26c22' },
           },
           {
             type: 'bar',
             name: 'Enriched Species',
-            data: [stats.enrichedFrequency],
+            data: stats.map(entry => entry.enrichedFrequency),
             itemStyle: { color: '#f9a825' },
           },
           {
             type: 'bar',
             name: 'Unique Fraction',
-            data: [stats.uniqueFraction],
+            data: stats.map(entry => entry.uniqueFraction),
             itemStyle: { color: '#43a047' },
           },
         ],
@@ -138,37 +143,45 @@ export class ExperimentChartService {
 
   // --- Sequencing Data tab ---
 
-  getForwardReadsNucleotideDistributionRawChart(experimentReport: Signal<ExperimentReport | undefined>, showPercentage: Signal<boolean>) {
+  getForwardReadsNucleotideDistributionRawChart(
+    experimentReport: Signal<ExperimentReport | undefined>,
+    showPercentage: Signal<boolean>,
+    selectedCycle: Signal<SelectionCycleResponse | null>
+  ) {
     return computed<EChartsOption>(() => {
       const exp = experimentReport();
-      if (!exp?.selectionCycleComposition) {
+      const cycle = selectedCycle();
+      if (!exp?.metadata?.nucleotideDistributionForward || !cycle) {
         return {};
       }
 
-      const distribution = exp.metadata.nucleotideDistributionForward[exp.selectionCycleResponse.name]; // TODO: In the future, there may be multiple cycles to choose from
+      const distribution = exp.metadata.nucleotideDistributionForward[cycle.name];
+      if (!distribution) {
+        return {};
+      }
       const positions = Object.keys(distribution).map(Number).sort((a, b) => a - b);
 
       const seriesA = positions.map(pos => {
         let val = distribution[pos][65] ?? 0; // 'A' = 65
-        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100; // TODO: In the future, there may be multiple cycles to choose from
+        if (showPercentage()) val = (val / cycle.totalSize) * 100;
         return val;
       });
 
       const seriesC = positions.map(pos => {
         let val = distribution[pos][67] ?? 0; // 'C' = 67
-        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
+        if (showPercentage()) val = (val / cycle.totalSize) * 100;
         return val;
       });
 
       const seriesG = positions.map(pos => {
         let val = distribution[pos][71] ?? 0; // 'G' = 71
-        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
+        if (showPercentage()) val = (val / cycle.totalSize) * 100;
         return val;
       });
 
       const seriesT = positions.map(pos => {
         let val = distribution[pos][84] ?? 0; // 'T' = 84
-        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
+        if (showPercentage()) val = (val / cycle.totalSize) * 100;
         return val;
       });
 
@@ -197,13 +210,15 @@ export class ExperimentChartService {
 
   getReverseReadsNucleotideDistributionRawChart(
     experimentReport: Signal<ExperimentReport | undefined>,
-    showPercentage: Signal<boolean>
+    showPercentage: Signal<boolean>,
+    selectedCycle: Signal<SelectionCycleResponse | null>
   ) {
     return computed<EChartsOption>(() => {
       const exp = experimentReport();
-      if (!exp?.metadata?.nucleotideDistributionReverse) return {};
+      const cycle = selectedCycle();
+      if (!exp?.metadata?.nucleotideDistributionReverse || !cycle) return {};
 
-      const distribution = exp.metadata.nucleotideDistributionReverse[exp.selectionCycleResponse.name]; // TODO: In the future, there may be multiple cycles to choose from
+      const distribution = exp.metadata.nucleotideDistributionReverse[cycle.name];
       if (!distribution || Object.keys(distribution).length === 0) {
         // No paired-end data
         return {};
@@ -213,25 +228,25 @@ export class ExperimentChartService {
 
       const seriesA = positions.map(pos => {
         let val = distribution[pos][65] ?? 0; // 'A' = 65
-        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100; // TODO: In the future, there may be multiple cycles to choose from
+        if (showPercentage()) val = (val / cycle.totalSize) * 100;
         return val;
       });
 
       const seriesC = positions.map(pos => {
         let val = distribution[pos][67] ?? 0; // 'C' = 67
-        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
+        if (showPercentage()) val = (val / cycle.totalSize) * 100;
         return val;
       });
 
       const seriesG = positions.map(pos => {
         let val = distribution[pos][71] ?? 0; // 'G' = 71
-        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
+        if (showPercentage()) val = (val / cycle.totalSize) * 100;
         return val;
       });
 
       const seriesT = positions.map(pos => {
         let val = distribution[pos][84] ?? 0; // 'T' = 84
-        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
+        if (showPercentage()) val = (val / cycle.totalSize) * 100;
         return val;
       });
 
@@ -261,13 +276,15 @@ export class ExperimentChartService {
   getAcceptedReadNucleotideDistributionChart(
     experimentReport: Signal<ExperimentReport | undefined>,
     showPercentage: Signal<boolean>,
-    selectedRegionSize: Signal<number>
+    selectedRegionSize: Signal<number>,
+    selectedCycle: Signal<SelectionCycleResponse | null>
   ) {
     return computed<EChartsOption>(() => {
       const exp = experimentReport();
-      if (!exp?.metadata?.nucleotideDistributionAccepted) return {};
+      const cycle = selectedCycle();
+      if (!exp?.metadata?.nucleotideDistributionAccepted || !cycle) return {};
 
-      const distributionByCycle = exp.metadata.nucleotideDistributionAccepted[exp.selectionCycleResponse.name]; // TODO: In the future, there may be multiple cycles to choose from
+      const distributionByCycle = exp.metadata.nucleotideDistributionAccepted[cycle.name];
       if (!distributionByCycle) return {};
 
       const regionSize = selectedRegionSize();
@@ -278,25 +295,25 @@ export class ExperimentChartService {
 
       const seriesA = positions.map(pos => {
         let val = distribution[pos][65] ?? 0; // 'A' = 65
-        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100; // TODO: In the future, there may be multiple cycles to choose from
+        if (showPercentage()) val = (val / cycle.totalSize) * 100;
         return val;
       });
 
       const seriesC = positions.map(pos => {
         let val = distribution[pos][67] ?? 0; // 'C' = 67
-        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
+        if (showPercentage()) val = (val / cycle.totalSize) * 100;
         return val;
       });
 
       const seriesG = positions.map(pos => {
         let val = distribution[pos][71] ?? 0; // 'G' = 71
-        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
+        if (showPercentage()) val = (val / cycle.totalSize) * 100;
         return val;
       });
 
       const seriesT = positions.map(pos => {
         let val = distribution[pos][84] ?? 0; // 'T' = 84
-        if (showPercentage()) val = (val / exp.selectionCycleResponse.totalSize) * 100;
+        if (showPercentage()) val = (val / cycle.totalSize) * 100;
         return val;
       });
 
@@ -557,14 +574,6 @@ export class ExperimentChartService {
     });
   }
 
-}
-
-interface SelectionCycleResponse {
-  name: string;
-  round: number;
-  totalSize: number;
-  uniqueSize: number;
-  counts: Record<number, number>; // count -> frequency
 }
 
 interface SelectionCycleStats {

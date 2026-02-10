@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, linkedSignal, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -17,7 +17,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import {FormField, form, min, required} from '@angular/forms/signals';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
-import {ExperimentReport} from '../../models/experiment-report';
+import {ExperimentReport, SelectionCycleResponse} from '../../models/experiment-report';
 import {ExperimentChartService} from '../../services/experiment-chart.service';
 import {PredictionsApiService} from '../../services/predictions-api.service';
 import {FornacVisualizationComponent} from '../shared/fornac-visualization/fornac-visualization.component';
@@ -81,9 +81,9 @@ export class AptamerPoolTabComponent {
       id: Number(id),
       sequence,
       bounds: idToBounds[Number(id)],
-      count: selectionCycleResponse.counts[Number(id)],
-      cpm: selectionCycleResponse.counts[Number(id)] / selectionCycleResponse.totalSize * 1_000_000,
-      frequency: selectionCycleResponse.counts[Number(id)] / selectionCycleResponse.totalSize
+      count: selectionCycleResponse[0].counts[Number(id)],  // TODO: Adapt to multiple cycles
+      cpm: selectionCycleResponse[0].counts[Number(id)] / selectionCycleResponse[0].totalSize * 1_000_000,  // TODO: Adapt to multiple cycles
+      frequency: selectionCycleResponse[0].counts[Number(id)] / selectionCycleResponse[0].totalSize // TODO: Adapt to multiple cycles
     }));
   });
   // 2. Table State Signals

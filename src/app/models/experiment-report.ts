@@ -25,34 +25,12 @@ export interface ExperimentReport {
   };
   selectionCycleComposition: {
     singletonCount: number;
-    positiveSelectionCycles: {
-      singletonFrequency: number;
-      enrichedFrequency: number;
-      uniqueFraction: number;
-    };
-    negativeSelectionCycles: {
-      singletonFrequency: number;
-      enrichedFrequency: number;
-      uniqueFraction: number;
-    } | null;
-    controlSelectionCycles: {
-      singletonFrequency: number;
-      enrichedFrequency: number;
-      uniqueFraction: number;
-    } | null;
+    positiveSelectionCycles: Record<string, SelectionCycleComposition> | null;
+    negativeSelectionCycles: Record<string, SelectionCycleComposition> | null;
+    controlSelectionCycles: Record<string, SelectionCycleComposition> | null;
   };
   // Testing purposes
-  selectionCycleResponse: {
-    name: string;
-    round: number;
-    isControlSelection: boolean;
-    isCounterSelection: boolean;
-    barcode5Prime: string | null;
-    barcode3Prime: string | null;
-    totalSize: number;
-    uniqueSize: number;
-    counts: Record<number, number>;
-  },
+  selectionCycleResponse: SelectionCycleResponse[];
   metadata: {
     qualityScoresForward: Record<string, Record<number, Accumulator>>;
     qualityScoresReverse: Record<string, Record<number, Accumulator>>;
@@ -64,6 +42,24 @@ export interface ExperimentReport {
   },
   idToAptamer: Record<number, string>,
   idToBounds: Record<number, AptamerBounds>;
+}
+
+export interface SelectionCycleComposition {
+  singletonFrequency: number;
+  enrichedFrequency: number;
+  uniqueFraction: number;
+}
+
+export interface SelectionCycleResponse {
+  name: string;
+  round: number;
+  isControlSelection: boolean;
+  isCounterSelection: boolean;
+  barcode5Prime: string | null;
+  barcode3Prime: string | null;
+  totalSize: number;
+  uniqueSize: number;
+  counts: Record<number, number>;
 }
 
 interface Accumulator {

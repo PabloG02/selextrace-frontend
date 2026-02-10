@@ -14,7 +14,22 @@
 
       <mat-divider vertical/>
 
-      <!-- Column 2: Randomized Region Size -->
+      <!-- Column 2: Selection Cycle -->
+      <div class="settings-column">
+        <p class="settings-label">
+          Select which selection cycle to inspect in the charts below.
+        </p>
+        <mat-form-field appearance="outline" class="size-select">
+          <mat-label>Selection Cycle</mat-label>
+          <mat-select [formField]="sequencingForm.selectedCycleName">
+            @for (cycle of selectionCycles(); track cycle.name) {
+              <mat-option [value]="cycle.name">Round {{ cycle.round }} ({{ cycle.name }})</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Column 3: Randomized Region Size -->
       <div class="settings-column">
         <p class="settings-label">
           To view the randomized region size distribution for different lengths, select the desired value below.
@@ -32,7 +47,7 @@
 
       <mat-divider vertical></mat-divider>
 
-      <!-- Column 3: Axis Scale -->
+      <!-- Column 4: Axis Scale -->
       <div class="settings-column">
         <p class="settings-label">
           To change the default scale of the randomized region size bar chart, select one of the options below:
@@ -48,7 +63,7 @@
 
 <mat-card appearance="outlined">
   <mat-card-header>
-    <mat-card-title>Selection Cycle {{ experimentReport()!.selectionCycleResponse.round }}: {{ experimentReport()!.selectionCycleResponse.name }} (Positive Selection)</mat-card-title>
+    <mat-card-title>Selection Cycle {{ selectedCycle()!.round }}: {{ selectedCycle()!.name }} (Positive Selection)</mat-card-title>
   </mat-card-header>
   <mat-card-content>
     <mat-card appearance="filled">
@@ -60,43 +75,45 @@
           <mat-card appearance="outlined" class="meta-card">
             <mat-card-content>
               <div class="meta-label">Round Number</div>
-              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.round }}</div>
+              <div class="meta-value">{{ selectedCycle()!.round }}</div>
             </mat-card-content>
           </mat-card>
           <mat-card appearance="outlined" class="meta-card">
             <mat-card-content>
               <div class="meta-label">Cycle Id</div>
-              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.name }}</div>
+              <div class="meta-value">{{ selectedCycle()!.name }}</div>
             </mat-card-content>
           </mat-card>
           <mat-card appearance="outlined" class="meta-card">
             <mat-card-content>
               <div class="meta-label">Type of Selection</div>
-              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.isControlSelection ? 'Control' : experimentReport()!.selectionCycleResponse.isCounterSelection ? 'Negative' : 'Positive' }}</div>
+              <div class="meta-value">
+                {{ selectedCycle()?.isControlSelection ? 'Control' : selectedCycle()?.isCounterSelection ? 'Negative' : 'Positive' }}
+              </div>
             </mat-card-content>
           </mat-card>
           <mat-card appearance="outlined" class="meta-card">
             <mat-card-content>
               <div class="meta-label">5' Barcode</div>
-              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.barcode5Prime ?? 'N/A' }}</div>
+              <div class="meta-value">{{ selectedCycle()?.barcode5Prime ?? 'N/A' }}</div>
             </mat-card-content>
           </mat-card>
           <mat-card appearance="outlined" class="meta-card">
             <mat-card-content>
               <div class="meta-label">3' Barcode</div>
-              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.barcode3Prime ?? 'N/A' }}</div>
+              <div class="meta-value">{{ selectedCycle()?.barcode3Prime ?? 'N/A' }}</div>
             </mat-card-content>
           </mat-card>
           <mat-card appearance="outlined" class="meta-card">
             <mat-card-content>
               <div class="meta-label">Pool Size</div>
-              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.totalSize }}</div>
+              <div class="meta-value">{{ selectedCycle()!.totalSize }}</div>
             </mat-card-content>
           </mat-card>
           <mat-card appearance="outlined" class="meta-card">
             <mat-card-content>
               <div class="meta-label">Unique Fraction</div>
-              <div class="meta-value">{{ experimentReport()!.selectionCycleResponse.uniqueSize }}</div>
+              <div class="meta-value">{{ selectedCycle()!.uniqueSize }}</div>
             </mat-card-content>
           </mat-card>
           <mat-card appearance="outlined" class="meta-card base-distribution">
