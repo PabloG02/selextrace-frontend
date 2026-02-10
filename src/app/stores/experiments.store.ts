@@ -21,8 +21,9 @@ export class ExperimentsStore {
   readonly sortOption = signal<SortOption>('createdAt');
 
   readonly filteredExperiments = computed(() => {
+    if (!this.experiments.hasValue()) return [];
+
     const list = this.experiments.value();
-    if (!list) return [];
 
     const search = this.globalSearchTerm().toLocaleLowerCase();
     const status = this.statusFilter();
