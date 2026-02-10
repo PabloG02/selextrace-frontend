@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, input, linkedSignal, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -17,7 +17,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import {FormField, form, min, required} from '@angular/forms/signals';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
-import {ExperimentReport, SelectionCycleResponse} from '../../models/experiment-report';
+import {ExperimentReport} from '../../models/experiment-report';
 import {ExperimentChartService} from '../../services/experiment-chart.service';
 import {PredictionsApiService} from '../../services/predictions-api.service';
 import {FornacVisualizationComponent} from '../shared/fornac-visualization/fornac-visualization.component';
@@ -74,21 +74,55 @@ export class AptamerPoolTabComponent {
   });
 
   /* Table */
-  // 1. All Data Signal
+  // 1. Table Definition & State Signals
+  /* Top Header Row (Groups): ID, Sequence + 1 Group per Cycle */
+  readonly groupedColumns = computed(() => {
+    const cycleGroups = this.experimentReport().selectionCycleResponse
+      .slice()
+      .sort((a, b) => b.round - a.round)
+      .map(cycle => `cycle-${cycle.round}-group`);
+    return ['id', 'sequence', ...cycleGroups];
+  });
+  /* Sub-Header Row: Columns per Cycle (Count & Frequency) */
+  readonly subcolumns = computed(() => {
+    return this.experimentReport().selectionCycleResponse
+      .slice()
+      .sort((a, b) => b.round - a.round)
+      .flatMap(cycle => [
+        `cycle-${cycle.round}-count`,
+        `cycle-${cycle.round}-frequency`
+      ]);
+  });
+  /* Data Rows: ID, Sequence + All flattened cycle subcolumns */
+  readonly dataColumns = computed(() => {
+    return ['id', 'sequence', ...this.subcolumns()];
+  });
+  readonly pageIndex = signal(0);
+  readonly sortState = signal<Sort>({ active: 'id', direction: 'asc' });
+  // 2. All Data Signal
   private readonly totalAptamerData = linkedSignal<AptamerRow[]>(() => {
     const { idToAptamer, idToBounds, selectionCycleResponse } = this.experimentReport();
-    return Object.entries(idToAptamer).map(([id, sequence]) => ({
-      id: Number(id),
-      sequence,
-      bounds: idToBounds[Number(id)],
-      count: selectionCycleResponse[0].counts[Number(id)],  // TODO: Adapt to multiple cycles
-      cpm: selectionCycleResponse[0].counts[Number(id)] / selectionCycleResponse[0].totalSize * 1_000_000,  // TODO: Adapt to multiple cycles
-      frequency: selectionCycleResponse[0].counts[Number(id)] / selectionCycleResponse[0].totalSize // TODO: Adapt to multiple cycles
-    }));
+    return Object.entries(idToAptamer).map(([id, sequence]) => {
+      const aptamerId = Number(id);
+
+      const cycles: Record<number, SelectionCycleMetrics> = Object.fromEntries(
+        selectionCycleResponse.map(cycle => {
+          const count = cycle.counts[aptamerId];
+          const frequency = count / cycle.totalSize;
+          const cpm = frequency * 1_000_000;
+
+          return [cycle.round, { count, cpm, frequency }];
+        })
+      );
+
+      return {
+        id: aptamerId,
+        sequence,
+        bounds: idToBounds[aptamerId],
+        cycles
+      };
+    });
   });
-  // 2. Table State Signals
-  readonly pageIndex = signal(0);
-  readonly sortState = signal<Sort>({ active: 'count', direction: 'desc' });
   // 3. Pipeline: Filtering (Search)
   readonly filteredData = linkedSignal(() => {
     const data = this.totalAptamerData();
@@ -114,19 +148,30 @@ export class AptamerPoolTabComponent {
     if (!active || direction === '') return data;
 
     const multiplier = direction === 'asc' ? 1 : -1;
-    return [...data].sort((a: any, b: any) => {
-      switch (active) {
-        case 'id':
-          return (a.id - b.id) * multiplier;
-        case 'count':
-          const aValue = this.poolForm.useCPM().value() ? a.cpm : a.count;
-          const bValue = this.poolForm.useCPM().value() ? b.cpm : b.count;
-          return (aValue - bValue) * multiplier;
-        case 'frequency':
-          return (a.frequency - b.frequency) * multiplier;
-        default:
-          return 0;
+    return [...data].sort((a: AptamerRow, b: AptamerRow) => {
+      // Static Columns
+      if (active === 'id') {
+        return (a.id - b.id) * multiplier;
       }
+      else if (active === 'sequence') {
+        return a.sequence.localeCompare(b.sequence) * multiplier;
+      }
+      // Dynamic Cycle Columns
+      const match = active.match(/^cycle-(\d+)-(count|frequency)$/);
+      if (match) {
+        const round = Number(match[1]);
+        const metric = match[2];
+
+        if (metric === 'count') {
+          const aValue = this.poolForm.useCPM().value() ? a.cycles[round].cpm : a.cycles[round].count;
+          const bValue = this.poolForm.useCPM().value() ? b.cycles[round].cpm : b.cycles[round].count;
+          return (aValue - bValue) * multiplier;
+        } else if (metric === 'frequency') {
+          return (a.cycles[round].frequency - b.cycles[round].frequency) * multiplier;
+        }
+      }
+
+      return 0;
     });
   });
   // 5. Pipeline: Pagination (Final View Source)
@@ -166,11 +211,18 @@ export class AptamerPoolTabComponent {
   }
 }
 
-type AptamerRow = {
-  id: number;
-  sequence: string;
-  bounds: { startIndex: number; endIndex: number };
+type SelectionCycleMetrics = {
   count: number;
   cpm: number;
   frequency: number;
+};
+
+type AptamerRow = {
+  id: number;
+  sequence: string;
+  bounds: {
+    startIndex: number;
+    endIndex: number
+  };
+  cycles: Record<number, SelectionCycleMetrics>;
 };

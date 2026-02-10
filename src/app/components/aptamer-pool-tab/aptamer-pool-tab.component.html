@@ -80,76 +80,78 @@
 <div class="split-root">
   <div class="table-pane">
     <mat-card appearance="outlined" class="table-card">
+      <table mat-table
+             [dataSource]="paginatedData()"
+             class="aptamer-table"
+             matSort
+             [matSortActive]="sortState().active"
+             [matSortDirection]="sortState().direction"
+             (matSortChange)="onSortChange($event)">
 
-         <table mat-table
-                [dataSource]="paginatedData()"
-                class="aptamer-table"
-                matSort
-                [matSortActive]="sortState().active"
-                [matSortDirection]="sortState().direction"
-                (matSortChange)="onSortChange($event)">
+        <!-- ID Column -->
+        <ng-container matColumnDef="id">
+         <th mat-header-cell *matHeaderCellDef mat-sort-header [attr.rowspan]="2">ID</th>
+         <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+        </ng-container>
 
-          <!-- ID Column -->
-          <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header [attr.rowspan]="2">ID</th>
-            <td mat-cell *matCellDef="let row">{{ row.id }}</td>
-          </ng-container>
+        <!-- Sequence Column -->
+        <ng-container matColumnDef="sequence">
+         <th mat-header-cell *matHeaderCellDef mat-sort-header [attr.rowspan]="2">Randomized Region</th>
+         <td mat-cell *matCellDef="let row" class="sequence monospace">
+           @if (poolForm.showPrimers().value()) {
+             <span class="primer">{{ row.sequence! | slice: 0 : row.bounds.startIndex }}</span>
+           }
+           @for (base of row.sequence! | slice: row.bounds.startIndex : row.bounds.endIndex; track $index) {
+             <span [class.nuc-a]="base === 'A'"
+                   [class.nuc-t]="base === 'T'"
+                   [class.nuc-c]="base === 'C'"
+                   [class.nuc-g]="base === 'G'">{{ base }}</span>
+           }
+           @if (poolForm.showPrimers().value()) {
+             <span class="primer">{{ row.sequence! | slice: row.bounds.endIndex }}</span>
+           }
+         </td>
+        </ng-container>
 
-          <!-- Sequence Column -->
-          <ng-container matColumnDef="sequence">
-            <th mat-header-cell *matHeaderCellDef [attr.rowspan]="2">Randomized Region</th>
-            <td mat-cell *matCellDef="let row" class="sequence monospace">
-              @if (poolForm.showPrimers().value()) {
-                <span class="primer">{{ row.sequence! | slice: 0 : row.bounds.startIndex }}</span>
-              }
-              @for (base of row.sequence! | slice: row.bounds.startIndex : row.bounds.endIndex; track $index) {
-                <span [class.nuc-a]="base === 'A'"
-                      [class.nuc-t]="base === 'T'"
-                      [class.nuc-c]="base === 'C'"
-                      [class.nuc-g]="base === 'G'">{{ base }}</span>
-              }
-              @if (poolForm.showPrimers().value()) {
-                <span class="primer">{{ row.sequence! | slice: row.bounds.endIndex }}</span>
-              }
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="selectionCycleGroup">
+        @for (cycle of experimentReport().selectionCycleResponse; track cycle.name) {
+          @let cyclePrefix = `cycle-${cycle.round}`;
+          <ng-container matColumnDef="{{ cyclePrefix }}-group">
             <th mat-header-cell *matHeaderCellDef [attr.colspan]="2">
-              <!-- TODO: Adapt to multiple cycles-->
-              Round nº {{ experimentReport().selectionCycleResponse[0].round }}, {{ experimentReport().selectionCycleResponse[0].name }}
+              Round nº {{ cycle.round }}, {{ cycle.name }}
             </th>
           </ng-container>
 
-          <!-- Selection Cycle: Count Column -->
-          <ng-container matColumnDef="count">
+          <!-- Count Column for this cycle -->
+          <ng-container matColumnDef="{{ cyclePrefix }}-count">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Count</th>
             <td mat-cell *matCellDef="let row">
-              {{ poolForm.useCPM().value() ? (row.cpm | number) : row.count }}
+              {{ poolForm.useCPM().value() ? (row.cycles[cycle.round].cpm | number) : row.cycles[cycle.round].count }}
             </td>
           </ng-container>
 
-          <!-- Selection Cycle: Frequency Column -->
-          <ng-container matColumnDef="frequency">
+          <!-- Frequency Column for this cycle -->
+          <ng-container matColumnDef="{{ cyclePrefix }}-frequency">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Frequency</th>
             <td mat-cell *matCellDef="let row">
-              {{ row.frequency | number: '1.1-5' }}
+              {{ row.cycles[cycle.round].frequency | number: '1.1-5' }}
             </td>
           </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="['id', 'sequence', 'selectionCycleGroup']; sticky: true"></tr>
-          <tr mat-header-row *matHeaderRowDef="['count', 'frequency']; sticky: true"></tr>
-          <tr mat-row *matRowDef="let row; columns: ['id', 'sequence', 'count', 'frequency'];"
-              (click)="onSelectRow(row)"
-              [class.selected]="selectedSequence() === row.sequence">
-          </tr>
-        </table>
+          <!-- TODO: Enrichment Column for this cycle (compared to previous cycle) -->
+        }
 
-        <mat-paginator [length]="filteredData().length"
-                       [pageSize]="poolForm.itemsPerPage().value()"
-                       (page)="onPageChange($event)"
-                       showFirstLastButtons/>
+        <tr mat-header-row *matHeaderRowDef="groupedColumns(); sticky: true"></tr>
+        <tr mat-header-row *matHeaderRowDef="subcolumns(); sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: dataColumns();"
+            (click)="onSelectRow(row)"
+            [class.selected]="selectedSequence() === row.sequence">
+        </tr>
+      </table>
 
+      <mat-paginator [length]="filteredData().length"
+                     [pageSize]="poolForm.itemsPerPage().value()"
+                     (page)="onPageChange($event)"
+                     showFirstLastButtons/>
     </mat-card>
   </div>
 
