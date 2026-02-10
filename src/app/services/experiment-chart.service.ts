@@ -11,24 +11,33 @@ export class ExperimentChartService {
 
   // --- Experiment Overview tab ---
 
-  getRandomizedRegionSizeDistributionChart(experimentReport: Signal<ExperimentReport | undefined>) {
+  getRandomizedRegionSizeDistributionChart(
+    experimentReport: Signal<ExperimentReport | undefined>,
+    axisUnit: Signal<'count' | 'percentage'>,
+    axisScale: Signal<'linear' | 'logarithmic'>
+  ) {
     return computed<EChartsOption>(() => {
       const exp = experimentReport();
-      if (!exp?.randomizedRegionSizeDistribution) {
+      if (!exp) {
         return {};
       }
 
-      const distribution = exp.randomizedRegionSizeDistribution.data;
-
-      // Convert keys to numbers and sort
+      const { distribution, total } = this.buildRandomizedRegionSizeDistribution(exp);
       const numericKeys = Object.keys(distribution).map(Number);
       const maxKey = Math.max(...numericKeys);
 
       // Generate continuous range from 0 to (maxKey + 4)
       const allKeys = Array.from({ length: maxKey + 5 }, (_, i) => i);
 
-      // Map values, defaulting to 0 if missing
-      const values = allKeys.map(k => distribution[k] ?? 0);
+      const isPercentage = axisUnit() === 'percentage';
+
+      const values = allKeys.map(k => {
+        // Map values, defaulting to 0 for missing keys.
+        const rawValue = distribution[k] ?? 0;
+        return isPercentage && total > 0 ? (rawValue / total) * 100 : rawValue;
+      });
+
+      const yAxisName = isPercentage ? 'Percentage of Occurrence' : 'Frequency of Occurrence';
 
       return {
         legend: {
@@ -43,7 +52,7 @@ export class ExperimentChartService {
         },
         yAxis: {
           type: 'value',
-          name: 'Frequency of Occurrence',
+          name: yAxisName,
           nameLocation: 'middle',
           nameRotate: 90,
         },
@@ -54,6 +63,25 @@ export class ExperimentChartService {
         }],
       };
     });
+  }
+
+  private buildRandomizedRegionSizeDistribution(exp: ExperimentReport) {
+    const distributionByCycle = exp.metadata?.nucleotideDistributionAccepted;
+    const totals: Record<number, number> = {};
+    let total = 0;
+
+    for (const cycleEntry of Object.values(distributionByCycle)) {
+      for (const [sizeStr, positions] of Object.entries(cycleEntry)) {
+        const size = Number(sizeStr);
+        const positionZero = positions[0];
+        // Only sum counts from position 0 (to match original behavior)
+        const sum = Object.values(positionZero).reduce((acc, value) => acc + value, 0);
+        totals[size] = (totals[size] ?? 0) + sum;
+        total += sum;
+      }
+    }
+
+    return { distribution: totals, total };
   }
 
   getPositiveSelectionCyclesChart(experimentReport: Signal<ExperimentReport | undefined>, singletonCutoff: Signal<number>) {

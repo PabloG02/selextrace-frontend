@@ -37,8 +37,8 @@ export class ExperimentOverviewTab {
   /* State */
   readonly experimentFormModel = signal({
     // Randomize Region Size Distribution
-    axisUnit: 'count',
-    axisScale: 'linear',
+    axisUnit: 'count' as 'count' | 'percentage',
+    axisScale: 'linear' as 'linear' | 'logarithmic',
     // Selection Cycle Composition
     singletonCutoff: 1,
   });
@@ -49,7 +49,11 @@ export class ExperimentOverviewTab {
   });
 
   /* Charts */
-  readonly randomizedRegionSizeDistributionChartOptions = this.chartService.getRandomizedRegionSizeDistributionChart(this.experimentReport);
+  readonly randomizedRegionSizeDistributionChartOptions = this.chartService.getRandomizedRegionSizeDistributionChart(
+    this.experimentReport,
+    this.experimentForm.axisUnit().value,
+    this.experimentForm.axisScale().value
+  );
   readonly positiveSelectionCyclesChartOptions = this.chartService.getPositiveSelectionCyclesChart(this.experimentReport, this.experimentForm.singletonCutoff().value);
 
   /* Computed */

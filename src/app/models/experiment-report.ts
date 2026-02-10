@@ -19,16 +19,6 @@ export interface ExperimentReport {
       totalProcessedReads: number;
     };
   };
-  randomizedRegionSizeDistribution: {
-    total: number;
-    data: Record<string, number>; // e.g., { "40": 27760 }
-  };
-  selectionCycleComposition: {
-    singletonCount: number;
-    positiveSelectionCycles: Record<string, SelectionCycleComposition> | null;
-    negativeSelectionCycles: Record<string, SelectionCycleComposition> | null;
-    controlSelectionCycles: Record<string, SelectionCycleComposition> | null;
-  };
   // Testing purposes
   selectionCycleResponse: SelectionCycleResponse[];
   metadata: {
@@ -42,12 +32,6 @@ export interface ExperimentReport {
   },
   idToAptamer: Record<number, string>,
   idToBounds: Record<number, AptamerBounds>;
-}
-
-export interface SelectionCycleComposition {
-  singletonFrequency: number;
-  enrichedFrequency: number;
-  uniqueFraction: number;
 }
 
 export interface SelectionCycleResponse {
