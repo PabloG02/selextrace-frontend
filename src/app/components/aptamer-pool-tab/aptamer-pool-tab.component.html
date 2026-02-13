@@ -33,34 +33,6 @@
 
       <mat-divider vertical/>
 
-      <!-- Sorting -->
-      <div class="header-column">
-        <p class="header-label">Modify sorting and reference cycle</p>
-        <div class="sort-row">
-          <label>Sort by</label>
-          <mat-form-field appearance="outline">
-            <mat-select [formField]="poolForm.sortBy">
-              <mat-option value="enrichment">Enrichment</mat-option>
-              <mat-option value="count">Count</mat-option>
-              <mat-option value="unique">Unique fraction</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <!-- TODO -->
-          <label>on cycle</label>
-          <mat-form-field appearance="outline" class="on-cycle-select">
-            <mat-select [formField]="poolForm.onCycle">
-              <mat-option [value]="null">(current)</mat-option>
-              <mat-option value="1">1</mat-option>
-              <mat-option value="2">2</mat-option>
-              <mat-option value="3">3</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </div>
-
-      <mat-divider vertical/>
-
       <!-- Search -->
       <div class="header-column search-column">
         <p class="header-label">Search the pool (regex supported). For IDs, check the box and use comma-separated ids.</p>

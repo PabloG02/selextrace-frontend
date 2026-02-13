@@ -62,15 +62,12 @@ export class AptamerPoolTabComponent {
     showPrimers: true,
     useCPM: true,
     itemsPerPage: 10,
-    sortBy: 'enrichment',
-    onCycle: null as string | null,
     query: '',
     searchIds: false,
   });
   readonly poolForm = form(this.poolFormModel, (p) => {
     required(p.itemsPerPage);
     min(p.itemsPerPage, 1);
-    required(p.sortBy);
   });
 
   /* Table */
