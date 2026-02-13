@@ -1,0 +1,16 @@
+.aptamer-table .selected {
+  font-weight: 600;
+  background-color: var(--mat-sys-surface-container);
+}
+
+.sequence {
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+/* Nucleotide Colors */
+.primer { color: var(--mat-sys-on-surface-variant); }
+.nuc-a { color: #1b7b1b; }
+.nuc-t { color: #c62828; }
+.nuc-c { color: #1565c0; }
+.nuc-g { color: #f9a825; }

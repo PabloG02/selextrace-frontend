@@ -4,17 +4,6 @@
   display: block;
 }
 
-/* Nucleotide Colors */
-.nuc-a { color: #1b7b1b; }
-.nuc-t { color: #c62828; }
-.nuc-c { color: #1565c0; }
-.nuc-g { color: #f9a825; }
-.primer { color: var(--mat-sys-on-surface-variant); }
-
-.sequence {
-  letter-spacing: 0.1em;
-}
-
 .header-card {
   margin-bottom: 12px;
   overflow-x: auto;
@@ -65,15 +54,6 @@
 .table-card {
   flex: 1;
   overflow: auto;
-}
-
-//.aptamer-table tr:nth-child(2n) {
-//  background-color: var(--mat-sys-surface-container-low);
-//}
-
-.aptamer-table .selected {
-  font-weight: 600;
-  background-color: var(--mat-sys-surface-container);
 }
 
 .chart-container {

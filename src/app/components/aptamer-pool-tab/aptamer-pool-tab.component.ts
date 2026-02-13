@@ -10,9 +10,6 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import {FormField, form, min, required} from '@angular/forms/signals';
@@ -21,6 +18,7 @@ import {ExperimentReport} from '../../models/experiment-report';
 import {ExperimentChartService} from '../../services/experiment-chart.service';
 import {PredictionsApiService} from '../../services/predictions-api.service';
 import {FornacVisualizationComponent} from '../shared/fornac-visualization/fornac-visualization.component';
+import {AptamerTableComponent, AptamerTableRow, SelectionCycleMetrics} from '../shared/aptamer-table/aptamer-table.component';
 
 @Component({
   selector: 'app-aptamer-pool-tab',
@@ -37,14 +35,12 @@ import {FornacVisualizationComponent} from '../shared/fornac-visualization/forna
     MatButtonModule,
     MatCheckboxModule,
     MatIconModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
     MatExpansionModule,
     NgxEchartsDirective,
     FormField,
     MatSlideToggle,
-    FornacVisualizationComponent
+    FornacVisualizationComponent,
+    AptamerTableComponent
   ],
   templateUrl: './aptamer-pool-tab.component.html',
   styleUrl: './aptamer-pool-tab.component.scss',
@@ -71,33 +67,8 @@ export class AptamerPoolTabComponent {
   });
 
   /* Table */
-  // 1. Table Definition & State Signals
-  /* Top Header Row (Groups): ID, Sequence + 1 Group per Cycle */
-  readonly groupedColumns = computed(() => {
-    const cycleGroups = this.experimentReport().selectionCycleResponse
-      .slice()
-      .sort((a, b) => b.round - a.round)
-      .map(cycle => `cycle-${cycle.round}-group`);
-    return ['id', 'sequence', ...cycleGroups];
-  });
-  /* Sub-Header Row: Columns per Cycle (Count & Frequency) */
-  readonly subcolumns = computed(() => {
-    return this.experimentReport().selectionCycleResponse
-      .slice()
-      .sort((a, b) => b.round - a.round)
-      .flatMap(cycle => [
-        `cycle-${cycle.round}-count`,
-        `cycle-${cycle.round}-frequency`
-      ]);
-  });
-  /* Data Rows: ID, Sequence + All flattened cycle subcolumns */
-  readonly dataColumns = computed(() => {
-    return ['id', 'sequence', ...this.subcolumns()];
-  });
-  readonly pageIndex = signal(0);
-  readonly sortState = signal<Sort>({ active: 'id', direction: 'asc' });
-  // 2. All Data Signal
-  private readonly totalAptamerData = linkedSignal<AptamerRow[]>(() => {
+  // 1. All Data Signal
+  private readonly totalAptamerData = linkedSignal<AptamerTableRow[]>(() => {
     const { idToAptamer, idToBounds, selectionCycleResponse } = this.experimentReport();
     return Object.entries(idToAptamer).map(([id, sequence]) => {
       const aptamerId = Number(id);
@@ -120,7 +91,7 @@ export class AptamerPoolTabComponent {
       };
     });
   });
-  // 3. Pipeline: Filtering (Search)
+  // 2. Pipeline: Filtering (Search)
   readonly filteredData = linkedSignal(() => {
     const data = this.totalAptamerData();
     const query = this.poolForm.query().value()?.trim().toLowerCase();
@@ -137,58 +108,6 @@ export class AptamerPoolTabComponent {
       return data.filter(row => row.sequence?.toLowerCase().includes(query));
     }
   });
-  // 4. Pipeline: Sorting
-  readonly sortedData = linkedSignal(() => {
-    const data = this.filteredData();
-    const { active, direction } = this.sortState();
-
-    if (!active || direction === '') return data;
-
-    const multiplier = direction === 'asc' ? 1 : -1;
-    return [...data].sort((a: AptamerRow, b: AptamerRow) => {
-      // Static Columns
-      if (active === 'id') {
-        return (a.id - b.id) * multiplier;
-      }
-      else if (active === 'sequence') {
-        return a.sequence.localeCompare(b.sequence) * multiplier;
-      }
-      // Dynamic Cycle Columns
-      const match = active.match(/^cycle-(\d+)-(count|frequency)$/);
-      if (match) {
-        const round = Number(match[1]);
-        const metric = match[2];
-
-        if (metric === 'count') {
-          const aValue = this.poolForm.useCPM().value() ? a.cycles[round].cpm : a.cycles[round].count;
-          const bValue = this.poolForm.useCPM().value() ? b.cycles[round].cpm : b.cycles[round].count;
-          return (aValue - bValue) * multiplier;
-        } else if (metric === 'frequency') {
-          return (a.cycles[round].frequency - b.cycles[round].frequency) * multiplier;
-        }
-      }
-
-      return 0;
-    });
-  });
-  // 5. Pipeline: Pagination (Final View Source)
-  readonly paginatedData = linkedSignal(() => {
-    const data = this.sortedData();
-    const pageIndex = this.pageIndex();
-    const pageSize = this.poolForm.itemsPerPage().value();
-
-    const startIndex = pageIndex * pageSize;
-    return data.slice(startIndex, startIndex + pageSize);
-  });
-
-  // 6. Event Handlers
-  onPageChange(event: PageEvent) {
-    this.pageIndex.set(event.pageIndex);
-  }
-
-  onSortChange(event: Sort) {
-    this.sortState.set(event);
-  }
 
   // Selection & Details
   readonly selectedSequence = signal<string | null>(null);
@@ -200,26 +119,9 @@ export class AptamerPoolTabComponent {
   resetSearch() {
     this.poolForm.query().value.set('');
     this.poolForm.searchIds().value.set(false);
-    this.pageIndex.set(0);
   }
 
-  onSelectRow(row: AptamerRow | null) {
+  onSelectRow(row: AptamerTableRow | null) {
     this.selectedSequence.set(row?.sequence ?? null);
   }
 }
-
-type SelectionCycleMetrics = {
-  count: number;
-  cpm: number;
-  frequency: number;
-};
-
-type AptamerRow = {
-  id: number;
-  sequence: string;
-  bounds: {
-    startIndex: number;
-    endIndex: number
-  };
-  cycles: Record<number, SelectionCycleMetrics>;
-};
