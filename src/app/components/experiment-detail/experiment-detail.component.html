@@ -69,11 +69,9 @@
 
       <mat-tab label="Aptamer Family Analysis">
         <div class="tab-content">
-          <mat-card appearance="outlined">
-            <mat-card-content>
-              <p>Family level motif alignment and similarity scoring results will be available soon.</p>
-            </mat-card-content>
-          </mat-card>
+          <app-aptamer-family-analysis-tab
+            [experimentReport]="experimentReport()!"
+            [experimentId]="experimentId()"/>
         </div>
       </mat-tab>
 

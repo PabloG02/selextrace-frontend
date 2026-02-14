@@ -1,0 +1,107 @@
+<mat-card class="control-card" appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>Clustering Options (AptaCluster)</mat-card-title>
+    <mat-card-subtitle>To cluster or re-cluster the pool, adjust the cluster option parameters and press "Run AptaCluster" below.</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="control-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Randomized Region Size</mat-label>
+        <mat-select [formField]="clusteringForm.randomizedRegionSize">
+          @for (size of randomizedRegionSizes(); track size) {
+            <mat-option [value]="size">{{ size }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Locality Sensitive Hashing Dimension</mat-label>
+        <mat-select [formField]="clusteringForm.localitySensitiveHashingDimensions">
+          @for (option of localitySensitiveHashingDimensionOptions(); track option) {
+            <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Locality Sensitive Hashing Iterations</mat-label>
+        <mat-select [formField]="clusteringForm.localitySensitiveHashingIterations">
+          @for (option of localitySensitiveHashingIterationOptions; track option) {
+            <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Edit Distance</mat-label>
+        <input matInput type="number" [formField]="clusteringForm.editDistance" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Kmer Size</mat-label>
+        <input matInput type="number" [formField]="clusteringForm.kmerSize" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Kmer Cutoff Iterations</mat-label>
+        <input matInput type="number" [formField]="clusteringForm.kmerCutoffIterations" />
+      </mat-form-field>
+      <button matButton="outlined" (click)="runClustering()" [disabled]="clusteringForm().invalid() || isSubmitting()">
+        Run clustering
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<div class="content-grid">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>History</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content class="no-padding">
+      <mat-selection-list [multiple]="false" hideSingleSelectionIndicator>
+        @for (analysis of sortedAnalyses(); track analysis.id) {
+          <mat-list-option
+            [value]="analysis.id"
+            [selected]="activeAnalysis()?.id === analysis.id"
+            (click)="selectAnalysis(analysis.id)">
+            <mat-icon matListItemIcon>history</mat-icon>
+            <div matListItemTitle>{{analysis.id}}</div>
+<!--            <div matListItemLine class="meta-line">{{ analysis.createdAt | date:'short' }}</div>-->
+          </mat-list-option>
+        } @empty {
+          <div> No analyses found. </div>
+        }
+      </mat-selection-list>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Clusters</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <app-cluster-table
+        [rows]="clusters()"
+        [selectedClusterId]="selectedClusterId()"
+        (clusterSelected)="selectCluster($event)">
+      </app-cluster-table>
+    </mat-card-content>
+  </mat-card>
+
+  @if (selectedCluster()) {
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Cluster Aptamers</mat-card-title>
+        <mat-card-subtitle>Cluster {{ selectedCluster()!.clusterId }}</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <app-aptamer-table
+          [rows]="selectedClusterRows()"
+          [selectionCycles]="experimentReport().selectionCycleResponse"
+          [showPrimers]="false"
+          [useCPM]="true"
+          [pageSize]="10">
+        </app-aptamer-table>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

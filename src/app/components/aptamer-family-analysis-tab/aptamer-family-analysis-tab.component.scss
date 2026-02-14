@@ -1,0 +1,18 @@
+@use '@angular/material' as mat;
+
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 16px 12px;
+  align-items: center;
+}
+
+.control-grid button {
+  grid-column: span 3;
+}
+
+.content-grid {
+  display: flex;
+  gap: 16px;
+  align-items: start;
+}

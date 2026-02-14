@@ -18,6 +18,7 @@ import {AptamerPoolTabComponent} from '../aptamer-pool-tab/aptamer-pool-tab.comp
 import {FormsModule} from '@angular/forms';
 import {SequencingDataTab} from '../sequencing-data-tab/sequencing-data-tab';
 import {ExperimentOverviewTab} from '../experiment-overview-tab/experiment-overview-tab';
+import {AptamerFamilyAnalysisTab} from '../aptamer-family-analysis-tab/aptamer-family-analysis-tab.component';
 
 @Component({
   selector: 'app-experiment-detail',
@@ -36,6 +37,7 @@ import {ExperimentOverviewTab} from '../experiment-overview-tab/experiment-overv
     FormsModule,
     SequencingDataTab,
     ExperimentOverviewTab,
+    AptamerFamilyAnalysisTab,
   ],
   templateUrl: "./experiment-detail.component.html",
   styleUrl: "./experiment-detail.component.scss",
