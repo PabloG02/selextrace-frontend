@@ -7,6 +7,8 @@
 @use 'styles/m3-expressive-type' as m3-expressive;
 // Align Angular Material tabs with the Material 3 design system
 @forward 'styles/tabs';
+// Align Angular Material accordions with Material 3 Expressive expandable lists
+@forward 'styles/accordion';
 // Import Material Symbols Rounded icon font
 @import 'material-symbols/rounded';
 // Import d3 Fornac visualization styles
