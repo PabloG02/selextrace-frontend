@@ -19,6 +19,14 @@ import {finalize} from 'rxjs';
 import {form, FormField, min, required} from '@angular/forms/signals';
 import {AptamerTableComponent, AptamerTableRow, SelectionCycleMetrics} from '../shared/aptamer-table/aptamer-table.component';
 import {ClusterTableComponent, ClusterTableRow} from '../shared/cluster-table/cluster-table.component';
+import {
+  MatAccordion,
+  MatExpansionPanel,
+  MatExpansionPanelHeader,
+  MatExpansionPanelTitle
+} from '@angular/material/expansion';
+import {NgxEchartsDirective} from 'ngx-echarts';
+import {ExperimentChartService} from '../../services/experiment-chart.service';
 
 @Component({
   selector: 'app-aptamer-family-analysis-tab',
@@ -38,13 +46,19 @@ import {ClusterTableComponent, ClusterTableRow} from '../shared/cluster-table/cl
     MatButtonToggleModule,
     FormField,
     AptamerTableComponent,
-    ClusterTableComponent
+    ClusterTableComponent,
+    MatAccordion,
+    MatExpansionPanel,
+    MatExpansionPanelHeader,
+    MatExpansionPanelTitle,
+    NgxEchartsDirective
   ],
   templateUrl: './aptamer-family-analysis-tab.component.html',
   styleUrl: './aptamer-family-analysis-tab.component.scss',
 })
 export class AptamerFamilyAnalysisTab {
   private readonly clustersApi = inject(ClustersApiService);
+  private readonly chartService = inject(ExperimentChartService);
 
   /* Inputs */
   readonly experimentId = input.required<string>();
@@ -210,13 +224,27 @@ export class AptamerFamilyAnalysisTab {
   });
 
   /** Aptamer rows filtered to only those in the currently selected cluster */
-  readonly selectedClusterRows = computed(() => {
+  readonly aptamersInSelectedCluster = computed(() => {
     const cluster = this.selectedCluster();
     if (!cluster) return [] as AptamerTableRow[];
 
     const ids = new Set(cluster.aptamerIds);
     return this.allAptamerRows().filter(row => ids.has(row.id));
   });
+
+  // TODO
+  readonly referenceSelectionCycle = computed(() => this.experimentReport().selectionCycleResponse[0] ?? null);
+
+  /* Charts */
+  readonly clusterSequenceLogoChartOptions = this.chartService.getClusterSequenceLogoChart(
+    this.aptamersInSelectedCluster,
+    this.referenceSelectionCycle
+  );
+
+  readonly clusterMutationRatesChartOptions = this.chartService.getClusterMutationRatesChart(
+    this.aptamersInSelectedCluster,
+    this.referenceSelectionCycle
+  );
 
   constructor() {
     // Auto-set LSH dimensions to 75% of region size when region size changes

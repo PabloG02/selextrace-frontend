@@ -2,6 +2,7 @@ import {computed, inject, Injectable, Signal} from '@angular/core';
 import {ExperimentReport, SelectionCycleResponse} from '../models/experiment-report';
 import {EChartsOption} from 'echarts';
 import {PredictionsApiService} from './predictions-api.service';
+import {AptamerTableRow} from '../components/shared/aptamer-table/aptamer-table.component';
 
 @Injectable({
   providedIn: 'root'
@@ -600,6 +601,318 @@ export class ExperimentChartService {
         }))
       };
     });
+  }
+
+  // --- Aptamer Family Analysis tab ---
+
+  /**
+   * Builds a cluster sequence logo using the first selection cycle for weights.
+   * Falls back to uniform weighting when cycle counts are missing.
+   */
+  getClusterSequenceLogoChart(
+    rows: Signal<AptamerTableRow[]>,
+    referenceCycle: Signal<SelectionCycleResponse | null>
+  ) {
+    return computed<EChartsOption>(() => {
+      const aptamersInCluster = rows();
+      const cycle = referenceCycle();
+      if (!aptamersInCluster.length || !cycle) return {};
+
+      const seedRow = this.pickSeedRow(aptamersInCluster, cycle.round);
+      if (!seedRow.bounds) return {};
+
+      const start = seedRow.bounds.startIndex;
+      const end = seedRow.bounds.endIndex;
+      const regionLength = end - start;
+      if (regionLength <= 0) return {};
+
+      const seedSequence = seedRow.sequence;
+      if (seedSequence.length < end) return {};
+
+      const nucleotideOrder = ['A', 'C', 'G', 'T'] as const;
+      const counts: number[][] = nucleotideOrder.map(() => Array(regionLength).fill(0));
+
+      const weights = aptamersInCluster.map(row => this.getRowCount(row, cycle.round));
+      const clusterSize = aptamersInCluster.length;
+
+      aptamersInCluster.forEach((row, index) => {
+        const sequence = row.sequence;
+        const bounds = row.bounds;
+        if (!sequence || !bounds) return;
+        if (bounds.startIndex !== start || bounds.endIndex !== end) return;
+
+        const weight = weights[index];
+        if (weight <= 0) return;
+
+        for (let i = 0; i < regionLength; i += 1) {
+          const base = sequence[start + i]?.toUpperCase();
+          const idx = nucleotideOrder.indexOf(base as typeof nucleotideOrder[number]);
+          if (idx >= 0) {
+            counts[idx][i] += weight;
+          }
+        }
+      });
+
+      const rawFrequencies = counts.map(series => series.map(value => value / clusterSize));
+      const maxFrequency = Math.max(...rawFrequencies.flat());
+      const normalizedFrequencies = rawFrequencies.map(series => series.map(value => value / maxFrequency));
+
+      return this.buildCustomSequenceLogoChart(
+        normalizedFrequencies,
+        nucleotideOrder,
+        ['assets/A.png', 'assets/C.png', 'assets/G.png', 'assets/T.png'],
+        'Sequence Position',
+        'Frequency'
+      );
+    });
+  }
+
+  /**
+   * Builds mutation rates relative to the cluster seed sequence (highest-count row).
+   * Uses per-aptamer counts for weighting when available.
+   */
+  getClusterMutationRatesChart(
+    rows: Signal<AptamerTableRow[]>,
+    referenceCycle: Signal<SelectionCycleResponse | null>
+  ) {
+    return computed<EChartsOption>(() => {
+      const aptamersInCluster = rows();
+      const cycle = referenceCycle();
+      if (!aptamersInCluster.length || !cycle) return {};
+
+      const seedRow = this.pickSeedRow(aptamersInCluster, cycle.round);
+      if (!seedRow.bounds) return {};
+
+      const start = seedRow.bounds.startIndex;
+      const end = seedRow.bounds.endIndex;
+      const regionLength = end - start;
+      if (regionLength <= 0) return {};
+
+      const seedSequence = seedRow.sequence;
+      if (seedSequence.length < end) return {};
+
+      const nucleotideOrder = ['A', 'C', 'G', 'T'] as const;
+      const mutations: number[][] = nucleotideOrder.map(() => Array(regionLength).fill(0));
+
+      const weights = aptamersInCluster.map(row => this.getRowCount(row, cycle.round));
+      const clusterSize = aptamersInCluster.length;
+
+      aptamersInCluster.forEach((row, index) => {
+        const sequence = row.sequence;
+        const bounds = row.bounds;
+        if (!sequence || !bounds) return;
+        if (bounds.startIndex !== start || bounds.endIndex !== end) return;
+
+        const weight = weights[index];
+        if (weight <= 0) return;
+
+        for (let i = 0; i < regionLength; i++) {
+          const base = sequence[start + i]?.toUpperCase();
+          const seedBase = seedSequence[start + i]?.toUpperCase();
+          if (base === seedBase) continue;
+
+          const idx = nucleotideOrder.indexOf(base as typeof nucleotideOrder[number]);
+          if (idx >= 0) {
+            mutations[idx][i] += weight;
+          }
+        }
+      });
+
+      const mutationFrequencies = mutations.map(series => series.map(value => value / clusterSize));
+      const xAxisData = Array.from({ length: regionLength }, (_, i) => {
+        const seedBase = seedSequence[start + i]?.toUpperCase() ?? '-';
+        return `${seedBase} (${i + 1})`;
+      });
+
+      const colors = ['#2e7d32', '#1e88e5', '#fb8c00', '#e53935'];
+
+      return {
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+        legend: { bottom: 0 },
+        dataZoom: [
+          { type: 'slider', show: regionLength > 30, start: 0, end: 50 },
+          { type: 'inside' }
+        ],
+        xAxis: {
+          type: 'category',
+          name: 'Seed Position',
+          data: xAxisData
+        },
+        yAxis: {
+          type: 'value',
+          name: 'Mutation Frequency',
+          min: 0,
+          max: 1
+        },
+        series: nucleotideOrder.map((label, idx) => ({
+          name: label,
+          type: 'bar',
+          stack: 'mutations',
+          data: mutationFrequencies[idx],
+          itemStyle: { color: colors[idx] }
+        }))
+      };
+    });
+  }
+
+  /**
+   * Picks a representative seed aptamer based on the highest count in the reference round.
+   */
+  private pickSeedRow(rows: AptamerTableRow[], round: number) {
+    let seed = rows[0];
+    let maxCount = this.getRowCount(seed, round);
+
+    for (let i = 1; i < rows.length; i++) {
+      const count = this.getRowCount(rows[i], round);
+      if (count > maxCount) {
+        maxCount = count;
+        seed = rows[i];
+      }
+    }
+
+    return seed;
+  }
+
+  /**
+   * Returns the count for a given row and selection round, or 0 when missing.
+   */
+  private getRowCount(row: AptamerTableRow, round: number) {
+    return row.cycles[round].count;
+  }
+
+  /**
+   * Creates a stacked image-based sequence logo using the provided per-position frequencies.
+   */
+  private buildCustomSequenceLogoChart(
+    frequencies: number[][],
+    categories: readonly string[],
+    imageUrls: string[],
+    xAxisLabel: string,
+    yAxisLabel: string
+  ): EChartsOption {
+    const sequenceLength = Math.max(...frequencies.map(series => series.length));
+    if (!sequenceLength) return {};
+
+    const xAxisData = Array.from({ length: sequenceLength }, (_, i) => `${i + 1}`);
+
+    const colors = ['#2e7d32', '#1e88e5', '#fb8c00', '#e53935'];
+    const colorMap = categories.reduce<Record<string, string>>((acc, category, index) => {
+      acc[category] = colors[index] ?? '#6d6e73';
+      return acc;
+    }, {});
+
+    return {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        formatter: (params: unknown) => {
+          if (!Array.isArray(params) || params.length === 0) {
+            return '';
+          }
+
+          const entries = params
+            .map(item => {
+              const entry = item as {
+                seriesName?: string;
+                value?: unknown;
+              };
+
+              const rawValue = Array.isArray(entry.value) ? entry.value[2] : entry.value;
+              const value = typeof rawValue === 'number' ? rawValue : 0;
+              const name = entry.seriesName ?? '';
+              return {
+                color: colorMap[name] ?? '#6d6e73',
+                name,
+                value
+              };
+            })
+            .sort((a, b) => {
+              if (b.value !== a.value) {
+                return b.value - a.value;
+              }
+              return a.name.localeCompare(b.name);
+            });
+
+          const rows = entries
+            .map(entry =>
+              `<tr>
+                <td><strong style="display:inline-block;color:${entry.color};margin-right:4px;">${entry.name.charAt(0)}</strong></td>
+                <td style="padding-left: 16px; text-align: right;"><strong>${entry.value.toFixed(3)}</strong></td>
+              </tr>`
+            )
+            .join('');
+
+          return `<table>${rows}</table>`;
+        }
+      },
+      legend: { bottom: 0 },
+      dataZoom: [
+        { type: 'slider', show: sequenceLength > 30, start: 0, end: 50 },
+        { type: 'inside' }
+      ],
+      xAxis: {
+        type: 'category',
+        name: xAxisLabel,
+        data: xAxisData,
+        axisLabel: { interval: 0 }
+      },
+      yAxis: {
+        type: 'value',
+        name: yAxisLabel,
+        min: 0,
+        max: 1
+      },
+      series: categories.map((category, index) => ({
+        name: category,
+        type: 'custom',
+        itemStyle: {
+          color: colors[index] ?? '#6d6e73'
+        },
+        renderItem: (params, api) => {
+          const xIndex = api.value(0) as number;
+          const yStart = api.value(1) as number;
+          const valHeight = api.value(2) as number;
+
+          const start = api.coord([xIndex, yStart]);
+          const end = api.coord([xIndex, yStart + valHeight]);
+          const height = Math.abs(start[1] - end[1]);
+          // TODO: fix ts-ignore
+          // @ts-ignore
+          const width = api.size([1, 0])[0] * 0.98;
+
+          return {
+            type: 'image',
+            style: {
+              image: imageUrls[index],
+              x: start[0] - width / 2,
+              y: end[1],
+              width,
+              height
+            }
+          };
+        },
+        data: (() => {
+          const seriesData: Array<[number, number, number]> = [];
+          for (let i = 0; i < sequenceLength; i += 1) {
+            const stackForPosition = categories.map((cat, catIndex) => ({
+              name: cat,
+              value: frequencies[catIndex]?.[i] ?? 0
+            }));
+            stackForPosition.sort((a, b) => a.value - b.value);
+
+            let yStart = 0;
+            for (let j = 0; j < stackForPosition.length; j += 1) {
+              if (stackForPosition[j].name === category) {
+                seriesData.push([i, yStart, stackForPosition[j].value]);
+                break;
+              }
+              yStart += stackForPosition[j].value;
+            }
+          }
+          return seriesData;
+        })(),
+      }))
+    };
   }
 
 }

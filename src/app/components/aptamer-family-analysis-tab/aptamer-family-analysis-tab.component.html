@@ -95,7 +95,7 @@
 
       <mat-card-content>
         <app-aptamer-table
-          [rows]="selectedClusterRows()"
+          [rows]="aptamersInSelectedCluster()"
           [selectionCycles]="experimentReport().selectionCycleResponse"
           [showPrimers]="false"
           [useCPM]="true"
@@ -104,4 +104,59 @@
       </mat-card-content>
     </mat-card>
   }
+
+  <mat-accordion multi>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Cluster Sequence Logo</mat-panel-title>
+      </mat-expansion-panel-header>
+      @if (aptamersInSelectedCluster().length > 0) {
+        <div
+          echarts
+          [options]="clusterSequenceLogoChartOptions()"
+          class="chart-container"
+          [autoResize]="true">
+        </div>
+      } @else {
+        <div>Select a cluster to view the sequence logo.</div>
+      }
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Mutation Rates from Seed Sequence</mat-panel-title>
+      </mat-expansion-panel-header>
+      @if (aptamersInSelectedCluster().length > 0) {
+        <div
+          echarts
+          [options]="clusterMutationRatesChartOptions()"
+          class="chart-container"
+          [autoResize]="true">
+        </div>
+      } @else {
+        <div>Select a cluster to view mutation rates.</div>
+      }
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Cardinality Chart (Selected Sequences)</mat-panel-title>
+      </mat-expansion-panel-header>
+      <div>Placeholder</div>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Cluster Cardinality Chart</mat-panel-title>
+      </mat-expansion-panel-header>
+      <div>Placeholder</div>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Cluster Enrichment</mat-panel-title>
+      </mat-expansion-panel-header>
+      <div>Placeholder</div>
+    </mat-expansion-panel>
+  </mat-accordion>
 </div>
