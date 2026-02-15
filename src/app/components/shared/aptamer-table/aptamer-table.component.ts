@@ -58,30 +58,38 @@ export class AptamerTableComponent {
 
     if (!active || direction === '') return data;
 
-    const multiplier = direction === 'asc' ? 1 : -1;
-    return [...data].sort((a, b) => {
-      // Static Columns
-      if (active === 'id') return (a.id - b.id) * multiplier;
-      if (active === 'sequence') return a.sequence.localeCompare(b.sequence) * multiplier;
+    let sortKey: 'id' | 'sequence' | 'count' | 'frequency' | null = null;
+    let round: number | null = null;
 
-      // Dynamic Cycle Columns
+    if (active === 'id' || active === 'sequence') {
+      sortKey = active;
+    } else {
       const match = active.match(/^cycle-(\d+)-(count|frequency)$/);
       if (match) {
-        const round = Number(match[1]);
-        const metric = match[2];
-        const aCycle = a.cycles[round];
-        const bCycle = b.cycles[round];
-
-        if (metric === 'count') {
-          const aValue = this.useCPM() ? aCycle.cpm : aCycle.count;
-          const bValue = this.useCPM() ? bCycle.cpm : bCycle.count;
-          return (aValue - bValue) * multiplier;
-        } else if (metric === 'frequency') {
-          return (aCycle.frequency - bCycle.frequency) * multiplier;
-        }
+        round = Number(match[1]);
+        sortKey = match[2] as 'count' | 'frequency';
       }
+    }
 
-      return 0;
+    const multiplier = direction === 'asc' ? 1 : -1;
+    return [...data].sort((a, b) => {
+      switch (sortKey) {
+        // Static Columns
+        case 'id':
+          return (a.id - b.id) * multiplier;
+        case 'sequence':
+          return a.sequence.localeCompare(b.sequence) * multiplier;
+        // Dynamic Cycle Columns
+        case 'count':
+          const aValue = this.useCPM() ? a.cycles[round!].cpm : a.cycles[round!].count;
+          const bValue = this.useCPM() ? b.cycles[round!].cpm : b.cycles[round!].count;
+          return (aValue - bValue) * multiplier;
+        case 'frequency':
+          return (a.cycles[round!].frequency - b.cycles[round!].frequency) * multiplier;
+
+        default:
+          return 0;
+      }
     });
   });
 
