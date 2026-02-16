@@ -14,10 +14,10 @@
       <!-- Use CPM -->
       <div class="header-column">
         <p class="header-label">Toggle between counts per million (CPM) and raw counts</p>
-        <mat-radio-group class="radio-row" aria-label="Count format" [formField]="poolForm.useCPM">
-          <mat-radio-button [value]="true">CPM</mat-radio-button>
-          <mat-radio-button [value]="false">Raw Counts</mat-radio-button>
-        </mat-radio-group>
+        <mat-button-toggle-group aria-label="Count format" [formField]="poolForm.useCPM" hideSingleSelectionIndicator>
+          <mat-button-toggle [value]="true">CPM</mat-button-toggle>
+          <mat-button-toggle [value]="false">Raw Counts</mat-button-toggle>
+        </mat-button-toggle-group>
       </div>
 
       <mat-divider vertical/>

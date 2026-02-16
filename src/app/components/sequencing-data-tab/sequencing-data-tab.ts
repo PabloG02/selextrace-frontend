@@ -2,7 +2,6 @@ import {Component, computed, effect, inject, input, linkedSignal, signal} from '
 import {ExperimentChartService} from '../../services/experiment-chart.service';
 import {ExperimentReport, SelectionCycleResponse} from '../../models/experiment-report';
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
-import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 import {FormsModule} from '@angular/forms';
 import {MatDivider} from '@angular/material/list';
 import {MatFormField, MatLabel} from '@angular/material/input';
@@ -10,14 +9,13 @@ import {MatOption, MatSelect} from '@angular/material/select';
 import {NgxEchartsDirective} from 'ngx-echarts';
 import {form, FormField, required} from '@angular/forms/signals';
 import {DecimalPipe, KeyValuePipe} from '@angular/common';
+import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
 
 @Component({
   selector: 'app-sequencing-data-tab',
   imports: [
     MatCard,
     MatCardContent,
-    MatRadioGroup,
-    MatRadioButton,
     FormsModule,
     MatDivider,
     MatFormField,
@@ -29,7 +27,9 @@ import {DecimalPipe, KeyValuePipe} from '@angular/common';
     FormField,
     MatOption,
     KeyValuePipe,
-    DecimalPipe
+    DecimalPipe,
+    MatButtonToggleGroup,
+    MatButtonToggle
   ],
   templateUrl: './sequencing-data-tab.html',
   styleUrl: './sequencing-data-tab.scss'

@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal}
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
-import { MatRadioModule } from '@angular/material/radio';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -19,6 +18,7 @@ import {ExperimentChartService} from '../../services/experiment-chart.service';
 import {PredictionsApiService} from '../../services/predictions-api.service';
 import {FornacVisualizationComponent} from '../shared/fornac-visualization/fornac-visualization.component';
 import {AptamerTableComponent, AptamerTableRow, SelectionCycleMetrics} from '../shared/aptamer-table/aptamer-table.component';
+import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
 
 @Component({
   selector: 'app-aptamer-pool-tab',
@@ -27,7 +27,6 @@ import {AptamerTableComponent, AptamerTableRow, SelectionCycleMetrics} from '../
     CommonModule,
     FormsModule,
     MatCardModule,
-    MatRadioModule,
     MatDividerModule,
     MatFormFieldModule,
     MatInputModule,
@@ -40,7 +39,9 @@ import {AptamerTableComponent, AptamerTableRow, SelectionCycleMetrics} from '../
     FormField,
     MatSlideToggle,
     FornacVisualizationComponent,
-    AptamerTableComponent
+    AptamerTableComponent,
+    MatButtonToggleGroup,
+    MatButtonToggle
   ],
   templateUrl: './aptamer-pool-tab.component.html',
   styleUrl: './aptamer-pool-tab.component.scss',

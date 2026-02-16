@@ -2,11 +2,11 @@ import {Component, computed, inject, input, signal} from '@angular/core';
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from "@angular/material/card";
 import {MatDivider} from "@angular/material/list";
 import {MatFormField, MatInput, MatLabel} from "@angular/material/input";
-import {MatRadioButton, MatRadioGroup} from "@angular/material/radio";
 import {NgxEchartsDirective} from "ngx-echarts";
 import {ExperimentChartService} from '../../services/experiment-chart.service';
 import {ExperimentReport} from '../../models/experiment-report';
 import {FormField, form, max, min, required} from '@angular/forms/signals';
+import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
 
 @Component({
   selector: 'app-experiment-overview-tab',
@@ -19,10 +19,10 @@ import {FormField, form, max, min, required} from '@angular/forms/signals';
     MatFormField,
     MatInput,
     MatLabel,
-    MatRadioButton,
-    MatRadioGroup,
     NgxEchartsDirective,
-    FormField
+    FormField,
+    MatButtonToggleGroup,
+    MatButtonToggle
   ],
   templateUrl: './experiment-overview-tab.html',
   styleUrl: './experiment-overview-tab.scss'

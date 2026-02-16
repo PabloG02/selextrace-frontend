@@ -107,18 +107,18 @@
       <mat-divider/>
       <div>
         <p>To change the default units of the Number Axis, select one of the options below:</p>
-        <mat-radio-group [formField]="experimentForm.axisUnit" class="radio-row" aria-label="Number Axis Units">
-          <mat-radio-button value="count">Count</mat-radio-button>
-          <mat-radio-button value="percentage">Percentage</mat-radio-button>
-        </mat-radio-group>
+        <mat-button-toggle-group [formField]="experimentForm.axisUnit" hideSingleSelectionIndicator aria-label="Number Axis Units">
+          <mat-button-toggle value="count">Count</mat-button-toggle>
+          <mat-button-toggle value="percentage">Percentage</mat-button-toggle>
+        </mat-button-toggle-group>
       </div>
       <mat-divider/>
       <div>
         <p>To change the default scale of the Number Axis, select one of the options below:</p>
-        <mat-radio-group [formField]="experimentForm.axisScale" class="radio-row" aria-label="Number Axis Scale">
-          <mat-radio-button value="linear">Linear</mat-radio-button>
-          <mat-radio-button value="logarithmic">Logarithmic</mat-radio-button>
-        </mat-radio-group>
+        <mat-button-toggle-group [formField]="experimentForm.axisScale" hideSingleSelectionIndicator aria-label="Number Axis Scale">
+          <mat-button-toggle value="linear">Linear</mat-button-toggle>
+          <mat-button-toggle value="logarithmic">Logarithmic</mat-button-toggle>
+        </mat-button-toggle-group>
       </div>
     </div>
     <mat-divider vertical/>
