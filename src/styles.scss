@@ -10,7 +10,7 @@
 // Align Angular Material accordions with Material 3 Expressive expandable lists
 @forward 'styles/accordion';
 // Import Material Symbols Rounded icon font
-@import 'material-symbols/rounded';
+@use '@fontsource-variable/material-symbols-rounded/full';
 // Import d3 Fornac visualization styles
 @import '@pablog02/fornac/style.css';
 
@@ -32,6 +32,21 @@ html {
 /* ——— Icon Fonts ——— */
 // Settings for Material Symbols Rounded
 .material-symbols-rounded {
+  font-family: "Material Symbols Rounded Variable";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "liga";
   font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
