@@ -2,10 +2,7 @@ import {
   Component,
   ChangeDetectionStrategy,
   signal,
-  computed,
   input,
-  effect,
-  inject,
   ElementRef,
   viewChild,
 } from '@angular/core';

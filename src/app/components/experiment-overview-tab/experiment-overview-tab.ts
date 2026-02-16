@@ -1,5 +1,4 @@
-import {Component, computed, inject, input, Signal, signal} from '@angular/core';
-import {MatButton} from "@angular/material/button";
+import {Component, computed, inject, input, signal} from '@angular/core';
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from "@angular/material/card";
 import {MatDivider} from "@angular/material/list";
 import {MatFormField, MatInput, MatLabel} from "@angular/material/input";
@@ -12,7 +11,6 @@ import {FormField, form, max, min, required} from '@angular/forms/signals';
 @Component({
   selector: 'app-experiment-overview-tab',
   imports: [
-    MatButton,
     MatCard,
     MatCardContent,
     MatCardHeader,

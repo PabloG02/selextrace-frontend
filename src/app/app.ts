@@ -1,5 +1,5 @@
 import {Component, computed, effect, inject, signal} from '@angular/core';
-import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
+import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {MatSidenavModule} from '@angular/material/sidenav';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatButtonModule} from '@angular/material/button';
@@ -10,7 +10,6 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
 import {NgOptimizedImage} from '@angular/common';
-import {ExperimentsStore} from './stores/experiments.store';
 import {BreakpointObserver} from '@angular/cdk/layout';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs/operators';
@@ -43,8 +42,6 @@ interface NavLink {
   styleUrl: './app.scss'
 })
 export class App {
-  // private readonly router = inject(Router);
-  // private readonly experimentsStore = inject(ExperimentsStore);
   private readonly breakpointObserver = inject(BreakpointObserver);
 
   readonly navLinks: NavLink[] = [
