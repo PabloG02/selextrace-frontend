@@ -1,0 +1,47 @@
+@use '@angular/material' as mat;
+
+@include mat.button-toggle-overrides((
+  divider-color: transparent,
+  background-color: var(--mat-sys-surface-container),
+  text-color: var(--mat-sys-on-surface-variant),
+  selected-state-background-color: var(--mat-sys-primary),
+  selected-state-text-color: var(--mat-sys-on-primary),
+));
+
+// Wrap overrides in :root to increase CSS specificity.
+// This ensures custom styles take precedence over the default ones.
+:root {
+  .mat-button-toggle-group.mat-button-toggle-group-appearance-standard {
+    gap: 2px;
+  }
+
+  .mat-button-toggle-group-appearance-standard .mat-button-toggle-appearance-standard {
+    border: none !important;
+  }
+
+  .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
+    padding: 0 16px;
+  }
+
+  .mat-button-toggle-appearance-standard.mat-button-toggle,
+  .mat-button-toggle-appearance-standard.mat-button-toggle > * {
+    transition: background-color var(--mat-sys-motion-spring-fast-effects-duration) var(--mat-sys-motion-spring-fast-effects-easing),
+    color var(--mat-sys-motion-spring-fast-effects-duration) var(--mat-sys-motion-spring-fast-effects-easing),
+    border-radius var(--mat-sys-motion-spring-fast-spatial-duration) var(--mat-sys-motion-spring-fast-spatial-easing);
+  }
+
+  .mat-button-toggle-appearance-standard.mat-button-toggle,
+  .mat-button-toggle-appearance-standard.mat-button-toggle > * {
+    border-radius: var(--mat-sys-corner-small);
+  }
+
+  .mat-button-toggle-appearance-standard:is(.mat-button-toggle, .mat-button-toggle-checked):active,
+  .mat-button-toggle-appearance-standard:is(.mat-button-toggle, .mat-button-toggle-checked):active > * {
+    border-radius: var(--mat-sys-corner-extra-small);
+  }
+
+  .mat-button-toggle-appearance-standard.mat-button-toggle-checked,
+  .mat-button-toggle-appearance-standard.mat-button-toggle-checked > * {
+    border-radius: var(--mat-sys-corner-extra-large);
+  }
+}

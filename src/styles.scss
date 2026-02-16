@@ -9,6 +9,8 @@
 @forward 'styles/tabs';
 // Align Angular Material accordions with Material 3 Expressive expandable lists
 @forward 'styles/accordion';
+// Align Angular Material button toggles with the Material 3 Expressive connected button group
+@forward 'styles/button-toggle';
 // Import Material Symbols Rounded icon font
 @use '@fontsource-variable/material-symbols-rounded/full';
 // Import d3 Fornac visualization styles
