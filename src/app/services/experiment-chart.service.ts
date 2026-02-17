@@ -373,6 +373,59 @@ export class ExperimentChartService {
 
   // --- Aptamer Pool tab ---
 
+  getSelectedAptamerCardinalityChart(
+    experimentReport: Signal<ExperimentReport | undefined>,
+    rows: Signal<AptamerTableRow[]>,
+    useCPM: Signal<boolean>,
+    metric: Signal<'counts' | 'enrichments'>
+  ) {
+    return computed<EChartsOption>(() => {
+      console.log(rows());
+      if (metric() !== 'counts') {
+        return {};
+      }
+
+      const exp = experimentReport();
+      const selectedRows = rows();
+      if (!exp?.selectionCycleResponse?.length || !selectedRows.length) {
+        return {};
+      }
+
+      const positiveCycles = exp.selectionCycleResponse
+        .filter(cycle => !cycle.isControlSelection && !cycle.isCounterSelection)
+        .sort((a, b) => a.round - b.round);
+      if (positiveCycles.length === 0) {
+        return {};
+      }
+
+      const cycleLabels = positiveCycles.map(cycle => cycle.name);
+      const yAxisName = useCPM() ? 'Counts per Million (CPM)' : 'Counts';
+
+      return {
+        tooltip: { trigger: 'axis' },
+        legend: { bottom: 0 },
+        xAxis: {
+          type: 'category',
+          name: 'Selection Cycle',
+          data: cycleLabels
+        },
+        yAxis: {
+          type: 'value',
+          name: yAxisName,
+          min: 0
+        },
+        series: selectedRows.map(row => ({
+          name: `#${row.id}`,
+          type: 'line',
+          data: positiveCycles.map(cycle => {
+            const value = row.cycles[cycle.round];
+            return useCPM() ? value.cpm : value.count;
+          })
+        }))
+      };
+    });
+  }
+
   getBasePairProbabilityMatrixHeatmapChart(sequence: Signal<string | null>) {
     const raggedUpperTriangleMatrix = this.predictionsApiService.getBppm(sequence);
 

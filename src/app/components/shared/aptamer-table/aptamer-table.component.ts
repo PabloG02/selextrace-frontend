@@ -117,6 +117,7 @@ export class AptamerTableComponent {
     const nextSelection = selectedIndex >= 0
       ? selectedRows.filter(item => item.id !== row.id)
       : [...selectedRows, row];
+    nextSelection.sort((a, b) => a.id - b.id);
     this.selectedRows.set(nextSelection);
   }
 

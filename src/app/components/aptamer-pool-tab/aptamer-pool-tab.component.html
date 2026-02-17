@@ -69,7 +69,27 @@
         <mat-expansion-panel-header>
           <mat-panel-title>Cardinality Chart (Selected Items, Positive Cycles Only)</mat-panel-title>
         </mat-expansion-panel-header>
-        <div class="bppm-block">Placeholder</div>
+        <mat-button-toggle-group
+          aria-label="Count format"
+          hideSingleSelectionIndicator
+          [(ngModel)]="cardinalityMetric">
+          <mat-button-toggle value="enrichments">Enrichments</mat-button-toggle>
+          <mat-button-toggle value="counts">Counts</mat-button-toggle>
+        </mat-button-toggle-group>
+        @if (cardinalityMetric() === 'enrichments') {
+          <!-- TODO -->
+          <div class="not-available">Enrichments chart is coming soon.</div>
+        } @else if (selectedRows().length > 0) {
+          <div
+            echarts
+            [options]="selectedCardinalityChartOptions()"
+            class="chart-container"
+            [autoResize]="true"
+            [theme]="themeService.echartsTheme()">
+          </div>
+        } @else {
+          <div class="not-available">Select one or more sequences to view the cardinality chart.</div>
+        }
       </mat-expansion-panel>
 
       <mat-expansion-panel>

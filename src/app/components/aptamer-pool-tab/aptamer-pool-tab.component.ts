@@ -117,6 +117,14 @@ export class AptamerPoolTabComponent {
   readonly selectedSequence = computed(() => this.selectedRows()[0]?.sequence ?? null);
   readonly hasSingleSelection = computed(() => this.selectedRows().length === 1);
 
+  readonly cardinalityMetric = signal<'counts' | 'enrichments'>('counts');
+
+  readonly selectedCardinalityChartOptions = this.chartService.getSelectedAptamerCardinalityChart(
+    this.experimentReport,
+    this.selectedRows,
+    this.poolForm.useCPM().value,
+    this.cardinalityMetric
+  );
   readonly mfeResource = this.predictionsApiService.getMfe(this.selectedSequence);
   readonly basePairProbabilityMatrixHeatmapChartOptions = this.chartService.getBasePairProbabilityMatrixHeatmapChart(this.selectedSequence);
   readonly contextProbabilitySequenceLogoChartOptions = this.chartService.getContextProbabilitySequenceLogoChart(this.selectedSequence);
