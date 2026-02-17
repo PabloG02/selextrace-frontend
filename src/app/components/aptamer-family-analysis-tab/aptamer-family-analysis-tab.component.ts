@@ -27,6 +27,7 @@ import {
 } from '@angular/material/expansion';
 import {NgxEchartsDirective} from 'ngx-echarts';
 import {ExperimentChartService} from '../../services/experiment-chart.service';
+import {MatSlideToggle} from '@angular/material/slide-toggle';
 
 @Component({
   selector: 'app-aptamer-family-analysis-tab',
@@ -51,7 +52,8 @@ import {ExperimentChartService} from '../../services/experiment-chart.service';
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
-    NgxEchartsDirective
+    NgxEchartsDirective,
+    MatSlideToggle
   ],
   templateUrl: './aptamer-family-analysis-tab.component.html',
   styleUrl: './aptamer-family-analysis-tab.component.scss',
@@ -86,6 +88,13 @@ export class AptamerFamilyAnalysisTab {
     required(p.kmerSize);
     required(p.kmerCutoffIterations);
   });
+
+  /* Reactive Signal Form Model */
+  readonly sequenceTableFormModel = signal({
+    showPrimers: false,
+    useCPM: true,
+  });
+  readonly sequenceTableForm = form(this.sequenceTableFormModel);
 
   /** Tracks whether the clustering analysis is running */
   readonly isSubmitting = signal(false);

@@ -89,16 +89,30 @@
   @if (selectedCluster()) {
     <mat-card appearance="outlined">
       <mat-card-header>
-        <mat-card-title>Cluster Aptamers</mat-card-title>
-        <mat-card-subtitle>Cluster {{ selectedCluster()!.clusterId }}</mat-card-subtitle>
+        <mat-card-title-group>
+          <mat-card-title>Cluster Aptamers</mat-card-title>
+          <mat-card-subtitle>Cluster {{ selectedCluster()!.clusterId }}</mat-card-subtitle>
+          <div class="cluster-card-actions">
+            <mat-slide-toggle [formField]="sequenceTableForm.showPrimers" labelPosition="before">
+              Show Primers
+            </mat-slide-toggle>
+            <mat-button-toggle-group
+              aria-label="Count format"
+              [formField]="sequenceTableForm.useCPM"
+              hideSingleSelectionIndicator>
+              <mat-button-toggle [value]="true">CPM</mat-button-toggle>
+              <mat-button-toggle [value]="false">Raw Counts</mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+        </mat-card-title-group>
       </mat-card-header>
 
       <mat-card-content>
         <app-aptamer-table
           [rows]="aptamersInSelectedCluster()"
           [selectionCycles]="experimentReport().selectionCycleResponse"
-          [showPrimers]="false"
-          [useCPM]="true"
+          [showPrimers]="sequenceTableForm.showPrimers().value()"
+          [useCPM]="sequenceTableForm.useCPM().value()"
           [pageSize]="10">
         </app-aptamer-table>
       </mat-card-content>

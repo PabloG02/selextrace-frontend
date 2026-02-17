@@ -24,3 +24,9 @@ mat-accordion {
 .chart-container {
   height: 260px;
 }
+
+.cluster-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
