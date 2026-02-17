@@ -7,6 +7,7 @@ import {ExperimentChartService} from '../../services/experiment-chart.service';
 import {ExperimentReport} from '../../models/experiment-report';
 import {FormField, form, max, min, required} from '@angular/forms/signals';
 import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
+import {ThemeService} from '../../services/theme.service';
 
 @Component({
   selector: 'app-experiment-overview-tab',
@@ -29,6 +30,7 @@ import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-to
 })
 export class ExperimentOverviewTab {
   /* Services */
+  readonly themeService = inject(ThemeService);
   private readonly chartService = inject(ExperimentChartService);
   /* Inputs */
   readonly experimentReport = input.required<ExperimentReport>();

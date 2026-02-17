@@ -10,6 +10,7 @@ import {NgxEchartsDirective} from 'ngx-echarts';
 import {form, FormField, required} from '@angular/forms/signals';
 import {DecimalPipe, KeyValuePipe} from '@angular/common';
 import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
+import {ThemeService} from '../../services/theme.service';
 
 @Component({
   selector: 'app-sequencing-data-tab',
@@ -36,6 +37,7 @@ import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-to
 })
 export class SequencingDataTab {
   /* Services */
+  readonly themeService = inject(ThemeService);
   private readonly chartService = inject(ExperimentChartService);
   /* Inputs */
   readonly experimentReport = input.required<ExperimentReport>();

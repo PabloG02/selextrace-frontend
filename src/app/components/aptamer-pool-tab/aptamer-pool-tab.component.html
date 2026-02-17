@@ -102,7 +102,7 @@
         <mat-expansion-panel-header>
           <mat-panel-title>Base Pair Probability Matrix (Prediction: RNAFold4J)</mat-panel-title>
         </mat-expansion-panel-header>
-        <div echarts [options]="basePairProbabilityMatrixHeatmapChartOptions()" class="chart-container" [autoResize]="true"></div>
+        <div echarts [options]="basePairProbabilityMatrixHeatmapChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
       </mat-expansion-panel>
 
       <mat-expansion-panel>
@@ -115,6 +115,7 @@
             [options]="contextProbabilitySequenceLogoChartOptions()"
             class="chart-container"
             [autoResize]="true"
+            [theme]="themeService.echartsTheme()"
             aria-label="Structural context sequence logo">
           </div>
         } @else {

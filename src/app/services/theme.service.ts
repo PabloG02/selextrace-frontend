@@ -1,4 +1,4 @@
-import { Injectable, signal, effect } from '@angular/core';
+import {Injectable, signal, effect, computed} from '@angular/core';
 
 export type Theme = 'light' | 'dark' | 'auto';
 
@@ -7,8 +7,8 @@ export type Theme = 'light' | 'dark' | 'auto';
 })
 export class ThemeService {
   private readonly THEME_KEY = 'app-theme';
-  
-  theme = signal<Theme>(this.getStoredTheme());
+
+  readonly theme = signal<Theme>(this.getStoredTheme());
 
   constructor() {
     // Apply theme whenever it changes
@@ -32,11 +32,20 @@ export class ThemeService {
 
   private applyTheme(theme: Theme): void {
     const body = document.body;
-    
+
     if (theme === 'auto') {
       body.style.colorScheme = 'light dark';
     } else {
       body.style.colorScheme = theme;
     }
   }
+
+  readonly echartsTheme = computed(() => {
+    const selected = this.theme();
+
+    if (selected === 'dark')
+      return 'dark';
+
+    return 'default';
+  });
 }

@@ -129,7 +129,8 @@
           echarts
           [options]="clusterSequenceLogoChartOptions()"
           class="chart-container"
-          [autoResize]="true">
+          [autoResize]="true"
+          [theme]="themeService.echartsTheme()">
         </div>
       } @else {
         <div>Select a cluster to view the sequence logo.</div>
@@ -145,7 +146,8 @@
           echarts
           [options]="clusterMutationRatesChartOptions()"
           class="chart-container"
-          [autoResize]="true">
+          [autoResize]="true"
+          [theme]="themeService.echartsTheme()">
         </div>
       } @else {
         <div>Select a cluster to view mutation rates.</div>

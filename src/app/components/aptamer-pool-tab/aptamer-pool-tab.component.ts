@@ -19,6 +19,7 @@ import {PredictionsApiService} from '../../services/predictions-api.service';
 import {FornacVisualizationComponent} from '../shared/fornac-visualization/fornac-visualization.component';
 import {AptamerTableComponent, AptamerTableRow, SelectionCycleMetrics} from '../shared/aptamer-table/aptamer-table.component';
 import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
+import {ThemeService} from '../../services/theme.service';
 
 @Component({
   selector: 'app-aptamer-pool-tab',
@@ -51,6 +52,7 @@ export class AptamerPoolTabComponent {
   readonly experimentReport = input.required<ExperimentReport>();
 
   /* Services */
+  readonly themeService = inject(ThemeService);
   private readonly chartService = inject(ExperimentChartService);
   private readonly predictionsApiService = inject(PredictionsApiService);
 

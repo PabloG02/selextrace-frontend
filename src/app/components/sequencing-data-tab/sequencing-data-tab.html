@@ -129,8 +129,8 @@
         </div>
       </mat-card-content>
     </mat-card>
-    <div echarts [options]="forwardReadsNucleotideDistributionRawChartOptions()" class="chart-container" [autoResize]="true"></div>
-    <div echarts [options]="reverseReadsNucleotideDistributionRawChartOptions()" class="chart-container" [autoResize]="true"></div>
-    <div echarts [options]="acceptedReadsNucleotideDistributionChartOptions()" class="chart-container" [autoResize]="true"></div>
+    <div echarts [options]="forwardReadsNucleotideDistributionRawChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
+    <div echarts [options]="reverseReadsNucleotideDistributionRawChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
+    <div echarts [options]="acceptedReadsNucleotideDistributionChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
   </mat-card-content>
 </mat-card>

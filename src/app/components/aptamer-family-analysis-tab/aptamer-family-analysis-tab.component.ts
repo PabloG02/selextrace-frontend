@@ -28,6 +28,7 @@ import {
 import {NgxEchartsDirective} from 'ngx-echarts';
 import {ExperimentChartService} from '../../services/experiment-chart.service';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
+import {ThemeService} from '../../services/theme.service';
 
 @Component({
   selector: 'app-aptamer-family-analysis-tab',
@@ -59,6 +60,7 @@ import {MatSlideToggle} from '@angular/material/slide-toggle';
   styleUrl: './aptamer-family-analysis-tab.component.scss',
 })
 export class AptamerFamilyAnalysisTab {
+  readonly themeService = inject(ThemeService);
   private readonly clustersApi = inject(ClustersApiService);
   private readonly chartService = inject(ExperimentChartService);
 
