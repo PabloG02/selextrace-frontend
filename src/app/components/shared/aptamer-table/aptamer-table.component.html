@@ -59,7 +59,7 @@
   <tr mat-header-row *matHeaderRowDef="subcolumns(); sticky: true"></tr>
   <tr mat-row *matRowDef="let row; columns: dataColumns();"
       (click)="onSelectRow(row)"
-      [class.selected]="enableSelection() && selectedSequence() === row.sequence">
+      [class.selected]="enableSelection() && isRowSelected(row)">
   </tr>
 </table>
 

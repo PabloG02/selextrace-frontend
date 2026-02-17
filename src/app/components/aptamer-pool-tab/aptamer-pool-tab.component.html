@@ -58,8 +58,7 @@
         [showPrimers]="poolForm.showPrimers().value()"
         [useCPM]="poolForm.useCPM().value()"
         [pageSize]="poolForm.itemsPerPage().value()"
-        [selectedSequence]="selectedSequence()"
-        (rowSelected)="onSelectRow($event)">
+        [(selectedRows)]="selectedRows">
       </app-aptamer-table>
     </mat-card>
   </div>
@@ -77,7 +76,7 @@
         <mat-expansion-panel-header>
           <mat-panel-title>Secondary Structure (RNAfold/Fornac)</mat-panel-title>
         </mat-expansion-panel-header>
-        @if (selectedSequence()) {
+        @if (hasSingleSelection()) {
           @if (mfeResource.isLoading()) {
             <div class="not-available">Loading structure prediction...</div>
           } @else if (mfeResource.hasValue()) {
@@ -94,7 +93,7 @@
             <div class="not-available">Error</div>
           }
         } @else {
-          <div class="not-available">Structure Prediction not available</div>
+          <div class="not-available">Select exactly one sequence to view structure prediction.</div>
         }
       </mat-expansion-panel>
 
@@ -102,14 +101,18 @@
         <mat-expansion-panel-header>
           <mat-panel-title>Base Pair Probability Matrix (Prediction: RNAFold4J)</mat-panel-title>
         </mat-expansion-panel-header>
-        <div echarts [options]="basePairProbabilityMatrixHeatmapChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
+        @if (hasSingleSelection()) {
+          <div echarts [options]="basePairProbabilityMatrixHeatmapChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
+        } @else {
+          <div class="not-available">Select exactly one sequence to view the matrix.</div>
+        }
       </mat-expansion-panel>
 
       <mat-expansion-panel>
         <mat-expansion-panel-header>
           <mat-panel-title>Structural Context Distribution</mat-panel-title>
         </mat-expansion-panel-header>
-        @if (selectedSequence()) {
+        @if (hasSingleSelection()) {
           <div
             echarts
             [options]="contextProbabilitySequenceLogoChartOptions()"
@@ -119,7 +122,7 @@
             aria-label="Structural context sequence logo">
           </div>
         } @else {
-          <div class="not-available">Structure Prediction not available</div>
+          <div class="not-available">Select exactly one sequence to view structural context distribution.</div>
         }
       </mat-expansion-panel>
     </mat-accordion>

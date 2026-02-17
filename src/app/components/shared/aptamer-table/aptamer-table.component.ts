@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, input, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, input, model, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatTableModule} from '@angular/material/table';
 import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
@@ -17,10 +17,8 @@ export class AptamerTableComponent {
   readonly showPrimers = input<boolean>(true);
   readonly useCPM = input<boolean>(true);
   readonly pageSize = input<number>(10);
-  readonly selectedSequence = input<string | null>(null);
   readonly enableSelection = input<boolean>(true);
-
-  readonly rowSelected = output<AptamerTableRow | null>();
+  readonly selectedRows = model<AptamerTableRow[]>([]);
 
   // Table Definition & State Signals
   readonly pageIndex = signal(0);
@@ -114,7 +112,20 @@ export class AptamerTableComponent {
 
   onSelectRow(row: AptamerTableRow) {
     if (!this.enableSelection()) return;
-    this.rowSelected.emit(row);
+    const selectedRows = this.selectedRows();
+    const selectedIndex = selectedRows.findIndex(item => item.id === row.id);
+    const nextSelection = selectedIndex >= 0
+      ? selectedRows.filter(item => item.id !== row.id)
+      : [...selectedRows, row];
+    this.selectedRows.set(nextSelection);
+  }
+
+  readonly selectedRowIds = computed(() => {
+    return new Set(this.selectedRows().map(row => row.id));
+  });
+
+  isRowSelected(row: AptamerTableRow) {
+    return this.selectedRowIds().has(row.id);
   }
 }
 

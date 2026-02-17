@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, input, linkedSignal, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -113,7 +113,9 @@ export class AptamerPoolTabComponent {
   });
 
   // Selection & Details
-  readonly selectedSequence = signal<string | null>(null);
+  readonly selectedRows = signal<AptamerTableRow[]>([]);
+  readonly selectedSequence = computed(() => this.selectedRows()[0]?.sequence ?? null);
+  readonly hasSingleSelection = computed(() => this.selectedRows().length === 1);
 
   readonly mfeResource = this.predictionsApiService.getMfe(this.selectedSequence);
   readonly basePairProbabilityMatrixHeatmapChartOptions = this.chartService.getBasePairProbabilityMatrixHeatmapChart(this.selectedSequence);
@@ -122,9 +124,5 @@ export class AptamerPoolTabComponent {
   resetSearch() {
     this.poolForm.query().value.set('');
     this.poolForm.searchIds().value.set(false);
-  }
-
-  onSelectRow(row: AptamerTableRow | null) {
-    this.selectedSequence.set(row?.sequence ?? null);
   }
 }
