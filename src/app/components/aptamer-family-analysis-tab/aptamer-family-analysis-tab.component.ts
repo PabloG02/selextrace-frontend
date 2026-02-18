@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, input, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, linkedSignal, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
@@ -94,6 +94,11 @@ export class AptamerFamilyAnalysisTab {
   });
 
   /* Reactive Signal Form Model */
+  readonly clusterTableFormModel = linkedSignal(() => ({
+    referenceCycleRound: this.experimentReport().selectionCycleResponse.at(-1)!.round
+  }));
+  readonly clusterTableForm = form(this.clusterTableFormModel);
+
   readonly sequenceTableFormModel = signal({
     showPrimers: false,
     useCPM: true,
@@ -171,7 +176,7 @@ export class AptamerFamilyAnalysisTab {
   /** Aggregated cluster data with metrics. */
   readonly clusters = computed(() => {
     const clusterMap = new Map<number, ClusterTableRow>();
-    const counts = this.experimentReport().selectionCycleResponse[0].counts;
+    const counts = this.referenceSelectionCycle().counts;
 
     // Group aptamers by cluster
     Object.entries(this.aptamerToCluster()).forEach(([aptamerIdStr, clusterId]) => {
@@ -210,6 +215,14 @@ export class AptamerFamilyAnalysisTab {
     return this.clusters().find(cluster => cluster.clusterId === selectedId) ?? null;
   });
 
+  /** Reference selection cycle for enrichment calculations and charts. */
+  readonly referenceSelectionCycle = computed(() => {
+    const cycles = this.experimentReport().selectionCycleResponse;
+    const selectedRound = this.clusterTableForm.referenceCycleRound().value();
+
+    return cycles.find(cycle => cycle.round === selectedRound)!;
+  });
+
   /* Cluster Table Data */
   /** All aptamers from the experiment formatted as table rows. */
   private readonly allAptamerRows = computed(() => {
@@ -244,9 +257,6 @@ export class AptamerFamilyAnalysisTab {
     const ids = new Set(cluster.aptamerIds);
     return this.allAptamerRows().filter(row => ids.has(row.id));
   });
-
-  // TODO
-  readonly referenceSelectionCycle = computed(() => this.experimentReport().selectionCycleResponse[0] ?? null);
 
   /* Charts */
   /** Selected aptamers for charting */

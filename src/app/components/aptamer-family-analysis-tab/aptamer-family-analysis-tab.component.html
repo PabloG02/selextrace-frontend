@@ -74,7 +74,19 @@
 
   <mat-card appearance="outlined">
     <mat-card-header>
-      <mat-card-title>Clusters</mat-card-title>
+      <mat-card-title-group>
+        <mat-card-title>Clusters</mat-card-title>
+        <div class="cluster-card-actions">
+          <mat-form-field appearance="outline">
+            <mat-label>Reference cycle</mat-label>
+            <mat-select [formField]="clusterTableForm.referenceCycleRound">
+              @for (cycle of experimentReport().selectionCycleResponse; track cycle.name) {
+                <mat-option [value]="cycle.round">{{ cycle.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </mat-card-title-group>
     </mat-card-header>
 
     <mat-card-content>
