@@ -183,7 +183,24 @@
       <mat-expansion-panel-header>
         <mat-panel-title>Cluster Cardinality Chart</mat-panel-title>
       </mat-expansion-panel-header>
-      <div>Placeholder</div>
+      <mat-button-toggle-group
+        aria-label="Cluster cardinality metric"
+        hideSingleSelectionIndicator
+        [(ngModel)]="clusterCardinalityMetric">
+        <mat-button-toggle value="sizes">Sizes</mat-button-toggle>
+        <mat-button-toggle value="diversities">Diversities</mat-button-toggle>
+      </mat-button-toggle-group>
+      @if (aptamersInSelectedCluster().length > 0) {
+        <div
+          echarts
+          [options]="clusterCardinalityChartOptions()"
+          class="chart-container"
+          [autoResize]="true"
+          [theme]="themeService.echartsTheme()">
+        </div>
+      } @else {
+        <div>Select a cluster to view the cardinality chart.</div>
+      }
     </mat-expansion-panel>
 
     <mat-expansion-panel>

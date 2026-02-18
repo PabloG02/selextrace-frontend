@@ -968,6 +968,71 @@ export class ExperimentChartService {
     };
   }
 
+  /**
+   * Builds the cluster cardinality chart (CPM) for the selected cluster.
+   */
+  getClusterCardinalityChart(
+    experimentReport: Signal<ExperimentReport>,
+    rows: Signal<AptamerTableRow[]>,
+    metric: Signal<'sizes' | 'diversities'>
+  ) {
+    return computed<EChartsOption>(() => {
+      const aptamersInCluster = rows();
+      const cycles = experimentReport().selectionCycleResponse;
+      if (!aptamersInCluster.length || !cycles.length) {
+        return {};
+      }
+
+      const data = cycles.map(cycle => {
+        let rawSize = 0;
+        let rawDiversity = 0;
+
+        for (const row of aptamersInCluster) {
+          const count = this.getRowCount(row, cycle.round);
+          if (count > 0) {
+            rawSize += count;
+            rawDiversity += 1;
+          }
+        }
+
+        const uniqueSize = cycle.uniqueSize;
+        const cpmSize = (rawSize / uniqueSize) * 1_000_000;
+        const cpmDiversity = (rawDiversity / uniqueSize) * 1_000_000;
+
+        return {
+          label: `Round ${cycle.round} (${cycle.name})`,
+          size: cpmSize,
+          diversity: cpmDiversity
+        };
+      });
+
+      const showSizes = metric() === 'sizes';
+      const seriesName = showSizes ? 'Cluster Sizes (CPM)' : 'Cluster Diversities (CPM)';
+
+      return {
+        tooltip: { trigger: 'axis' },
+        legend: { bottom: 0 },
+        xAxis: {
+          type: 'category',
+          name: 'Selection Cycle',
+          data: data.map(entry => entry.label)
+        },
+        yAxis: {
+          type: 'value',
+          name: seriesName,
+          min: 0
+        },
+        series: [
+          {
+            name: seriesName,
+            type: 'bar',
+            data: data.map(entry => (showSizes ? entry.size : entry.diversity)),
+          }
+        ]
+      };
+    });
+  }
+
 }
 
 interface SelectionCycleStats {

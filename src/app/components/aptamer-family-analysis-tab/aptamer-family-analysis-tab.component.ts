@@ -252,6 +252,7 @@ export class AptamerFamilyAnalysisTab {
   /** Selected aptamers for charting */
   readonly selectedAptamerRows = signal<AptamerTableRow[]>([]);
   readonly selectedAptamerCardinalityMetric = signal<'counts' | 'enrichments'>('counts');
+  readonly clusterCardinalityMetric = signal<'sizes' | 'diversities'>('sizes');
 
   readonly clusterSequenceLogoChartOptions = this.chartService.getClusterSequenceLogoChart(
     this.aptamersInSelectedCluster,
@@ -268,6 +269,12 @@ export class AptamerFamilyAnalysisTab {
     this.selectedAptamerRows,
     this.sequenceTableForm.useCPM().value,
     this.selectedAptamerCardinalityMetric
+  );
+
+  readonly clusterCardinalityChartOptions = this.chartService.getClusterCardinalityChart(
+    this.experimentReport,
+    this.aptamersInSelectedCluster,
+    this.clusterCardinalityMetric
   );
 
   constructor() {
