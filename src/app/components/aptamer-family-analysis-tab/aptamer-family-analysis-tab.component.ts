@@ -263,6 +263,16 @@ export class AptamerFamilyAnalysisTab {
   readonly selectedAptamerRows = signal<AptamerTableRow[]>([]);
   readonly selectedAptamerCardinalityMetric = signal<'counts' | 'enrichments'>('counts');
   readonly clusterCardinalityMetric = signal<'sizes' | 'diversities'>('sizes');
+  readonly clusterEnrichmentCompareRound = linkedSignal(() => this.experimentReport().selectionCycleResponse.at(0)!.round);
+  readonly clusterEnrichmentScale = signal<'linear' | 'logarithmic'>('linear');
+
+  /** Comparison selection cycle for cluster enrichment charts. */
+  readonly compareSelectionCycle = computed(() => {
+    const cycles = this.experimentReport().selectionCycleResponse;
+    const selectedRound = this.clusterEnrichmentCompareRound();
+
+    return cycles.find(cycle => cycle.round === selectedRound)!;
+  });
 
   readonly clusterSequenceLogoChartOptions = this.chartService.getClusterSequenceLogoChart(
     this.aptamersInSelectedCluster,
@@ -285,6 +295,13 @@ export class AptamerFamilyAnalysisTab {
     this.experimentReport,
     this.aptamersInSelectedCluster,
     this.clusterCardinalityMetric
+  );
+
+  readonly clusterEnrichmentChartOptions = this.chartService.getClusterEnrichmentScatterChart(
+    this.aptamersInSelectedCluster,
+    this.referenceSelectionCycle,
+    this.compareSelectionCycle,
+    this.clusterEnrichmentScale
   );
 
   constructor() {

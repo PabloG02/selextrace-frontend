@@ -219,7 +219,34 @@
       <mat-expansion-panel-header>
         <mat-panel-title>Cluster Enrichment</mat-panel-title>
       </mat-expansion-panel-header>
-      <div>Placeholder</div>
+      <div class="cluster-enrichment-controls">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Compare to cycle</mat-label>
+          <mat-select [(ngModel)]="clusterEnrichmentCompareRound">
+            @for (cycle of experimentReport().selectionCycleResponse; track cycle.name) {
+              <mat-option [value]="cycle.round">{{ cycle.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-button-toggle-group
+          aria-label="Cluster enrichment scale"
+          hideSingleSelectionIndicator
+          [(ngModel)]="clusterEnrichmentScale">
+          <mat-button-toggle value="linear">Linear</mat-button-toggle>
+          <mat-button-toggle value="logarithmic">Logarithmic</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+      @if (aptamersInSelectedCluster().length > 0) {
+        <div
+          echarts
+          [options]="clusterEnrichmentChartOptions()"
+          class="chart-container"
+          [autoResize]="true"
+          [theme]="themeService.echartsTheme()">
+        </div>
+      } @else {
+        <div>Select a cluster to view enrichment.</div>
+      }
     </mat-expansion-panel>
   </mat-accordion>
 </div>

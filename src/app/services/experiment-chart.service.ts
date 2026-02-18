@@ -1033,6 +1033,80 @@ export class ExperimentChartService {
     });
   }
 
+  /**
+   * Builds a scatter plot comparing CPM values between two selection cycles.
+   */
+  getClusterEnrichmentScatterChart(
+    rows: Signal<AptamerTableRow[]>,
+    referenceCycle: Signal<SelectionCycleResponse>,
+    compareToCycle: Signal<SelectionCycleResponse>,
+    scale: Signal<'linear' | 'logarithmic'>
+  ) {
+    return computed<EChartsOption>(() => {
+      const aptamers = rows();
+      const reference = referenceCycle();
+      const compareTo = compareToCycle();
+
+      if (!aptamers.length || !reference || !compareTo) {
+        return {};
+      }
+
+      const isLog = scale() === 'logarithmic';
+      const points = aptamers.map(row => {
+        const referenceCpm = row.cycles[reference.round].cpm;
+        const compareCpm = row.cycles[compareTo.round].cpm;
+        const x = isLog ? Math.log(referenceCpm): referenceCpm;
+        const y = isLog ? Math.log(compareCpm) : compareCpm;
+
+        return {
+          id: row.id,
+          x,
+          y,
+          referenceCpm,
+          compareCpm
+        };
+      });
+
+      return {
+        tooltip: {
+          trigger: 'item',
+          formatter: (params: unknown) => {
+            const entry = params as { data?: { id?: number; referenceCpm?: number; compareCpm?: number } };
+            const data = entry.data;
+            if (!data) return '';
+            // TODO: Revise tooltip content
+            return `#${data.id}<br/>${reference.name}: ${data.referenceCpm?.toFixed(2)} CPM<br/>${compareTo.name}: ${data.compareCpm?.toFixed(2)} CPM`;
+          }
+        },
+        xAxis: {
+          type: isLog? 'log' : 'value',
+          name: `${reference.name} (CPM)`,
+          min: 0,
+          nameLocation: 'middle',
+          nameGap: 30
+        },
+        yAxis: {
+          type: isLog? 'log' : 'value',
+          name: `${compareTo.name} (CPM)`,
+          min: 0,
+          nameLocation: 'middle',
+          nameRotate: 90,
+        },
+        series: [
+          {
+            type: 'scatter',
+            data: points.map(point => ({
+              value: [point.x, point.y],
+              id: point.id,
+              referenceCpm: point.referenceCpm,
+              compareCpm: point.compareCpm
+            }))
+          }
+        ]
+      };
+    });
+  }
+
 }
 
 interface SelectionCycleStats {
