@@ -29,6 +29,7 @@ import {NgxEchartsDirective} from 'ngx-echarts';
 import {ExperimentChartService} from '../../services/experiment-chart.service';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
 import {ThemeService} from '../../services/theme.service';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-aptamer-family-analysis-tab',
@@ -54,7 +55,8 @@ import {ThemeService} from '../../services/theme.service';
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
     NgxEchartsDirective,
-    MatSlideToggle
+    MatSlideToggle,
+    FormsModule
   ],
   templateUrl: './aptamer-family-analysis-tab.component.html',
   styleUrl: './aptamer-family-analysis-tab.component.scss',
@@ -247,6 +249,10 @@ export class AptamerFamilyAnalysisTab {
   readonly referenceSelectionCycle = computed(() => this.experimentReport().selectionCycleResponse[0] ?? null);
 
   /* Charts */
+  /** Selected aptamers for charting */
+  readonly selectedAptamerRows = signal<AptamerTableRow[]>([]);
+  readonly selectedAptamerCardinalityMetric = signal<'counts' | 'enrichments'>('counts');
+
   readonly clusterSequenceLogoChartOptions = this.chartService.getClusterSequenceLogoChart(
     this.aptamersInSelectedCluster,
     this.referenceSelectionCycle
@@ -255,6 +261,13 @@ export class AptamerFamilyAnalysisTab {
   readonly clusterMutationRatesChartOptions = this.chartService.getClusterMutationRatesChart(
     this.aptamersInSelectedCluster,
     this.referenceSelectionCycle
+  );
+
+  readonly selectedAptamerCardinalityChartOptions = this.chartService.getSelectedAptamerCardinalityChart(
+    this.experimentReport,
+    this.selectedAptamerRows,
+    this.sequenceTableForm.useCPM().value,
+    this.selectedAptamerCardinalityMetric
   );
 
   constructor() {
@@ -283,6 +296,7 @@ export class AptamerFamilyAnalysisTab {
   /** Selects a specific cluster for detailed aptamer view */
   selectCluster(id: number) {
     this.selectedClusterId.set(id);
+    this.selectedAptamerRows.set([]);
   }
 
   /**

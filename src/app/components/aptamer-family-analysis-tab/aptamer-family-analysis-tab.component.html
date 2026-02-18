@@ -113,6 +113,7 @@
           [selectionCycles]="experimentReport().selectionCycleResponse"
           [showPrimers]="sequenceTableForm.showPrimers().value()"
           [useCPM]="sequenceTableForm.useCPM().value()"
+          [(selectedRows)]="selectedAptamerRows"
           [pageSize]="10">
         </app-aptamer-table>
       </mat-card-content>
@@ -158,7 +159,24 @@
       <mat-expansion-panel-header>
         <mat-panel-title>Cardinality Chart (Selected Sequences)</mat-panel-title>
       </mat-expansion-panel-header>
-      <div>Placeholder</div>
+      <mat-button-toggle-group
+        aria-label="Count format"
+        hideSingleSelectionIndicator
+        [(ngModel)]="selectedAptamerCardinalityMetric">
+        <mat-button-toggle value="enrichments">Enrichments</mat-button-toggle>
+        <mat-button-toggle value="counts">Counts</mat-button-toggle>
+      </mat-button-toggle-group>
+      @if (selectedAptamerRows().length > 0) {
+        <div
+          echarts
+          [options]="selectedAptamerCardinalityChartOptions()"
+          class="chart-container"
+          [autoResize]="true"
+          [theme]="themeService.echartsTheme()">
+        </div>
+      } @else {
+        <div>Select one or more aptamers to view the cardinality chart.</div>
+      }
     </mat-expansion-panel>
 
     <mat-expansion-panel>
