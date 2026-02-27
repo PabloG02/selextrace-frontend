@@ -80,7 +80,7 @@
           <mat-form-field appearance="outline">
             <mat-label>Reference cycle</mat-label>
             <mat-select [formField]="clusterTableForm.referenceCycleRound">
-              @for (cycle of experimentReport().selectionCycleResponse; track cycle.name) {
+              @for (cycle of experimentReport().selectionCycles; track cycle.name) {
                 <mat-option [value]="cycle.round">{{ cycle.name }}</mat-option>
               }
             </mat-select>
@@ -122,7 +122,7 @@
       <mat-card-content>
         <app-aptamer-table
           [rows]="aptamersInSelectedCluster()"
-          [selectionCycles]="experimentReport().selectionCycleResponse"
+          [selectionCycles]="experimentReport().selectionCycles"
           [showPrimers]="sequenceTableForm.showPrimers().value()"
           [useCPM]="sequenceTableForm.useCPM().value()"
           [(selectedRows)]="selectedAptamerRows"
@@ -223,7 +223,7 @@
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Compare to cycle</mat-label>
           <mat-select [(ngModel)]="clusterEnrichmentCompareRound">
-            @for (cycle of experimentReport().selectionCycleResponse; track cycle.name) {
+            @for (cycle of experimentReport().selectionCycles; track cycle.name) {
               <mat-option [value]="cycle.round">{{ cycle.name }}</mat-option>
             }
           </mat-select>

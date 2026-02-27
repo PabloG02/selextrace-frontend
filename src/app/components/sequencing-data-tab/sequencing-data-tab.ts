@@ -41,7 +41,7 @@ export class SequencingDataTab {
   private readonly chartService = inject(ExperimentChartService);
   /* Inputs */
   readonly experimentReport = input.required<ExperimentReport>();
-  readonly selectionCycles = computed(() => this.experimentReport().selectionCycleResponse);
+  readonly selectionCycles = computed(() => this.experimentReport().selectionCycles);
   readonly selectedCycle = linkedSignal<SelectionCycleResponse | null>(() => {
     const cycles = this.selectionCycles();
     if (cycles.length === 0) return null;
@@ -51,7 +51,7 @@ export class SequencingDataTab {
   });
   /* Computed Properties */
   readonly randomizedRegionSizes = computed(() => {
-    const accepted = this.experimentReport()?.metadata.nucleotideDistributionAccepted;
+    const accepted = this.experimentReport()?.technicalDetails.metadata.nucleotideDistributionAccepted;
     if (!accepted) return [];
 
     // Flatten all keys across size maps
@@ -68,7 +68,7 @@ export class SequencingDataTab {
     if (!report) return null;
     if (!cycle) return null;
 
-    const acceptedByCycle = report.metadata.nucleotideDistributionAccepted[cycle.name];
+    const acceptedByCycle = report.technicalDetails.metadata.nucleotideDistributionAccepted[cycle.name];
     if (!acceptedByCycle) return null;
 
     let adenineTotal = 0;

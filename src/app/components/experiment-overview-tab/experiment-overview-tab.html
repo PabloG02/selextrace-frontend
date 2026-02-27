@@ -11,23 +11,23 @@
         <dl class="meta-list">
           <div>
             <dt>Name</dt>
-            <dd>{{ experimentReport()!.experimentDetails.generalInformation.name }}</dd>
+            <dd>{{ experimentReport()!.name }}</dd>
           </div>
           <div>
             <dt>Description</dt>
-            <dd>{{ experimentReport()!.experimentDetails.generalInformation.description }}</dd>
+            <dd>{{ experimentReport()!.description }}</dd>
           </div>
           <div>
             <dt>Aptamer Size</dt>
-            <dd>{{ experimentReport()!.experimentDetails.generalInformation.aptamerSize }}</dd>
+            <dd>{{ experimentReport()!.sequencing.aptamerSize }}</dd>
           </div>
           <div>
             <dt>Five Prime Primer</dt>
-            <dd>{{ experimentReport()!.experimentDetails.generalInformation.fivePrimePrimer }}</dd>
+            <dd>{{ experimentReport()!.sequencing.fivePrimePrimer }}</dd>
           </div>
           <div>
             <dt>Three Prime Primer</dt>
-            <dd>{{ experimentReport()!.experimentDetails.generalInformation.threePrimePrimer }}</dd>
+            <dd>{{ experimentReport()!.sequencing.threePrimePrimer }}</dd>
           </div>
         </dl>
       </mat-card-content>
@@ -41,35 +41,35 @@
         <dl class="meta-list">
           <div>
             <dt>Total Processed Reads</dt>
-            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.totalProcessedReads }}</dd>
+            <dd>{{ experimentReport()!.importStats.totalProcessedReads }}</dd>
           </div>
           <div>
             <dt>Total Accepted Reads</dt>
-            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.totalAcceptedReads }}</dd>
+            <dd>{{ experimentReport()!.importStats.totalAcceptedReads }}</dd>
           </div>
           <div>
             <dt>Contig Assembly Failure</dt>
-            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.contigAssemblyFailure }}</dd>
+            <dd>{{ experimentReport()!.importStats.contigAssemblyFailure }}</dd>
           </div>
           <div>
             <dt>Invalid Alphabet</dt>
-            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.invalidAlphabet }}</dd>
+            <dd>{{ experimentReport()!.importStats.invalidAlphabet }}</dd>
           </div>
           <div>
             <dt>5' Primer Error</dt>
-            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.fivePrimeError }}</dd>
+            <dd>{{ experimentReport()!.importStats.fivePrimeError }}</dd>
           </div>
           <div>
             <dt>3' Primer Error</dt>
-            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.threePrimeError }}</dd>
+            <dd>{{ experimentReport()!.importStats.threePrimeError }}</dd>
           </div>
           <div>
             <dt>Invalid Cycle</dt>
-            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.invalidCycle }}</dd>
+            <dd>{{ experimentReport()!.importStats.invalidCycle }}</dd>
           </div>
           <div>
             <dt>Total Primer Overlaps</dt>
-            <dd>{{ experimentReport()!.experimentDetails.sequenceImportStatistics.totalPrimerOverlaps }}</dd>
+            <dd>{{ experimentReport()!.importStats.totalPrimerOverlaps }}</dd>
           </div>
         </dl>
       </mat-card-content>

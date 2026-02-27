@@ -1,37 +1,30 @@
 export interface ExperimentReport {
-  experimentDetails: {
-    generalInformation: {
-      aptamerSize: number;
-      description: string;
-      fivePrimePrimer: string;
-      name: string;
-      threePrimePrimer: string;
-    };
-    selectionCyclePercentages: Record<string, number>; // e.g., { r14: 100.0 }
-    sequenceImportStatistics: {
-      contigAssemblyFailure: number;
-      fivePrimeError: number;
-      invalidAlphabet: number;
-      invalidCycle: number;
-      threePrimeError: number;
-      totalAcceptedReads: number;
-      totalPrimerOverlaps: number;
-      totalProcessedReads: number;
-    };
-  };
-  // Testing purposes
-  selectionCycleResponse: SelectionCycleResponse[];
-  metadata: {
-    qualityScoresForward: Record<string, Record<number, Accumulator>>;
-    qualityScoresReverse: Record<string, Record<number, Accumulator>>;
+  id: string;
+  createdAt: string;
+  name: string;
+  description: string;
+  sequencing: ExperimentSequencing;
+  importStats: ExperimentImportStats;
+  selectionCycles: SelectionCycleResponse[];
+  pool: ExperimentPool;
+  technicalDetails: ExperimentTechnicalDetails;
+}
 
-    nucleotideDistributionForward: Record<string, Record<number, Record<number, number>>>;
-    nucleotideDistributionReverse: Record<string, Record<number, Record<number, number>>>;
+export interface ExperimentSequencing {
+  aptamerSize: number;
+  fivePrimePrimer: string;
+  threePrimePrimer: string;
+}
 
-    nucleotideDistributionAccepted: Record<string, Record<number, Record<number, Record<number, number>>>>;
-  },
-  idToAptamer: Record<number, string>,
-  idToBounds: Record<number, AptamerBounds>;
+export interface ExperimentImportStats {
+  totalProcessedReads: number;
+  totalAcceptedReads: number;
+  contigAssemblyFailure: number;
+  invalidAlphabet: number;
+  fivePrimeError: number;
+  threePrimeError: number;
+  invalidCycle: number;
+  totalPrimerOverlaps: number;
 }
 
 export interface SelectionCycleResponse {
@@ -44,6 +37,26 @@ export interface SelectionCycleResponse {
   totalSize: number;
   uniqueSize: number;
   counts: Record<number, number>;
+}
+
+export interface ExperimentPool {
+  idToAptamer: Record<number, string>;
+  idToBounds: Record<number, AptamerBounds>;
+}
+
+export interface ExperimentTechnicalDetails {
+  selectionCyclePercentages: Record<string, number>;
+  metadata: Metadata;
+}
+
+export interface Metadata {
+  qualityScoresForward: Record<string, Record<number, Accumulator>>;
+  qualityScoresReverse: Record<string, Record<number, Accumulator>>;
+
+  nucleotideDistributionForward: Record<string, Record<number, Record<number, number>>>;
+  nucleotideDistributionReverse: Record<string, Record<number, Record<number, number>>>;
+
+  nucleotideDistributionAccepted: Record<string, Record<number, Record<number, Record<number, number>>>>;
 }
 
 interface Accumulator {

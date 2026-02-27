@@ -54,7 +54,7 @@
     <mat-card appearance="outlined" class="table-card">
       <app-aptamer-table
         [rows]="filteredData()"
-        [selectionCycles]="experimentReport().selectionCycleResponse"
+        [selectionCycles]="experimentReport().selectionCycles"
         [showPrimers]="poolForm.showPrimers().value()"
         [useCPM]="poolForm.useCPM().value()"
         [pageSize]="poolForm.itemsPerPage().value()"

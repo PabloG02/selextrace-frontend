@@ -72,12 +72,13 @@ export class AptamerPoolTabComponent {
   /* Table */
   // 1. All Data Signal
   private readonly totalAptamerData = linkedSignal<AptamerTableRow[]>(() => {
-    const { idToAptamer, idToBounds, selectionCycleResponse } = this.experimentReport();
+    const { idToAptamer, idToBounds } = this.experimentReport().pool;
+    const { selectionCycles } = this.experimentReport();
     return Object.entries(idToAptamer).map(([id, sequence]) => {
       const aptamerId = Number(id);
 
       const cycles: Record<number, SelectionCycleMetrics> = Object.fromEntries(
-        selectionCycleResponse.map(cycle => {
+        selectionCycles.map(cycle => {
           const count = cycle.counts[aptamerId];
           const frequency = count / cycle.totalSize;
           const cpm = frequency * 1_000_000;

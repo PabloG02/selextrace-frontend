@@ -58,6 +58,6 @@ export class ExperimentOverviewTab {
 
   /* Computed */
   readonly selectionCyclePercentagesEntries = computed(() =>
-    Object.entries(this.experimentReport().experimentDetails.selectionCyclePercentages ?? {})
+    Object.entries(this.experimentReport().technicalDetails.selectionCyclePercentages ?? {})
   );
 }

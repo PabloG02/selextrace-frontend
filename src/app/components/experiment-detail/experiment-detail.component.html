@@ -17,11 +17,11 @@
 } @else if (experimentReportRes.hasValue()) {
   <mat-card appearance="outlined" class="experiment-summary-card">
     <mat-card-header>
-      <div mat-card-avatar class="avatar">{{ avatarInitials(experimentReportRes.value()!.experimentDetails.generalInformation.name) }}</div>
-      <mat-card-title>{{ experimentReportRes.value()!.experimentDetails.generalInformation.name }}</mat-card-title>
+      <div mat-card-avatar class="avatar">{{ avatarInitials(experimentReportRes.value()!.name) }}</div>
+      <mat-card-title>{{ experimentReportRes.value()!.name }}</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <div>{{ experimentReportRes.value()!.experimentDetails.generalInformation.description }}</div>
+      <div>{{ experimentReportRes.value()!.description }}</div>
 <!--      <dl class="meta-list">-->
 <!--        <div>-->
 <!--          <dt>Created</dt>-->

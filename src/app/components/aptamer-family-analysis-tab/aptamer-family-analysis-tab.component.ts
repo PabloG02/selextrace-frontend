@@ -95,7 +95,7 @@ export class AptamerFamilyAnalysisTab {
 
   /* Reactive Signal Form Model */
   readonly clusterTableFormModel = linkedSignal(() => ({
-    referenceCycleRound: this.experimentReport().selectionCycleResponse.at(-1)!.round
+    referenceCycleRound: this.experimentReport().selectionCycles.at(-1)!.round
   }));
   readonly clusterTableForm = form(this.clusterTableFormModel);
 
@@ -110,7 +110,7 @@ export class AptamerFamilyAnalysisTab {
 
   /* Form: Select options */
   readonly randomizedRegionSizes = computed(() => {
-    const accepted = this.experimentReport()?.metadata.nucleotideDistributionAccepted;
+    const accepted = this.experimentReport()?.technicalDetails.metadata.nucleotideDistributionAccepted;
     if (!accepted) return [];
 
     // Flatten all keys across size maps
@@ -217,7 +217,7 @@ export class AptamerFamilyAnalysisTab {
 
   /** Reference selection cycle for enrichment calculations and charts. */
   readonly referenceSelectionCycle = computed(() => {
-    const cycles = this.experimentReport().selectionCycleResponse;
+    const cycles = this.experimentReport().selectionCycles;
     const selectedRound = this.clusterTableForm.referenceCycleRound().value();
 
     return cycles.find(cycle => cycle.round === selectedRound)!;
@@ -226,12 +226,13 @@ export class AptamerFamilyAnalysisTab {
   /* Cluster Table Data */
   /** All aptamers from the experiment formatted as table rows. */
   private readonly allAptamerRows = computed(() => {
-    const { idToAptamer, idToBounds, selectionCycleResponse } = this.experimentReport();
+    const { idToAptamer, idToBounds } = this.experimentReport().pool;
+    const { selectionCycles } = this.experimentReport();
     return Object.entries(idToAptamer).map(([id, sequence]) => {
       const aptamerId = Number(id);
 
       const cycles: Record<number, SelectionCycleMetrics> = Object.fromEntries(
-        selectionCycleResponse.map(cycle => {
+        selectionCycles.map(cycle => {
           const count = cycle.counts[aptamerId];
           const frequency = count / cycle.totalSize;
           const cpm = frequency * 1_000_000;
@@ -263,12 +264,12 @@ export class AptamerFamilyAnalysisTab {
   readonly selectedAptamerRows = signal<AptamerTableRow[]>([]);
   readonly selectedAptamerCardinalityMetric = signal<'counts' | 'enrichments'>('counts');
   readonly clusterCardinalityMetric = signal<'sizes' | 'diversities'>('sizes');
-  readonly clusterEnrichmentCompareRound = linkedSignal(() => this.experimentReport().selectionCycleResponse.at(0)!.round);
+  readonly clusterEnrichmentCompareRound = linkedSignal(() => this.experimentReport().selectionCycles.at(0)!.round);
   readonly clusterEnrichmentScale = signal<'linear' | 'logarithmic'>('linear');
 
   /** Comparison selection cycle for cluster enrichment charts. */
   readonly compareSelectionCycle = computed(() => {
-    const cycles = this.experimentReport().selectionCycleResponse;
+    const cycles = this.experimentReport().selectionCycles;
     const selectedRound = this.clusterEnrichmentCompareRound();
 
     return cycles.find(cycle => cycle.round === selectedRound)!;

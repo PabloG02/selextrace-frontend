@@ -67,7 +67,7 @@ export class ExperimentChartService {
   }
 
   private buildRandomizedRegionSizeDistribution(exp: ExperimentReport) {
-    const distributionByCycle = exp.metadata?.nucleotideDistributionAccepted;
+    const distributionByCycle = exp.technicalDetails?.metadata.nucleotideDistributionAccepted;
     const totals: Record<number, number> = {};
     let total = 0;
 
@@ -88,11 +88,11 @@ export class ExperimentChartService {
   getPositiveSelectionCyclesChart(experimentReport: Signal<ExperimentReport | undefined>, singletonCutoff: Signal<number>) {
     return computed<EChartsOption>(() => {
       const exp = experimentReport();
-      if (!exp?.selectionCycleResponse?.length) {
+      if (!exp?.selectionCycles?.length) {
         return {};
       }
 
-      const cycles = exp.selectionCycleResponse
+      const cycles = exp.selectionCycles
         .filter(cycle => !cycle.isControlSelection && !cycle.isCounterSelection)
         .sort((a, b) => (a.round - b.round));
       if (cycles.length === 0) {
@@ -180,11 +180,11 @@ export class ExperimentChartService {
     return computed<EChartsOption>(() => {
       const exp = experimentReport();
       const cycle = selectedCycle();
-      if (!exp?.metadata?.nucleotideDistributionForward || !cycle) {
+      if (!exp?.technicalDetails?.metadata.nucleotideDistributionForward || !cycle) {
         return {};
       }
 
-      const distribution = exp.metadata.nucleotideDistributionForward[cycle.name];
+      const distribution = exp.technicalDetails.metadata.nucleotideDistributionForward[cycle.name];
       if (!distribution) {
         return {};
       }
@@ -245,9 +245,9 @@ export class ExperimentChartService {
     return computed<EChartsOption>(() => {
       const exp = experimentReport();
       const cycle = selectedCycle();
-      if (!exp?.metadata?.nucleotideDistributionReverse || !cycle) return {};
+      if (!exp?.technicalDetails?.metadata.nucleotideDistributionReverse || !cycle) return {};
 
-      const distribution = exp.metadata.nucleotideDistributionReverse[cycle.name];
+      const distribution = exp.technicalDetails.metadata.nucleotideDistributionReverse[cycle.name];
       if (!distribution || Object.keys(distribution).length === 0) {
         // No paired-end data
         return {};
@@ -311,9 +311,9 @@ export class ExperimentChartService {
     return computed<EChartsOption>(() => {
       const exp = experimentReport();
       const cycle = selectedCycle();
-      if (!exp?.metadata?.nucleotideDistributionAccepted || !cycle) return {};
+      if (!exp?.technicalDetails?.metadata.nucleotideDistributionAccepted || !cycle) return {};
 
-      const distributionByCycle = exp.metadata.nucleotideDistributionAccepted[cycle.name];
+      const distributionByCycle = exp.technicalDetails.metadata.nucleotideDistributionAccepted[cycle.name];
       if (!distributionByCycle) return {};
 
       const regionSize = selectedRegionSize();
@@ -387,11 +387,11 @@ export class ExperimentChartService {
 
       const exp = experimentReport();
       const selectedRows = rows();
-      if (!exp?.selectionCycleResponse?.length || !selectedRows.length) {
+      if (!exp?.selectionCycles?.length || !selectedRows.length) {
         return {};
       }
 
-      const positiveCycles = exp.selectionCycleResponse
+      const positiveCycles = exp.selectionCycles
         .filter(cycle => !cycle.isControlSelection && !cycle.isCounterSelection)
         .sort((a, b) => a.round - b.round);
       if (positiveCycles.length === 0) {
@@ -978,7 +978,7 @@ export class ExperimentChartService {
   ) {
     return computed<EChartsOption>(() => {
       const aptamersInCluster = rows();
-      const cycles = experimentReport().selectionCycleResponse;
+      const cycles = experimentReport().selectionCycles;
       if (!aptamersInCluster.length || !cycles.length) {
         return {};
       }

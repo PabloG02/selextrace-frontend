@@ -59,7 +59,7 @@ export class ExperimentDetailComponent {
   constructor() {
     effect(
       () => {
-        document.title = `${this.experimentReport()?.experimentDetails.generalInformation.name} • SELEXTrace`;
+        document.title = `${this.experimentReport()?.name} • SELEXTrace`;
       }
     );
   }
@@ -94,7 +94,7 @@ export class ExperimentDetailComponent {
       .open(ConfirmDialogComponent, {
         data: {
           title: 'Delete experiment?',
-          message: `Deleting "${experiment.experimentDetails.generalInformation.name}" cannot be undone.`,
+          message: `Deleting "${experiment.name}" cannot be undone.`,
           confirmLabel: 'Delete',
           variant: 'warning',
         },
