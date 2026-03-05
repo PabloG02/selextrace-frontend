@@ -42,6 +42,10 @@
 <!--        </mat-chip>-->
 <!--      </mat-chip-set>-->
       <span class="action-spacer"></span>
+        <button mat-stroked-button type="button" (click)="exportCreationParams()">
+          <mat-icon>file_export</mat-icon>
+          Export Recipe
+        </button>
       <button mat-icon-button type="button" color="warn" matTooltip="Delete" (click)="deleteExperiment()">
         <mat-icon>delete</mat-icon>
       </button>

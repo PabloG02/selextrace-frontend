@@ -1,43 +1,16 @@
-import {FileFormat, ReadType} from './experiment';
+import { z } from 'zod';
+import {
+  CreateExperimentDtoSchema,
+  ExperimentSequencingSchema,
+  ExactLengthRandomizedRegionSchema,
+  RangeRandomizedRegionSchema,
+  SelectionCycleSchema,
+  SelectionCycleFilesSchema,
+} from './experiment-creation.schema';
 
-export interface CreateExperimentDto {
-  name: string;
-  description: string;
-  sequencing: ExperimentSequencing;
-  selectionCycles: SelectionCycle[];
-}
-
-export interface ExperimentSequencing {
-  isDemultiplexed: boolean;
-  readType: ReadType;
-  fileFormat: FileFormat;
-  primers: {
-    fivePrime: string;
-    threePrime?: string;
-  };
-  randomizedRegion: ExactLengthRandomizedRegion | RangeRandomizedRegion;
-}
-
-export interface ExactLengthRandomizedRegion {
-  type: 'exact';
-  exactLength: number;
-}
-
-export interface RangeRandomizedRegion {
-  type: 'range';
-  min: number;
-  max: number;
-}
-
-export interface SelectionCycle {
-  roundNumber: number;
-  roundName: string;
-  isControl: boolean;
-  isCounterSelection: boolean;
-  files: SelectionCycleFiles;
-}
-
-export interface SelectionCycleFiles {
-  forward: File;
-  reverse?: File;
-}
+export type CreateExperimentDto = z.infer<typeof CreateExperimentDtoSchema>;
+export type ExperimentSequencing = z.infer<typeof ExperimentSequencingSchema>;
+export type ExactLengthRandomizedRegion = z.infer<typeof ExactLengthRandomizedRegionSchema>;
+export type RangeRandomizedRegion = z.infer<typeof RangeRandomizedRegionSchema>;
+export type SelectionCycle = z.infer<typeof SelectionCycleSchema>;
+export type SelectionCycleFiles = z.infer<typeof SelectionCycleFilesSchema>;

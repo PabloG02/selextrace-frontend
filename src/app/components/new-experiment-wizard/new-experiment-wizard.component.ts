@@ -1,7 +1,16 @@
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import {
+  FormArray,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
 import { MatStepperModule, MatStepper } from '@angular/material/stepper';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -22,7 +31,9 @@ import { FileFormat, ReadType } from '../../models/experiment';
 import { ProgressDialogComponent } from '../shared/progress-dialog/progress-dialog.component';
 import { FileUploadDropzoneComponent } from '../shared/file-upload-dropzone/file-upload-dropzone.component';
 import { catchError, of } from 'rxjs';
-import {CreateExperimentDto, SelectionCycle} from '../../models/create-experiment-dto';
+import { CreateExperimentDto, SelectionCycle } from '../../models/create-experiment-dto';
+import { ExperimentCreationParams } from '../../models/experiment-creation-params';
+import {ExperimentCreationParamsSchema} from '../../models/experiment-creation.schema';
 
 type CycleFormGroup = FormGroup<{
   roundNumber: FormControl<number>;
@@ -58,6 +69,7 @@ type CycleFormGroup = FormGroup<{
     MatSnackBarModule,
     TitleCasePipe,
     FileUploadDropzoneComponent,
+    FormsModule,
   ],
   templateUrl: './new-experiment-wizard.component.html',
   styleUrl: './new-experiment-wizard.component.scss',
@@ -175,7 +187,7 @@ export class NewExperimentWizardComponent {
         validators: [Validators.required, Validators.min(1)],
       }),
       roundName: this.fb.nonNullable.control('', Validators.required),
-      forwardFiles: this.fb.control<File | null>(null),
+      forwardFiles: this.fb.control<File | null>(null, Validators.required),
       reverseFiles: this.fb.control<File | null>(null),
       isControl: this.fb.nonNullable.control(false),
       isCounterSelection: this.fb.nonNullable.control(false),
@@ -186,6 +198,71 @@ export class NewExperimentWizardComponent {
       .subscribe(() => this.validateRoundNameUniqueness());
 
     return group;
+  }
+
+  async importExperimentParams(file: File | null): Promise<void> {
+    if (!file) return;
+
+    try {
+      const raw = await file.text();
+      const parsed = JSON.parse(raw) as unknown;
+      const result = ExperimentCreationParamsSchema.safeParse(parsed);
+
+      if (!result.success) {
+        const firstError = result.error.issues[0];
+        const field = firstError.path.join('.') || 'unknown';
+        this.snackBar.open(
+          `Invalid experiment JSON: "${field}" — ${firstError.message}`,
+          'Dismiss',
+          { duration: 5000 }
+        );
+        return;
+      }
+
+      this.applyExperimentParams(result.data);
+      this.snackBar.open('Experiment details imported. Add files and review before creating.', 'Dismiss', {
+        duration: 5000,
+      });
+    } catch (error) {
+      console.error('Failed to import experiment JSON:', error);
+      this.snackBar.open('Unable to read the JSON file. Please confirm it is valid.', 'Dismiss', {
+        duration: 5000,
+      });
+    }
+  }
+
+  private applyExperimentParams(params: ExperimentCreationParams): void {
+    const { name, description, sequencing } = params;
+
+    this.generalForm.patchValue({
+      name,
+      description,
+      isDemultiplexed: sequencing.isDemultiplexed,
+      readType: sequencing.readType,
+      fileFormat: sequencing.fileFormat,
+    });
+
+    this.structureForm.patchValue({
+      fivePrime: sequencing.primers.fivePrime,
+      threePrime: sequencing.primers.threePrime ?? '',
+    });
+
+    this.structureForm.patchValue(
+      sequencing.randomizedRegion.type === 'exact'
+        ? { randomizedRegionType: 'exact', randomizedExactLength: sequencing.randomizedRegion.exactLength }
+        : { randomizedRegionType: 'range', randomizedRangeMin: sequencing.randomizedRegion.min, randomizedRangeMax: sequencing.randomizedRegion.max }
+    );
+
+    this.cyclesForm.clear();
+
+    params.selectionCycles.forEach((cycle) => {
+      const group = this.createCycleGroup();
+      group.patchValue(cycle);
+      this.cyclesForm.push(group);
+    });
+
+    this.validateRoundNameUniqueness();
+    this.syncReverseValidators();
   }
 
   /**

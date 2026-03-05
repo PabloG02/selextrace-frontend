@@ -32,6 +32,14 @@
   margin: 0;
 }
 
+.import-card mat-card-header {
+  padding: 16px 16px 12px;
+}
+
+.import-card mat-card-title {
+  font: var(--mat-sys-title-small);
+}
+
 /* Wizard stepper */
 .wizard mat-stepper {
   background: transparent;

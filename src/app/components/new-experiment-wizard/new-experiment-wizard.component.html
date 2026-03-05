@@ -342,6 +342,21 @@
   </section>
 
   <aside class="summary" aria-label="Experiment summary">
+    <mat-card appearance="outlined" class="import-card">
+      <mat-card-header>
+        <mat-card-title>Import params from JSON</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="file-controls">
+          <app-file-upload-dropzone
+            [ngModel]="null"
+            (ngModelChange)="importExperimentParams($event)"
+            accept="application/json"
+          />
+        </div>
+      </mat-card-content>
+    </mat-card>
+
     <mat-card appearance="outlined">
       <mat-card-header>
         <mat-card-title>General</mat-card-title>

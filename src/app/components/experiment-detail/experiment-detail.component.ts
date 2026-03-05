@@ -19,6 +19,8 @@ import {FormsModule} from '@angular/forms';
 import {SequencingDataTab} from '../sequencing-data-tab/sequencing-data-tab';
 import {ExperimentOverviewTab} from '../experiment-overview-tab/experiment-overview-tab';
 import {AptamerFamilyAnalysisTab} from '../aptamer-family-analysis-tab/aptamer-family-analysis-tab.component';
+import {ExperimentCreationParams, SelectionCycleImport} from '../../models/experiment-creation-params';
+import {DownloadService} from '../../services/download.service';
 
 @Component({
   selector: 'app-experiment-detail',
@@ -48,6 +50,7 @@ export class ExperimentDetailComponent {
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
   private readonly apiService = inject(ExperimentsApiService);
+  private readonly downloadService = inject(DownloadService);
 
   readonly activeTab = signal(0);
   readonly isLoading = signal(false);
@@ -109,6 +112,50 @@ export class ExperimentDetailComponent {
           this.router.navigate(['/experiments']);
         }
       });
+  }
+
+  exportCreationParams(): void {
+    const report = this.experimentReport();
+    if (!report) {
+      this.snackBar.open('Experiment report is still loading.', 'Dismiss', { duration: 2500 });
+      return;
+    }
+
+    const params: Partial<ExperimentCreationParams> = {
+      name: report.name,
+      description: report.description,
+      sequencing: {
+        isDemultiplexed: true,  // TODO
+        readType: 'paired-end', // TODO
+        fileFormat: 'fastq',    // TODO
+        primers: {
+          fivePrime: report.sequencing.fivePrimePrimer,
+          threePrime: report.sequencing.threePrimePrimer || undefined,
+        },
+        // TODO: Do not assume the same region type for all experiments
+        randomizedRegion: {
+          type: 'exact',
+          exactLength: report.sequencing.aptamerSize,
+        },
+      },
+      selectionCycles: report.selectionCycles.map((cycle) => ({
+        roundNumber: cycle.round,
+        roundName: cycle.name,
+        isControl: cycle.isControlSelection,
+        isCounterSelection: cycle.isCounterSelection,
+      } satisfies SelectionCycleImport))
+    };
+
+    const blob = new Blob([JSON.stringify(params, null, 2)], { type: 'application/json' });
+    this.downloadService.downloadBlob(blob, `${this.slugify(report.name)}-creation-params.json`);
+
+    this.snackBar.open('Experiment params exported.', 'Dismiss', { duration: 2500 });
+  }
+
+  private slugify(value: string): string {
+    const trimmed = value.trim().toLocaleLowerCase();
+    const slug = trimmed.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return slug || 'experiment';
   }
 
   protected readonly Object = Object;
