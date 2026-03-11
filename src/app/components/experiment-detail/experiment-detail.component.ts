@@ -19,6 +19,7 @@ import {FormsModule} from '@angular/forms';
 import {SequencingDataTab} from '../sequencing-data-tab/sequencing-data-tab';
 import {ExperimentOverviewTab} from '../experiment-overview-tab/experiment-overview-tab';
 import {AptamerFamilyAnalysisTab} from '../aptamer-family-analysis-tab/aptamer-family-analysis-tab.component';
+import {MotifAnalysisTabComponent} from '../motif-analysis-tab/motif-analysis-tab.component';
 import {ExperimentCreationParams, SelectionCycleImport} from '../../models/experiment-creation-params';
 import {DownloadService} from '../../services/download.service';
 
@@ -40,6 +41,7 @@ import {DownloadService} from '../../services/download.service';
     SequencingDataTab,
     ExperimentOverviewTab,
     AptamerFamilyAnalysisTab,
+    MotifAnalysisTabComponent,
   ],
   templateUrl: "./experiment-detail.component.html",
   styleUrl: "./experiment-detail.component.scss",

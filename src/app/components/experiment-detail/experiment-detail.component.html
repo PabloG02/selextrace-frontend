@@ -81,14 +81,9 @@
 
       <mat-tab label="Motif Analysis">
         <div class="tab-content">
-          <mat-card appearance="outlined">
-            <mat-card-content>
-              <p>
-                Motif discovery outputs, consensus logos, and enrichment heatmaps will show up here when
-                generated.
-              </p>
-            </mat-card-content>
-          </mat-card>
+          <app-motif-analysis-tab
+            [experimentReport]="experimentReport()!"
+            [experimentId]="experimentId()"/>
         </div>
       </mat-tab>
     </mat-tab-group>

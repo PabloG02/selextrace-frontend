@@ -18,11 +18,13 @@
       @if (showPrimers()) {
         <span class="primer">{{ row.sequence | slice: 0 : row.bounds.startIndex }}</span>
       }
-      @for (base of row.sequence | slice: row.bounds.startIndex : row.bounds.endIndex; track $index) {
-        <span [class.nuc-a]="base === 'A'"
-              [class.nuc-t]="base === 'T'"
-              [class.nuc-c]="base === 'C'"
-              [class.nuc-g]="base === 'G'">{{ base }}</span>
+      @let tokens = getRandomizedTokens(row);
+      @for (token of tokens; track $index) {
+        <span [class.nuc-a]="token.base === 'A'"
+              [class.nuc-t]="token.base === 'T'"
+              [class.nuc-c]="token.base === 'C'"
+              [class.nuc-g]="token.base === 'G'"
+              [class.motif-hit]="token.isMatch">{{ token.base }}</span>
       }
       @if (showPrimers()) {
         <span class="primer">{{ row.sequence | slice: row.bounds.endIndex }}</span>

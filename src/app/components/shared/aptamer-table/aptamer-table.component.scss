@@ -8,6 +8,22 @@
   white-space: nowrap;
 }
 
+.motif-hit {
+  background-color: oklch(94% 0.05 267);
+}
+
+/* Round the left side if the previous element is NOT a motif-hit */
+.motif-hit:not(.motif-hit + .motif-hit) {
+  border-top-left-radius: var(--mat-sys-corner-extra-small);
+  border-bottom-left-radius: var(--mat-sys-corner-extra-small);
+}
+
+/* Round the right side if the next element is NOT a motif-hit */
+.motif-hit:not(:has(+ .motif-hit)) {
+  border-top-right-radius: var(--mat-sys-corner-extra-small);
+  border-bottom-right-radius: var(--mat-sys-corner-extra-small);
+}
+
 /* Nucleotide Colors */
 .primer { color: var(--mat-sys-on-surface-variant); }
 .nuc-a { color: #1b7b1b; }

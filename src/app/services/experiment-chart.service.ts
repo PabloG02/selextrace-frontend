@@ -3,6 +3,30 @@ import {ExperimentReport, SelectionCycleResponse} from '../models/experiment-rep
 import {EChartsOption} from 'echarts';
 import {PredictionsApiService} from './predictions-api.service';
 import {AptamerTableRow} from '../components/shared/aptamer-table/aptamer-table.component';
+import {MotifAnalysisProfile} from '../models/motif-analysis';
+
+type LogoType = 'nucleotide' | 'structure';
+
+interface LogoConfig {
+  categories: string[];
+  colors: string[];
+  images: string[];
+  apiKeys?: string[];
+}
+
+const LOGO_CONFIGS: Record<LogoType, LogoConfig> = {
+  nucleotide: {
+    categories: ['A', 'C', 'G', 'T'],
+    colors: ['#2e7d32', '#1e88e5', '#fb8c00', '#e53935'],
+    images: ['assets/A.png', 'assets/C.png', 'assets/G.png', 'assets/T.png']
+  },
+  structure: {
+    categories: ['Hairpin', 'Bulge', 'Internal', 'Multi', 'Dangling', 'Paired'],
+    colors: ['#ff7070', '#fa9600', '#a0a0ff', '#00ffff', '#ffc0cb', '#c8c8c8'],
+    images: ['assets/H.png', 'assets/B.png', 'assets/I.png', 'assets/M.png', 'assets/D.png', 'assets/P.png'],
+    apiKeys: ['hairpin', 'bulge', 'internal', 'multi', 'dangling', 'paired']
+  }
+};
 
 @Injectable({
   providedIn: 'root'
@@ -426,6 +450,97 @@ export class ExperimentChartService {
     });
   }
 
+  getMotifCoverageChart(
+    experimentReport: Signal<ExperimentReport | undefined>,
+    motifProfile: Signal<MotifAnalysisProfile | null>,
+    selectedCycle: Signal<SelectionCycleResponse | null>,
+    useCpm: Signal<boolean>
+  ) {
+    return computed<EChartsOption>(() => {
+      const exp = experimentReport();
+      const profile = motifProfile();
+      const cycle = selectedCycle();
+      if (!exp || !profile || !cycle || cycle.totalSize <= 0) {
+        return {};
+      }
+
+      const kmerList = [...new Set(profile.kmers.map((kmer) => kmer.trim().toUpperCase()).filter(Boolean))];
+      if (kmerList.length === 0 || profile.memberAptamers.length === 0) {
+        return {};
+      }
+
+      const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const patterns = kmerList.map((kmer) => new RegExp(escapeRegExp(kmer), 'g'));
+
+      let maxRegionSize = 0;
+      const occurrences: number[] = [];
+
+      for (const member of profile.memberAptamers) {
+        const aptamerId = member.aptamerId;
+        const sequence = exp.pool.idToAptamer[aptamerId];
+        const bounds = exp.pool.idToBounds[aptamerId];
+        if (!sequence || !bounds) {
+          continue;
+        }
+
+        const count = cycle.counts[aptamerId];
+        if (count <= 0) {
+          continue;
+        }
+
+        const contribution = useCpm() ? (count / cycle.totalSize) * 1_000_000 : count;
+        if (contribution <= 0) {
+          continue;
+        }
+
+        const region = sequence.slice(bounds.startIndex, bounds.endIndex).toUpperCase();
+        maxRegionSize = Math.max(maxRegionSize, region.length);
+
+        for (const pattern of patterns) {
+          pattern.lastIndex = 0;
+          let match = pattern.exec(region);
+          while (match) {
+            const start = match.index;
+            const end = start + match[0].length;
+            for (let idx = start; idx < end; idx += 1) {
+              occurrences[idx] = (occurrences[idx] ?? 0) + contribution;
+            }
+            match = pattern.exec(region);
+          }
+        }
+      }
+
+      if (maxRegionSize === 0) {
+        return {};
+      }
+
+      const data = Array.from({length: maxRegionSize}, (_, index) => occurrences[index] ?? 0);
+
+      return {
+        tooltip: {trigger: 'axis'},
+        xAxis: {
+          type: 'category',
+          name: 'Randomized Region Index',
+          nameLocation: 'middle',
+          data: Array.from({length: maxRegionSize}, (_, index) => index),
+        },
+        yAxis: {
+          type: 'value',
+          name: `Motif Coverage${useCpm() ? ' (CPM)' : ''}`,
+          nameLocation: 'middle',
+          nameRotate: 90,
+        },
+        series: [
+          {
+            type: 'line',
+            areaStyle: {},
+            data,
+          },
+        ],
+      };
+    });
+  }
+
   getBasePairProbabilityMatrixHeatmapChart(sequence: Signal<string | null>) {
     const raggedUpperTriangleMatrix = this.predictionsApiService.getBppm(sequence);
 
@@ -496,163 +611,17 @@ export class ExperimentChartService {
         return {};
       }
 
-      // 1) DATA INPUT
       const data = contextProbabilities.value();
+      const config = LOGO_CONFIGS['structure'];
 
-      const seriesConfigs = [
-        { key: 'paired', name: 'Paired', color: '#c8c8c8', imageUrl: 'assets/P.png' },
-        { key: 'hairpin', name: 'Hairpin', color: '#ff7070', imageUrl: 'assets/H.png' },
-        { key: 'bulge', name: 'Bulge', color: '#fa9600', imageUrl: 'assets/B.png' },
-        { key: 'internal', name: 'Internal', color: '#a0a0ff', imageUrl: 'assets/I.png' },
-        { key: 'multi', name: 'Multi', color: '#00ffff', imageUrl: 'assets/M.png' },
-        { key: 'dangling', name: 'Dangling', color: '#ffc0cb', imageUrl: 'assets/D.png' },
-      ] as const;
+      const frequencies = config.apiKeys!.map(key => data[key as keyof typeof data] ?? []);
 
-      const rawData = seriesConfigs.reduce<Record<string, number[]>>((acc, config) => {
-        acc[config.name] = data[config.key] ?? [];
-        return acc;
-      }, {});
-
-      const categories = seriesConfigs.map(config => config.name);
-      const sequenceLength = Math.max(...categories.map(cat => rawData[cat].length));
-      if (!sequenceLength) {
-        return {};
-      }
-
-      const colorMap = seriesConfigs.reduce<Record<string, string>>((acc, config) => {
-        acc[config.name] = config.color;
-        return acc;
-      }, {});
-
-      // 2) PREPARE DATA FOR CUSTOM SERIES (SORTING LOGIC)
-      const xAxisData: string[] = [];
-
-      for (let i = 0; i < sequenceLength; i += 1) {
-        xAxisData.push(`${i + 1}`);
-
-        const stackForPosition = categories.map(category => ({
-          name: category,
-          value: rawData[category][i]
-        }));
-
-        stackForPosition.sort((a, b) => a.value - b.value);
-      }
-
-      return {
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: { type: 'shadow' },
-          formatter: (params: unknown) => {
-            if (!Array.isArray(params) || params.length === 0) {
-              return '';
-            }
-
-            const entries = params
-              .map(item => {
-                const entry = item as {
-                  seriesName?: string;
-                  value?: unknown;
-                };
-
-                const rawValue = Array.isArray(entry.value) ? entry.value[2] : entry.value;
-                const value = typeof rawValue === 'number' ? rawValue : 0;
-                const name = entry.seriesName ?? '';
-                return {
-                  color: colorMap[name] ?? '#6d6e73',
-                  name,
-                  value
-                };
-              })
-              .sort((a, b) => {
-                if (b.value !== a.value) {
-                  return b.value - a.value; // sort by value (desc)
-                }
-                return a.name.localeCompare(b.name); // then by name (asc)
-              });
-
-            const rows = entries
-              .map(entry =>
-                `<tr>
-                  <td><strong style="display:inline-block;color:${entry.color};margin-right:4px;">${entry.name.charAt(0)}</strong></td>
-                  <td>${entry.name}</td>
-                  <td style="padding-left: 16px; text-align: right;"><strong>${entry.value}</strong></td>
-                </tr>`
-              )
-              .join('');
-
-            return `<table>${rows}</table>`;
-          }
-        },
-        legend: { bottom: 0 },
-        dataZoom: [
-          { type: 'slider', show: sequenceLength > 30, start: 0, end: 50 },
-          { type: 'inside' }
-        ],
-        xAxis: {
-          type: 'category',
-          name: 'Sequence Position',
-          data: xAxisData,
-          axisLabel: {
-            interval: 0
-          }
-        },
-        yAxis: {
-          type: 'value',
-          name: 'Probability',
-          min: 0,
-          max: 1
-        },
-        series: seriesConfigs.map(config => ({
-          name: config.name,
-          type: 'custom',
-          itemStyle: {
-            color: config.color
-          },
-          renderItem: (params, api) => {
-            const xIndex = api.value(0) as number;
-            const yStart = api.value(1) as number;
-            const valHeight = api.value(2) as number;
-
-            const start = api.coord([xIndex, yStart]);
-            const end = api.coord([xIndex, yStart + valHeight]);
-            const height = Math.abs(start[1] - end[1]);
-            // TODO: fix ts-ignore
-            // @ts-ignore
-            const width = api.size([1, 0])[0] * 0.98;
-
-            return {
-              type: 'image',
-              style: {
-                image: config.imageUrl,
-                x: start[0] - width / 2,
-                y: end[1],
-                width,
-                height
-              }
-            };
-          },
-          data: (() => {
-            const seriesData: Array<[number, number, number]> = [];
-            for (let i = 0; i < sequenceLength; i++) {
-              const stackForPosition = categories.map(cat => ({
-                name: cat,
-                value: rawData[cat][i]
-              }));
-              stackForPosition.sort((a, b) => a.value - b.value);
-
-              let yStart = 0;
-              for (let j = 0; j < stackForPosition.length; j++) {
-                if (stackForPosition[j].name === config.name) {
-                  seriesData.push([i, yStart, stackForPosition[j].value]);
-                  break;
-                }
-                yStart += stackForPosition[j].value;
-              }
-            }
-            return seriesData;
-          })(),
-        }))
-      };
+      return this.buildSequenceLogoChart(
+        'structure',
+        frequencies,
+        'Sequence Position',
+        'Probability'
+      );
     });
   }
 
@@ -710,12 +679,13 @@ export class ExperimentChartService {
       const maxFrequency = Math.max(...rawFrequencies.flat());
       const normalizedFrequencies = rawFrequencies.map(series => series.map(value => value / maxFrequency));
 
-      return this.buildCustomSequenceLogoChart(
+      return this.buildSequenceLogoChart(
+        'nucleotide',
         normalizedFrequencies,
-        nucleotideOrder,
-        ['assets/A.png', 'assets/C.png', 'assets/G.png', 'assets/T.png'],
         'Sequence Position',
-        'Frequency'
+        'Frequency',
+        undefined,
+        3
       );
     });
   }
@@ -777,7 +747,7 @@ export class ExperimentChartService {
         return `${seedBase} (${i + 1})`;
       });
 
-      const colors = ['#2e7d32', '#1e88e5', '#fb8c00', '#e53935'];
+      const colors = LOGO_CONFIGS['nucleotide'].colors;
 
       return {
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
@@ -833,24 +803,75 @@ export class ExperimentChartService {
     return row.cycles[round].count;
   }
 
+  // --- Motif Analysis tab ---
+
+  getMotifSequenceLogoChart(motifProfile: Signal<MotifAnalysisProfile | null>) {
+    return computed<EChartsOption>(() => {
+      const profile = motifProfile();
+      if (!profile?.pwm?.length) {
+        return {};
+      }
+
+      const normalizedPwm = this.normalizeMotifMatrix(profile.pwm, 4);
+
+      return this.buildSequenceLogoChart(
+        'nucleotide',
+        normalizedPwm,
+        'Motif Position',
+        'Frequency'
+      );
+    });
+  }
+
+  getMotifContextTraceChart(
+    motifProfile: Signal<MotifAnalysisProfile | null>,
+    roundLabels: Signal<string[]>
+  ) {
+    return computed<EChartsOption>(() => {
+      const profile = motifProfile();
+      if (!profile?.contextTrace?.length) {
+        return {};
+      }
+
+      const normalizedContextTrace = this.normalizeMotifMatrix(profile.contextTrace, 6);
+
+      const seriesLength = Math.max(...normalizedContextTrace.map((series) => series.length));
+      const labels = roundLabels();
+      const xAxisData = Array.from({length: seriesLength}, (_, index) => labels[index]);
+
+      return this.buildSequenceLogoChart(
+        'structure',
+        normalizedContextTrace,
+        'Selection Cycle',
+        'Context Frequency',
+        xAxisData,
+        3
+      );
+    });
+  }
+
   /**
    * Creates a stacked image-based sequence logo using the provided per-position frequencies.
    */
-  private buildCustomSequenceLogoChart(
+  private buildSequenceLogoChart(
+    logoType: LogoType,
     frequencies: number[][],
-    categories: readonly string[],
-    imageUrls: string[],
     xAxisLabel: string,
-    yAxisLabel: string
+    yAxisLabel: string,
+    xAxisData?: string[],
+    tooltipDecimals?: number
   ): EChartsOption {
+    const config = LOGO_CONFIGS[logoType];
     const sequenceLength = Math.max(...frequencies.map(series => series.length));
     if (!sequenceLength) return {};
 
-    const xAxisData = Array.from({ length: sequenceLength }, (_, i) => `${i + 1}`);
+    // If xAxisData is provided and has entries, use it. Otherwise, generate default labels (1, 2, 3, ...).
+    const resolvedXAxisData = xAxisData?.length
+      ? xAxisData
+      : Array.from({ length: sequenceLength }, (_, i) => `${i + 1}`);
 
-    const colors = ['#2e7d32', '#1e88e5', '#fb8c00', '#e53935'];
-    const colorMap = categories.reduce<Record<string, string>>((acc, category, index) => {
-      acc[category] = colors[index] ?? '#6d6e73';
+    const colorMap = config.categories.reduce<Record<string, string>>((acc, category, index) => {
+      acc[category] = config.colors[index] ?? '#6d6e73';
       return acc;
     }, {});
 
@@ -869,7 +890,6 @@ export class ExperimentChartService {
                 seriesName?: string;
                 value?: unknown;
               };
-
               const rawValue = Array.isArray(entry.value) ? entry.value[2] : entry.value;
               const value = typeof rawValue === 'number' ? rawValue : 0;
               const name = entry.seriesName ?? '';
@@ -887,26 +907,34 @@ export class ExperimentChartService {
             });
 
           const rows = entries
-            .map(entry =>
-              `<tr>
+            .map(entry => {
+              // Conditionally format the number
+              const displayValue = tooltipDecimals !== undefined
+                ? entry.value.toFixed(tooltipDecimals)
+                : entry.value;
+
+              return `<tr>
                 <td><strong style="display:inline-block;color:${entry.color};margin-right:4px;">${entry.name.charAt(0)}</strong></td>
-                <td style="padding-left: 16px; text-align: right;"><strong>${entry.value.toFixed(3)}</strong></td>
-              </tr>`
-            )
+                <td>${entry.name}</td>
+                <td style="padding-left: 16px; text-align: right;"><strong>${displayValue}</strong></td>
+              </tr>`;
+            })
             .join('');
 
           return `<table>${rows}</table>`;
         }
       },
       legend: { bottom: 0 },
-      dataZoom: [
-        { type: 'slider', show: sequenceLength > 30, start: 0, end: 50 },
-        { type: 'inside' }
-      ],
+      ...(sequenceLength > 30 ? {
+        dataZoom: [
+          { type: 'slider', show: true, start: 0, end: 50 },
+          { type: 'inside' }
+        ]
+      } : {}),
       xAxis: {
         type: 'category',
         name: xAxisLabel,
-        data: xAxisData,
+        data: resolvedXAxisData,
         axisLabel: { interval: 0 }
       },
       yAxis: {
@@ -915,11 +943,11 @@ export class ExperimentChartService {
         min: 0,
         max: 1
       },
-      series: categories.map((category, index) => ({
+      series: config.categories.map((category, index) => ({
         name: category,
         type: 'custom',
         itemStyle: {
-          color: colors[index] ?? '#6d6e73'
+          color: config.colors[index] ?? '#6d6e73'
         },
         renderItem: (params, api) => {
           const xIndex = api.value(0) as number;
@@ -936,7 +964,7 @@ export class ExperimentChartService {
           return {
             type: 'image',
             style: {
-              image: imageUrls[index],
+              image: config.images[index],
               x: start[0] - width / 2,
               y: end[1],
               width,
@@ -947,7 +975,7 @@ export class ExperimentChartService {
         data: (() => {
           const seriesData: Array<[number, number, number]> = [];
           for (let i = 0; i < sequenceLength; i += 1) {
-            const stackForPosition = categories.map((cat, catIndex) => ({
+            const stackForPosition = config.categories.map((cat, catIndex) => ({
               name: cat,
               value: frequencies[catIndex]?.[i] ?? 0
             }));
@@ -966,6 +994,37 @@ export class ExperimentChartService {
         })(),
       }))
     };
+  }
+
+  /**
+   * Ensure motif matrices are shaped as [series][position].
+   * Accepts either N x seriesCount or seriesCount x N.
+   */
+  private normalizeMotifMatrix(matrix: number[][], seriesCount: number) {
+    if (matrix.length === seriesCount) {
+      return matrix;
+    }
+
+    const firstRowLength = matrix[0].length;
+    if (firstRowLength === seriesCount) {
+      return this.transposeMatrix(matrix);
+    }
+
+    throw new Error('Unexpected motif matrix shape: neither dimension matches series count');
+  }
+
+  private transposeMatrix(matrix: number[][]) {
+    const rowCount = matrix.length;
+    const colCount = Math.max(...matrix.map((row) => row.length));
+    const result: number[][] = Array.from({length: colCount}, () => Array(rowCount).fill(0));
+
+    for (let rowIndex = 0; rowIndex < rowCount; rowIndex += 1) {
+      for (let colIndex = 0; colIndex < colCount; colIndex += 1) {
+        result[colIndex][rowIndex] = matrix[rowIndex]?.[colIndex] ?? 0;
+      }
+    }
+
+    return result;
   }
 
   /**

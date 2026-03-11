@@ -16,6 +16,8 @@ export class AptamerTableComponent {
   readonly selectionCycles = input.required<SelectionCycleSummary[]>();
   readonly showPrimers = input<boolean>(true);
   readonly useCPM = input<boolean>(true);
+  /** Terms to highlight in the randomized region (case-insensitive, literal match). */
+  readonly searchTerms = input<string[]>([]);
   readonly pageSize = input<number>(10);
   readonly enableSelection = input<boolean>(true);
   readonly selectedRows = model<AptamerTableRow[]>([]);
@@ -101,6 +103,59 @@ export class AptamerTableComponent {
     return data.slice(startIndex, startIndex + pageSize);
   });
 
+  /** Tokenized randomized region per visible row, with match flags for rendering. */
+  readonly randomizedTokens = computed(() => {
+    const tokens = new Map<number, SequenceToken[]>();
+    const terms = this.searchTerms();
+    for (const row of this.paginatedData()) {
+      tokens.set(row.id, this.buildRandomizedTokens(row, terms));
+    }
+    return tokens;
+  });
+
+  /** Lookup precomputed randomized-region tokens for the provided row. */
+  getRandomizedTokens(row: AptamerTableRow) {
+    return this.randomizedTokens().get(row.id) ?? [];
+  }
+
+  /** Build per-base tokens for the randomized region with match flags. */
+  private buildRandomizedTokens(row: AptamerTableRow, terms: string[]) {
+    const {startIndex, endIndex} = row.bounds;
+    const matches = this.buildMatchSet(row.sequence, row.bounds, terms);
+
+    const tokens: SequenceToken[] = [];
+    for (let index = startIndex; index < endIndex; index += 1) {
+      const base = row.sequence.charAt(index);
+      tokens.push({
+        base,
+        isMatch: matches.has(index),
+      });
+    }
+    return tokens;
+  }
+
+  /** Compute matching indices for all terms within the randomized region. */
+  private buildMatchSet(sequence: string, bounds: AptamerTableRow['bounds'], terms: string[]) {
+    const matches = new Set<number>();
+    if (terms.length === 0) {
+      return matches;
+    }
+
+    const region = sequence.slice(bounds.startIndex, bounds.endIndex);
+
+    for (const term of terms) {
+      let index = region.indexOf(term);
+      while (index !== -1) {
+        for (let offset = 0; offset < term.length; offset++) {
+          matches.add(bounds.startIndex + index + offset);
+        }
+        index = region.indexOf(term, index + 1);
+      }
+    }
+
+    return matches;
+  }
+
   // Event Handlers
   onPageChange(event: PageEvent) {
     this.pageIndex.set(event.pageIndex);
@@ -149,4 +204,10 @@ export type AptamerTableRow = {
     endIndex: number;
   };
   cycles: Record<number, SelectionCycleMetrics>;
+};
+
+/** Single-base render token for the randomized region. */
+type SequenceToken = {
+  base: string;
+  isMatch: boolean;
 };

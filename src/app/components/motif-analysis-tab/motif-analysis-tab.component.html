@@ -1,0 +1,283 @@
+<mat-card class="control-card" appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>Motif Identification Options (AptaTRACE)</mat-card-title>
+    <mat-card-subtitle>Configure the motif discovery parameters and run AptaTRACE for this experiment.</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="control-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>K-mer Size</mat-label>
+        <mat-select [formField]="motifForm.kmerLength">
+          @for (option of kmerSizeOptions(); track option) {
+            <mat-option [value]="option">{{ option }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Alpha</mat-label>
+        <input matInput type="number" [formField]="motifForm.alpha" />
+      </mat-form-field>
+
+      <mat-slide-toggle [formField]="motifForm.filterClusters" labelPosition="before" aria-label="Filter clusters">
+        Filter clusters
+      </mat-slide-toggle>
+
+      <button matButton="outlined" type="button" (click)="runMotifAnalysis()" [disabled]="motifForm().invalid() || isSubmitting()">
+        @if (isSubmitting()) {
+          Running AptaTRACE...
+        } @else {
+          Run AptaTrace
+        }
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<div class="content-grid">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>History</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content class="no-padding">
+      <mat-selection-list [multiple]="false" hideSingleSelectionIndicator>
+        @for (analysis of sortedAnalyses(); track analysis.id) {
+          <mat-list-option
+            [value]="analysis.id"
+            [selected]="activeAnalysis()?.id === analysis.id"
+            (click)="selectAnalysis(analysis.id)">
+            <mat-icon matListItemIcon>history</mat-icon>
+            <div matListItemTitle>{{ analysis.id }}</div>
+            <div matListItemLine>k={{ analysis.requestConfig.kmerLength }}, alpha={{ analysis.requestConfig.alpha }}</div>
+            <div matListItemLine>{{ formatAnalysisMeta(analysis) }}</div>
+          </mat-list-option>
+        } @empty {
+          <div class="state-block">No motif analyses found.</div>
+        }
+      </mat-selection-list>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Motifs in the Selected Run</mat-card-title>
+      <mat-card-subtitle>
+        @if (activeAnalysis()) {
+          {{ activeAnalysis()!.motifCount }} motifs found
+        } @else {
+          Select a run to inspect its motifs.
+        }
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content class="no-padding">
+      <mat-selection-list [multiple]="false" hideSingleSelectionIndicator>
+        @for (motif of rankedProfiles(); track motif.rank) {
+          <mat-list-option
+            [value]="motif.rank"
+            [selected]="activeMotif()?.rank === motif.rank"
+            (click)="selectMotif(motif.rank)">
+            <div matListItemTitle>Motif {{ motif.rank }} {{ motif.profile.consensus || motif.profile.seed }}</div>
+            <div matListItemLine>{{ motif.profile.kmers.length }} k-mers</div>
+            <div matListItemLine>P-value {{ motif.profile.seedPValue | number: '1.2-4' }}</div>
+          </mat-list-option>
+        } @empty {
+          <div class="state-block">No motifs available for the selected run.</div>
+        }
+      </mat-selection-list>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title-group>
+        <mat-card-title>Aptamer Table</mat-card-title>
+        <mat-card-subtitle>
+          @if (activeMotif()) {
+            Showing aptamers for motif {{ activeMotif()!.rank }} ({{ activeMotif()!.profile.consensus || activeMotif()!.profile.seed }})
+          } @else {
+            Select a motif to inspect matching sequences.
+          }
+        </mat-card-subtitle>
+        <div class="aptamer-card-actions">
+          <mat-slide-toggle [formField]="sequenceTableForm.showPrimers" labelPosition="before">
+            Show Primers
+          </mat-slide-toggle>
+          <mat-button-toggle-group
+            aria-label="Count format"
+            [formField]="sequenceTableForm.useCPM"
+            hideSingleSelectionIndicator>
+            <mat-button-toggle [value]="true">CPM</mat-button-toggle>
+            <mat-button-toggle [value]="false">Raw Counts</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+      </mat-card-title-group>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (aptamersForActiveMotif().length > 0) {
+        <app-aptamer-table
+          [rows]="aptamersForActiveMotif()"
+          [selectionCycles]="experimentReport().selectionCycles"
+          [searchTerms]="activeMotifSearchTerms()"
+          [showPrimers]="sequenceTableForm.showPrimers().value()"
+          [useCPM]="sequenceTableForm.useCPM().value()"
+          [(selectedRows)]="selectedAptamerRows"
+          [pageSize]="10">
+        </app-aptamer-table>
+      } @else {
+        <div class="state-block">No aptamers are attached to the selected motif profile.</div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-accordion multi>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Motif Overview</mat-panel-title>
+      </mat-expansion-panel-header>
+      @if (activeMotif(); as motif) {
+        <div class="metrics-grid">
+          <article class="metric-tile">
+            <span class="metric-label">Seed k-mer</span>
+            <strong class="metric-value">{{ motif.profile.seed }}</strong>
+          </article>
+
+          <article class="metric-tile">
+            <span class="metric-label">Consensus</span>
+            <strong class="metric-value">{{ motif.profile.consensus || 'Not available' }}</strong>
+          </article>
+
+          <article class="metric-tile">
+            <span class="metric-label">Seed p-value</span>
+            <strong class="metric-value">{{ motif.profile.seedPValue | number: '1.2-4' }}</strong>
+          </article>
+
+          <article class="metric-tile">
+            <span class="metric-label">Seed frequency</span>
+            <strong class="metric-value">{{ motif.profile.seedProportion | percent: '1.2-2' }}</strong>
+          </article>
+
+          <article class="metric-tile">
+            <span class="metric-label">Motif frequency</span>
+            <strong class="metric-value">{{ motif.profile.motifProportion | percent: '1.2-2' }}</strong>
+          </article>
+
+          <article class="metric-tile">
+            <span class="metric-label">Member aptamers</span>
+            <strong class="metric-value">{{ motif.profile.memberAptamers.length }}</strong>
+          </article>
+        </div>
+
+        <section class="detail-panel">
+          <h3>Aligned k-mers</h3>
+          @if (activeMotifKmerAlignmentEntries().length > 0) {
+            <div class="alignment-list" role="list" aria-label="Aligned motif k-mers">
+              @for (entry of activeMotifKmerAlignmentEntries(); track entry.kmer) {
+                <div class="alignment-row" role="listitem">
+                  <span class="monospace">{{ entry.kmer }}</span>
+                  <span class="monospace">{{ entry.alignment }}</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="state-block compact">No alignment details are available for this motif.</div>
+          }
+        </section>
+      }
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Motif Sequence Logo</mat-panel-title>
+      </mat-expansion-panel-header>
+      @if (motifSequenceLogoChartOptions().series) {
+        <div
+          echarts
+          [options]="motifSequenceLogoChartOptions()"
+          class="chart-container detail-chart"
+          [autoResize]="true"
+          [theme]="themeService.echartsTheme()"
+          aria-label="Motif sequence logo chart">
+        </div>
+      }
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Motif Context Trace</mat-panel-title>
+      </mat-expansion-panel-header>
+      @if (motifContextTraceChartOptions().series) {
+        <div
+          echarts
+          [options]="motifContextTraceChartOptions()"
+          class="chart-container detail-chart"
+          [autoResize]="true"
+          [theme]="themeService.echartsTheme()"
+          aria-label="Motif structural context trace chart">
+        </div>
+      } @else {
+        <div class="state-block compact">No structural context trace is available for this motif.</div>
+      }
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Motif Coverage</mat-panel-title>
+      </mat-expansion-panel-header>
+      <div class="motif-coverage-controls">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Cycle</mat-label>
+          <mat-select [formField]="motifCoverageForm.cycleRound">
+            @for (cycle of motifCoverageCycles(); track cycle.round) {
+              <mat-option [value]="cycle.round">{{ cycle.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-button-toggle-group
+          aria-label="Motif coverage units"
+          [formField]="motifCoverageForm.useCpm"
+          hideSingleSelectionIndicator>
+          <mat-button-toggle [value]="true">CPM</mat-button-toggle>
+          <mat-button-toggle [value]="false">Raw Counts</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+
+      @if (motifCoverageChartOptions().series) {
+        <div
+          echarts
+          [options]="motifCoverageChartOptions()"
+          class="chart-container detail-chart"
+          [autoResize]="true"
+          [theme]="themeService.echartsTheme()"
+          aria-label="Motif coverage chart">
+        </div>
+      } @else {
+        <div class="state-block compact">No motif coverage data is available for this motif.</div>
+      }
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>Cardinality Chart (Selected Sequences)</mat-panel-title>
+      </mat-expansion-panel-header>
+      <p class="detail-caption">
+        Select one or more aptamers in the table above to compare their {{ sequenceTableForm.useCPM().value() ? 'CPM' : 'raw count' }} traces.
+      </p>
+
+      @if (selectedAptamerRows().length > 0) {
+        <div
+          echarts
+          [options]="selectedAptamerCardinalityChartOptions()"
+          class="chart-container detail-chart"
+          [autoResize]="true"
+          [theme]="themeService.echartsTheme()"
+          aria-label="Selected motif aptamer cardinality chart">
+        </div>
+      }
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>
