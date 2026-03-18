@@ -1,0 +1,192 @@
+// Material 3 Expressive List for Angular Aria
+// https://m3.material.io/components/lists/specs
+
+.m3-expressive-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Base Option Item */
+.m3-expressive-list [ngOption] {
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 56px;
+  padding: 10px 16px;
+  gap: 12px;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  border-radius: var(--mat-sys-corner-extra-small);
+  cursor: pointer;
+  overflow: hidden;
+  outline: none;
+  transition:
+    background-color var(--mat-sys-motion-spring-fast-effects-duration) var(--mat-sys-motion-spring-fast-effects-easing),
+    color var(--mat-sys-motion-spring-fast-effects-duration) var(--mat-sys-motion-spring-fast-effects-easing),
+    border-radius var(--mat-sys-motion-spring-fast-spatial-duration) var(--mat-sys-motion-spring-fast-spatial-easing);
+
+  /* Typography */
+  font: var(--mat-sys-body-large);
+  letter-spacing: var(--mat-sys-body-large-tracking);
+
+  /* State Layer (Hover, Focus, Pressed) */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: transparent;
+    opacity: 0;
+    transition:
+      opacity var(--mat-sys-motion-spring-fast-effects-duration) var(--mat-sys-motion-spring-fast-effects-easing),
+      background-color var(--mat-sys-motion-spring-fast-effects-duration) var(--mat-sys-motion-spring-fast-effects-easing);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* --- SLOTS --- */
+  .list-item-leading-slot,
+  .list-item-content-slot,
+  .list-item-trailing-slot {
+    position: relative;
+    z-index: 1; /* Keep above state layer */
+  }
+
+  /* 1. Leading Slot */
+  .list-item-leading-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  /* 2. Content Slot (Largest, fills space) */
+  .list-item-content-slot {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    .list-item-overline {
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-label-small);
+      letter-spacing: var(--mat-sys-label-small-tracking);
+    }
+
+    .list-item-supporting-text {
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-body-medium);
+      letter-spacing: var(--mat-sys-body-medium-tracking);
+    }
+  }
+
+  /* 3. Trailing Slot */
+  .list-item-trailing-slot {
+    display: flex;
+    align-items: center;
+    color: var(--mat-sys-on-surface-variant);
+
+    .list-item-trailing-supporting-text {
+      color: var(--mat-sys-on-surface-variant);
+      font: var(--mat-sys-label-small);
+      letter-spacing: var(--mat-sys-label-small-tracking);
+    }
+  }
+
+  /* --- INTERACTIVE STATES --- */
+
+  /* Hover */
+  &:hover:not([aria-disabled="true"]) {
+    color: var(--mat-sys-on-surface);
+    border-radius: var(--mat-sys-corner-medium);
+    &::before {
+      background-color: var(--mat-sys-on-surface);
+      opacity: var(--mat-sys-hover-state-layer-opacity);
+    }
+  }
+
+  /* Focus */
+  &:focus-visible:not([aria-disabled="true"]) {
+    color: var(--mat-sys-on-surface);
+    border-radius: var(--mat-sys-corner-large);
+    outline: 3px solid var(--mat-sys-secondary);
+    outline-offset: -3px;
+    &::before {
+      background-color: var(--mat-sys-on-surface);
+      opacity: var(--mat-sys-focus-state-layer-opacity);
+    }
+  }
+
+  /* Pressed */
+  &:active:not([aria-disabled="true"]) {
+    color: var(--mat-sys-on-surface);
+    border-radius: var(--mat-sys-corner-large);
+    &::before {
+      background-color: var(--mat-sys-on-surface);
+      opacity: var(--mat-sys-pressed-state-layer-opacity);
+    }
+  }
+
+  /* Selected State (ARIA standard for ngOption) */
+  &[aria-selected="true"] {
+    background-color: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+    border-radius: var(--mat-sys-corner-large);
+
+    .list-item-leading-slot, .list-item-trailing-slot {
+      color: var(--mat-sys-on-secondary-container);
+    }
+
+    .list-item-content-slot .list-item-supporting-text,
+    .list-item-content-slot .list-item-overline {
+      color: var(--mat-sys-on-secondary-container);
+    }
+
+    /* Selected + Hover */
+    &:hover:not([aria-disabled="true"]) {
+      color: var(--mat-sys-on-secondary-container);
+      border-radius: var(--mat-sys-corner-large);
+      &::before {
+        background-color: var(--mat-sys-on-surface);
+        opacity: var(--mat-sys-hover-state-layer-opacity);
+      }
+    }
+
+    /* Selected + Focus */
+    &:focus-visible:not([aria-disabled="true"]) {
+      &::before {
+        background-color: var(--mat-sys-on-surface);
+        opacity: var(--mat-sys-focus-state-layer-opacity);
+      }
+    }
+  }
+
+  /* Disabled State */
+  &[aria-disabled="true"] {
+    cursor: default;
+    background-color: transparent;
+    color: color-mix(in srgb, var(--mat-sys-on-surface) 38%, transparent);
+    pointer-events: none;
+
+    &::before {
+      background-color: var(--mat-sys-on-surface);
+      opacity: 0.1;
+    }
+
+    .list-item-leading-slot,
+    .list-item-trailing-slot {
+      opacity: 0.38;
+    }
+
+    .list-item-content-slot .list-item-supporting-text,
+    .list-item-content-slot .list-item-overline {
+      opacity: 0.38;
+    }
+
+    /* Disabled + Selected */
+    &[aria-selected="true"] {
+      background-color: color-mix(in srgb, var(--mat-sys-on-surface) 38%, transparent);
+      color: color-mix(in srgb, var(--mat-sys-on-surface) 38%, transparent);
+    }
+  }
+}
