@@ -9,10 +9,10 @@ import {MatChipsModule} from '@angular/material/chips';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
-import {MatListModule} from '@angular/material/list';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSelectModule} from '@angular/material/select';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
+import {MatRippleModule} from '@angular/material/core';
 import {NgxEchartsDirective} from 'ngx-echarts';
 import {ExperimentReport, SelectionCycleResponse} from '../../models/experiment-report';
 import {AptaTraceConfiguration} from '../../models/aptatrace-configuration';
@@ -27,6 +27,7 @@ import {
   MatExpansionPanelHeader,
   MatExpansionPanelTitle
 } from '@angular/material/expansion';
+import {Listbox, Option} from '@angular/aria/listbox';
 
 type RankedMotifProfile = {
   rank: number;
@@ -45,7 +46,7 @@ type RankedMotifProfile = {
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    MatListModule,
+    MatRippleModule,
     MatProgressSpinnerModule,
     MatSelectModule,
     MatSlideToggle,
@@ -56,6 +57,8 @@ type RankedMotifProfile = {
     MatExpansionPanel,
     MatExpansionPanelHeader,
     MatExpansionPanelTitle,
+    Listbox,
+    Option,
   ],
   templateUrl: './motif-analysis-tab.component.html',
   styleUrl: './motif-analysis-tab.component.scss',
@@ -102,6 +105,8 @@ export class MotifAnalysisTabComponent {
 
   /** Tracks whether the motif analysis is running */
   readonly isSubmitting = signal(false);
+  /** Tracks which analysis is being deleted */
+  readonly deletingAnalysisId = signal<string | null>(null);
 
   /* Form: Select options */
   readonly maxRandomizedRegionSize = computed(() => {
@@ -351,6 +356,30 @@ export class MotifAnalysisTabComponent {
         next: () => this.analysesRes.reload(),
         error: (error) => {
           console.error('Failed to run AptaTRACE', error);
+        }
+      });
+  }
+
+  deleteAnalysis(analysisId: string): void {
+    const experimentId = this.experimentId();
+    if (!experimentId || !analysisId || this.deletingAnalysisId()) {
+      return;
+    }
+
+    this.deletingAnalysisId.set(analysisId);
+    this.motifsApi.deleteAnalysis(experimentId, analysisId)
+      .pipe(finalize(() => this.deletingAnalysisId.set(null)))
+      .subscribe({
+        next: () => {
+          if (this.selectedAnalysisId() === analysisId) {
+            this.selectedAnalysisId.set(null);
+            this.selectedMotifRank.set(null);
+            this.selectedAptamerRows.set([]);
+          }
+          this.analysesRes.reload();
+        },
+        error: (error) => {
+          console.error('Failed to delete motif analysis', error);
         }
       });
   }

@@ -8,7 +8,6 @@ import {MatDividerModule} from '@angular/material/divider';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatIconModule} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
-import {MatListModule} from '@angular/material/list';
 import {MatSelectModule} from '@angular/material/select';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {ExperimentReport} from '../../models/experiment-report';
@@ -30,6 +29,8 @@ import {ExperimentChartService} from '../../services/experiment-chart.service';
 import {MatSlideToggle} from '@angular/material/slide-toggle';
 import {ThemeService} from '../../services/theme.service';
 import {FormsModule} from '@angular/forms';
+import {Listbox, Option} from '@angular/aria/listbox';
+import {MatRipple} from '@angular/material/core';
 
 @Component({
   selector: 'app-aptamer-family-analysis-tab',
@@ -44,7 +45,6 @@ import {FormsModule} from '@angular/forms';
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    MatListModule,
     MatSelectModule,
     MatButtonToggleModule,
     FormField,
@@ -56,7 +56,10 @@ import {FormsModule} from '@angular/forms';
     MatExpansionPanelTitle,
     NgxEchartsDirective,
     MatSlideToggle,
-    FormsModule
+    FormsModule,
+    Listbox,
+    MatRipple,
+    Option
   ],
   templateUrl: './aptamer-family-analysis-tab.component.html',
   styleUrl: './aptamer-family-analysis-tab.component.scss',
@@ -107,6 +110,8 @@ export class AptamerFamilyAnalysisTab {
 
   /** Tracks whether the clustering analysis is running */
   readonly isSubmitting = signal(false);
+  /** Tracks which analysis is being deleted */
+  readonly deletingAnalysisId = signal<string | null>(null);
 
   /* Form: Select options */
   readonly randomizedRegionSizes = computed(() => {
@@ -358,6 +363,30 @@ export class AptamerFamilyAnalysisTab {
         next: () => this.clusterAnalysesRes.reload(),
         error: (error) => {
           console.error('Failed to run clustering', error);
+        }
+      });
+  }
+
+  deleteAnalysis(analysisId: string): void {
+    const experimentId = this.experimentId();
+    if (!experimentId || !analysisId || this.deletingAnalysisId()) {
+      return;
+    }
+
+    this.deletingAnalysisId.set(analysisId);
+    this.clustersApi.deleteAnalysis(experimentId, analysisId)
+      .pipe(finalize(() => this.deletingAnalysisId.set(null)))
+      .subscribe({
+        next: () => {
+          if (this.selectedAnalysisId() === analysisId) {
+            this.selectedAnalysisId.set(null);
+            this.selectedClusterId.set(NaN);
+            this.selectedAptamerRows.set([]);
+          }
+          this.clusterAnalysesRes.reload();
+        },
+        error: (error) => {
+          console.error('Failed to delete clustering analysis', error);
         }
       });
   }

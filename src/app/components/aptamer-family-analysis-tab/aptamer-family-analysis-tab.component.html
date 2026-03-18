@@ -62,20 +62,30 @@
     </mat-card-header>
 
     <mat-card-content class="no-padding">
-      <mat-selection-list [multiple]="false" hideSingleSelectionIndicator>
+      <div ngListbox [values]="[activeAnalysis()?.id]" class="m3-expressive-list">
         @for (analysis of sortedAnalyses(); track analysis.id) {
-          <mat-list-option
+          <div
+            ngOption
+            matRipple
             [value]="analysis.id"
-            [selected]="activeAnalysis()?.id === analysis.id"
             (click)="selectAnalysis(analysis.id)">
-            <mat-icon matListItemIcon>history</mat-icon>
-            <div matListItemTitle>{{analysis.id}}</div>
-            <div matListItemLine class="meta-line">{{ analysis.createdAt | date:'short' }}</div>
-          </mat-list-option>
+            <div class="list-item-content-slot">
+              <div>{{ analysis.id }}</div>
+              <div class="list-item-supporting-text">{{ analysis.createdAt | date:'short' }}</div>
+            </div>
+            <div class="list-item-trailing-slot">
+              <button
+                matIconButton
+                aria-label="Delete motif analysis"
+                (click)="$event.stopPropagation(); deleteAnalysis(analysis.id)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
         } @empty {
-          <div>No analyses found.</div>
+          <div class="state-block">No analyses found.</div>
         }
-      </mat-selection-list>
+      </div>
     </mat-card-content>
   </mat-card>
 

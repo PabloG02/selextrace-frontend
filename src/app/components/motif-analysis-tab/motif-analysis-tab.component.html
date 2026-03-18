@@ -42,21 +42,31 @@
     </mat-card-header>
 
     <mat-card-content class="no-padding">
-      <mat-selection-list [multiple]="false" hideSingleSelectionIndicator>
+      <div ngListbox [values]="[activeAnalysis()?.id]" class="m3-expressive-list">
         @for (analysis of sortedAnalyses(); track analysis.id) {
-          <mat-list-option
+          <div
+            ngOption
+            matRipple
             [value]="analysis.id"
-            [selected]="activeAnalysis()?.id === analysis.id"
             (click)="selectAnalysis(analysis.id)">
-            <mat-icon matListItemIcon>history</mat-icon>
-            <div matListItemTitle>{{ analysis.id }}</div>
-            <div matListItemLine>k={{ analysis.requestConfig.kmerLength }}, alpha={{ analysis.requestConfig.alpha }}</div>
-            <div matListItemLine>{{ formatAnalysisMeta(analysis) }}</div>
-          </mat-list-option>
+            <div class="list-item-content-slot">
+              <div>{{ analysis.id }}</div>
+              <div class="list-item-supporting-text">k={{ analysis.requestConfig.kmerLength }}, alpha={{ analysis.requestConfig.alpha }}</div>
+              <div class="list-item-supporting-text">{{ formatAnalysisMeta(analysis) }}</div>
+            </div>
+            <div class="list-item-trailing-slot">
+              <button
+                matIconButton
+                aria-label="Delete motif analysis"
+                (click)="$event.stopPropagation(); deleteAnalysis(analysis.id)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
         } @empty {
           <div class="state-block">No motif analyses found.</div>
         }
-      </mat-selection-list>
+      </div>
     </mat-card-content>
   </mat-card>
 
@@ -73,20 +83,23 @@
     </mat-card-header>
 
     <mat-card-content class="no-padding">
-      <mat-selection-list [multiple]="false" hideSingleSelectionIndicator>
+      <div ngListbox [values]="[activeMotif()?.rank]" class="m3-expressive-list">
         @for (motif of rankedProfiles(); track motif.rank) {
-          <mat-list-option
+          <div
+            ngOption
+            matRipple
             [value]="motif.rank"
-            [selected]="activeMotif()?.rank === motif.rank"
             (click)="selectMotif(motif.rank)">
-            <div matListItemTitle>Motif {{ motif.rank }} {{ motif.profile.consensus || motif.profile.seed }}</div>
-            <div matListItemLine>{{ motif.profile.kmers.length }} k-mers</div>
-            <div matListItemLine>P-value {{ motif.profile.seedPValue | number: '1.2-4' }}</div>
-          </mat-list-option>
+            <div class="list-item-content-slot">
+              <div>Motif {{ motif.rank }} {{ motif.profile.consensus || motif.profile.seed }}</div>
+              <div class="list-item-supporting-text">{{ motif.profile.kmers.length }} k-mers</div>
+              <div class="list-item-supporting-text">P-value {{ motif.profile.seedPValue | number: '1.2-4' }}</div>
+            </div>
+          </div>
         } @empty {
           <div class="state-block">No motifs available for the selected run.</div>
         }
-      </mat-selection-list>
+      </div>
     </mat-card-content>
   </mat-card>
 

@@ -29,4 +29,10 @@ export class MotifsApiService {
       payload
     );
   }
+
+  deleteAnalysis(experimentId: string, analysisId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.baseUrl()}/${experimentId}/motifs/${analysisId}`
+    );
+  }
 }
