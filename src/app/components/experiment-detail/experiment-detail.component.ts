@@ -9,7 +9,7 @@ import {MatTabsModule} from '@angular/material/tabs';
 import {MatListModule} from '@angular/material/list';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatSnackBar, MatSnackBarModule} from '@angular/material/snack-bar';
-import {take} from 'rxjs';
+import {exhaustMap, filter} from 'rxjs';
 import {ExperimentsStore} from '../../stores/experiments.store';
 import {ConfirmDialogComponent} from '../shared/confirm-dialog/confirm-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
@@ -55,7 +55,6 @@ export class ExperimentDetailComponent {
   private readonly downloadService = inject(DownloadService);
 
   readonly activeTab = signal(0);
-  readonly isLoading = signal(false);
 
   readonly experimentId = input.required<string>();
   readonly experimentReportRes = this.apiService.getExperimentReportRes(this.experimentId);
@@ -92,9 +91,8 @@ export class ExperimentDetailComponent {
 
   deleteExperiment(): void {
     const experiment = this.experimentReport();
-    if (!experiment) {
-      return;
-    }
+    if (!experiment) return;
+
     this.dialog
       .open(ConfirmDialogComponent, {
         data: {
@@ -106,12 +104,20 @@ export class ExperimentDetailComponent {
         autoFocus: false
       })
       .afterClosed()
-      .pipe(take(1))
-      .subscribe((confirmed) => {
-        if (confirmed) {
-          this.experimentsStore.deleteExperiment(this.experimentId());
+      .pipe(
+        // 1. Only proceed if the user confirmed
+        filter(Boolean),
+        // 2. Switch to the delete observable, ignoring subsequent clicks until it finishes
+        exhaustMap(() => this.experimentsStore.deleteExperiment(this.experimentId()))
+      )
+      .subscribe({
+        next: () => {
           this.snackBar.open('Experiment deleted', 'Dismiss', { duration: 2500 });
           this.router.navigate(['/experiments']);
+        },
+        error: (err) => {
+          console.error('Failed to delete experiment', err);
+          this.snackBar.open('Failed to delete experiment', 'Dismiss', { duration: 3000 });
         }
       });
   }

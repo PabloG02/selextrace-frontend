@@ -12,7 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { DatePipe, NgOptimizedImage, TitleCasePipe } from '@angular/common';
-import { take } from 'rxjs';
+import {exhaustMap, filter, Observable} from 'rxjs';
 import {DateRangeFilter, ExperimentsStore, SortOption} from '../../stores/experiments.store';
 import { ExperimentStatus } from '../../models/experiment';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
@@ -115,15 +115,21 @@ export class ExperimentsListComponent {
   /** Delete all selected experiments after confirmation */
   deleteSelected(): void {
     const ids = Array.from(this.selectedIds());
-    if (!ids.length) {
-      return;
-    }
-    this.confirmDeletion(ids.length === 1 ? 'Delete experiment?' : `Delete ${ids.length} experiments?`,
-      'Deleted experiments cannot be recovered.',
-      () => {
-        this.experimentsStore.deleteExperiments(ids);
-        this.selectedIds.set(new Set());
-        this.snackBar.open('Experiments deleted', 'Dismiss', { duration: 3000 });
+    if (!ids.length) return;
+
+    const title = ids.length === 1 ? 'Delete experiment?' : `Delete ${ids.length} experiments?`;
+
+    this.confirmDeletion(title, 'Deleted experiments cannot be recovered.')
+      .pipe(exhaustMap(() => this.experimentsStore.deleteExperiments(ids)))
+      .subscribe({
+        next: () => {
+          this.clearSelection();
+          this.snackBar.open('Experiments deleted', 'Dismiss', { duration: 3000 });
+        },
+        error: (err) => {
+          console.error('Failed to delete selected experiments', err);
+          this.snackBar.open('Failed to delete selected experiments', 'Dismiss', { duration: 3500 });
+        },
       });
   }
 
@@ -140,17 +146,23 @@ export class ExperimentsListComponent {
    * @param experiment - The experiment to delete
    */
   deleteExperiment(experiment: ExperimentSummary): void {
-    this.confirmDeletion(
-      'Delete experiment?',
-      `This will permanently delete "${experiment.name}"`,
-      () => {
-        this.experimentsStore.deleteExperiment(experiment.id);
-        const updated = new Set(this.selectedIds());
-        updated.delete(experiment.id);
-        this.selectedIds.set(updated);
-        this.snackBar.open('Experiment deleted', 'Dismiss', { duration: 3000 });
-      },
-    );
+    this.confirmDeletion('Delete experiment?', `This will permanently delete "${experiment.name}"`)
+      .pipe(exhaustMap(() => this.experimentsStore.deleteExperiment(experiment.id)))
+      .subscribe({
+        next: () => {
+          // Remove the deleted ID from the selection set if it exists
+          this.selectedIds.update((current) => {
+            const updated = new Set(current);
+            updated.delete(experiment.id);
+            return updated;
+          });
+          this.snackBar.open('Experiment deleted', 'Dismiss', { duration: 3000 });
+        },
+        error: (err) => {
+          console.error('Failed to delete experiment', err);
+          this.snackBar.open('Failed to delete experiment', 'Dismiss', { duration: 3000 });
+        }
+      });
   }
 
   /**
@@ -168,13 +180,13 @@ export class ExperimentsListComponent {
   }
 
   /**
-   * Show a confirmation dialog before deleting
+   * Shows a deletion dialog and returns an observable that emits
+   * only if the user confirms.
    * @param title - The dialog title
    * @param message - The dialog message
-   * @param onConfirm - Callback to execute when confirmed
    */
-  private confirmDeletion(title: string, message: string, onConfirm: () => void): void {
-    this.dialog
+  private confirmDeletion(title: string, message: string): Observable<boolean> {
+    return this.dialog
       .open(ConfirmDialogComponent, {
         data: {
           title,
@@ -185,11 +197,6 @@ export class ExperimentsListComponent {
         autoFocus: false
       })
       .afterClosed()
-      .pipe(take(1))
-      .subscribe((confirmed) => {
-        if (confirmed) {
-          onConfirm();
-        }
-      });
+      .pipe(filter(Boolean));
   }
 }

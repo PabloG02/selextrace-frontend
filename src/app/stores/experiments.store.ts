@@ -1,5 +1,5 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
-import {forkJoin, Observable, tap} from 'rxjs';
+import {forkJoin, map, Observable, of, tap} from 'rxjs';
 import {ExperimentsApiService} from '../services/experiments-api.service';
 import {CreateExperimentDto} from '../models/create-experiment-dto';
 import {ExperimentReport} from '../models/experiment-report';
@@ -47,36 +47,22 @@ export class ExperimentsStore {
     return result;
   });
 
-  /**
-   * Deletes a single experiment and refreshes the list.
-   */
-  deleteExperiment(id: string): void {
-    this.apiService.deleteExperiment(id).subscribe({
-      next: () => {
-        this.experiments.reload();
-      },
-      error: (err) => {
-        console.error('Failed to delete experiment', err);
-      }
-    });
+  /** Deletes a single experiment and refreshes the list. */
+  deleteExperiment(id: string): Observable<void> {
+    return this.apiService.deleteExperiment(id).pipe(
+      tap(() => this.experiments.reload())
+    );
   }
 
-  /**
-   * Deletes multiple experiments in parallel and refreshes the list once.
-   */
-  deleteExperiments(ids: string[]): void {
-    if (ids.length === 0) return;
+  /** Deletes multiple experiments in parallel and refreshes the list once. */
+  deleteExperiments(ids: string[]): Observable<void> {
+    if (ids.length === 0) return of(void 0);
 
     const tasks$ = ids.map(id => this.apiService.deleteExperiment(id));
-    forkJoin(tasks$).subscribe({
-      next: () => {
-        this.experiments.reload();
-      },
-      error: (err) => {
-        console.error('Failed to delete some experiments', err);
-        this.experiments.reload();
-      }
-    });
+    return forkJoin(tasks$).pipe(
+      tap(() => this.experiments.reload()),
+      map(() => void 0)
+    );
   }
 
   /**
