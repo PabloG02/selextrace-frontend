@@ -1,18 +1,23 @@
 @use '@angular/material' as mat;
 
-.control-grid {
+.analysis-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* History card */
+/* AptaCluster form dialog */
+.dialog-control-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
   gap: 16px 12px;
   align-items: center;
 }
 
-.control-grid button {
-  grid-column: span 3;
-}
-
-.content-grid {
+.workspace-grid {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   align-items: start;
 }
@@ -21,16 +26,25 @@
   padding: 0;
 }
 
-mat-accordion {
-  flex: 1;
-}
-
 .chart-container {
   height: 260px;
 }
 
-.cluster-card-actions {
+.cluster-enrichment-controls {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.state-block {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+}
+
+.state-block.compact {
+  min-height: 72px;
 }

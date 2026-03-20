@@ -1,11 +1,19 @@
-.control-grid {
+.analysis-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* History card */
+/* AptaTRACE form dialog */
+.dialog-control-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
   gap: 16px 12px;
   align-items: center;
 }
 
-.control-grid ::ng-deep mat-slide-toggle > .mdc-form-field.mdc-form-field--align-end {
+.dialog-control-grid ::ng-deep mat-slide-toggle > .mdc-form-field.mdc-form-field--align-end {
   display: flex;
   min-height: 56px;
   padding: 8px 16px;
@@ -17,21 +25,11 @@
   }
 }
 
-.control-grid button {
-  grid-column: span 3;
-}
-
-.content-grid {
+.workspace-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   align-items: start;
-}
-
-.aptamer-card-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 .state-block {

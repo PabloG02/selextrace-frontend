@@ -102,3 +102,9 @@ body {
     color: var(--mat-sys-on-surface-variant);
   }
 }
+
+.mat-card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}

@@ -1,11 +1,252 @@
-<mat-card class="control-card" appearance="outlined">
-  <mat-card-header>
-    <mat-card-title>Clustering Options (AptaCluster)</mat-card-title>
-    <mat-card-subtitle>To cluster or re-cluster the pool, adjust the cluster option parameters and press "Run AptaCluster" below.</mat-card-subtitle>
-  </mat-card-header>
+<div class="analysis-layout">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title-group>
+        <mat-card-title>History</mat-card-title>
+        <mat-card-subtitle>Review previous AptaCluster runs or start a new clustering analysis.</mat-card-subtitle>
+        <div class="mat-card-header-actions">
+          <button matButton="filled" (click)="openClusteringDialog()">
+            <mat-icon>play_arrow</mat-icon>
+            Run AptaCluster
+          </button>
+        </div>
+      </mat-card-title-group>
+    </mat-card-header>
 
-  <mat-card-content>
-    <div class="control-grid">
+    <mat-card-content class="no-padding">
+      <div ngListbox [values]="[activeAnalysis()?.id]" class="m3-expressive-list">
+        @for (analysis of sortedAnalyses(); track analysis.id) {
+          <div
+            ngOption
+            matRipple
+            [value]="analysis.id"
+            (click)="selectAnalysis(analysis.id)">
+            <div class="list-item-content-slot">
+              <div>{{ analysis.id }}</div>
+              <div class="list-item-supporting-text">{{ analysis.createdAt | date:'short' }}</div>
+            </div>
+            <div class="list-item-trailing-slot">
+              <button
+                matIconButton
+                aria-label="Delete clustering analysis"
+                (click)="$event.stopPropagation(); deleteAnalysis(analysis.id)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="state-block">No analyses found.</div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="workspace-grid">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title-group>
+          <mat-card-title>Clusters</mat-card-title>
+          <mat-card-subtitle>
+            @if (activeAnalysis()) {
+              {{ clusters().length }} clusters in the selected run
+            } @else {
+              Select a run from history to inspect its clusters.
+            }
+          </mat-card-subtitle>
+          <div class="mat-card-header-actions">
+            <mat-form-field appearance="outline">
+              <mat-label>Reference cycle</mat-label>
+              <mat-select [formField]="clusterTableForm.referenceCycleRound">
+                @for (cycle of experimentReport().selectionCycles; track cycle.name) {
+                  <mat-option [value]="cycle.round">{{ cycle.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </mat-card-title-group>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (activeAnalysis()) {
+          <app-cluster-table
+            [rows]="clusters()"
+            [selectedClusterId]="selectedClusterId()"
+            (clusterSelected)="selectCluster($event)">
+          </app-cluster-table>
+        } @else {
+          <div class="state-block">Run or select an analysis to populate the cluster list.</div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title-group>
+          <mat-card-title>Cluster Aptamers</mat-card-title>
+          <mat-card-subtitle>
+            @if (selectedCluster()) {
+              Cluster {{ selectedCluster()!.clusterId }}
+            } @else {
+              Select a cluster to inspect its aptamers.
+            }
+          </mat-card-subtitle>
+          <div class="mat-card-header-actions">
+            <mat-slide-toggle [formField]="sequenceTableForm.showPrimers" labelPosition="before">
+              Show Primers
+            </mat-slide-toggle>
+            <mat-button-toggle-group
+              aria-label="Count format"
+              [formField]="sequenceTableForm.useCPM"
+              hideSingleSelectionIndicator>
+              <mat-button-toggle [value]="true">CPM</mat-button-toggle>
+              <mat-button-toggle [value]="false">Raw Counts</mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+        </mat-card-title-group>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (selectedCluster()) {
+          <app-aptamer-table
+            [rows]="aptamersInSelectedCluster()"
+            [selectionCycles]="experimentReport().selectionCycles"
+            [showPrimers]="sequenceTableForm.showPrimers().value()"
+            [useCPM]="sequenceTableForm.useCPM().value()"
+            [(selectedRows)]="selectedAptamerRows"
+            [pageSize]="10">
+          </app-aptamer-table>
+        } @else {
+          <div class="state-block">Choose a cluster to populate the aptamer table.</div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-accordion multi>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Cluster Sequence Logo</mat-panel-title>
+        </mat-expansion-panel-header>
+        @if (aptamersInSelectedCluster().length > 0) {
+          <div
+            echarts
+            [options]="clusterSequenceLogoChartOptions()"
+            class="chart-container"
+            [autoResize]="true"
+            [theme]="themeService.echartsTheme()">
+          </div>
+        } @else {
+          <div class="state-block compact">Select a cluster to view the sequence logo.</div>
+        }
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Mutation Rates from Seed Sequence</mat-panel-title>
+        </mat-expansion-panel-header>
+        @if (aptamersInSelectedCluster().length > 0) {
+          <div
+            echarts
+            [options]="clusterMutationRatesChartOptions()"
+            class="chart-container"
+            [autoResize]="true"
+            [theme]="themeService.echartsTheme()">
+          </div>
+        } @else {
+          <div class="state-block compact">Select a cluster to view mutation rates.</div>
+        }
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Cardinality Chart (Selected Sequences)</mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-button-toggle-group
+          aria-label="Count format"
+          hideSingleSelectionIndicator
+          [(ngModel)]="selectedAptamerCardinalityMetric">
+          <mat-button-toggle value="enrichments">Enrichments</mat-button-toggle>
+          <mat-button-toggle value="counts">Counts</mat-button-toggle>
+        </mat-button-toggle-group>
+        @if (selectedAptamerRows().length > 0) {
+          <div
+            echarts
+            [options]="selectedAptamerCardinalityChartOptions()"
+            class="chart-container"
+            [autoResize]="true"
+            [theme]="themeService.echartsTheme()">
+          </div>
+        } @else {
+          <div class="state-block compact">Select one or more aptamers to view the cardinality chart.</div>
+        }
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Cluster Cardinality Chart</mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-button-toggle-group
+          aria-label="Cluster cardinality metric"
+          hideSingleSelectionIndicator
+          [(ngModel)]="clusterCardinalityMetric">
+          <mat-button-toggle value="sizes">Sizes</mat-button-toggle>
+          <mat-button-toggle value="diversities">Diversities</mat-button-toggle>
+        </mat-button-toggle-group>
+        @if (aptamersInSelectedCluster().length > 0) {
+          <div
+            echarts
+            [options]="clusterCardinalityChartOptions()"
+            class="chart-container"
+            [autoResize]="true"
+            [theme]="themeService.echartsTheme()">
+          </div>
+        } @else {
+          <div class="state-block compact">Select a cluster to view the cardinality chart.</div>
+        }
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Cluster Enrichment</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="cluster-enrichment-controls">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Compare to cycle</mat-label>
+            <mat-select [(ngModel)]="clusterEnrichmentCompareRound">
+              @for (cycle of experimentReport().selectionCycles; track cycle.name) {
+                <mat-option [value]="cycle.round">{{ cycle.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-button-toggle-group
+            aria-label="Cluster enrichment scale"
+            hideSingleSelectionIndicator
+            [(ngModel)]="clusterEnrichmentScale">
+            <mat-button-toggle value="linear">Linear</mat-button-toggle>
+            <mat-button-toggle value="logarithmic">Logarithmic</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+        @if (aptamersInSelectedCluster().length > 0) {
+          <div
+            echarts
+            [options]="clusterEnrichmentChartOptions()"
+            class="chart-container"
+            [autoResize]="true"
+            [theme]="themeService.echartsTheme()">
+          </div>
+        } @else {
+          <div class="state-block compact">Select a cluster to view enrichment.</div>
+        }
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</div>
+
+<ng-template #clusteringDialog>
+  <h2 mat-dialog-title>Clustering Options (AptaCluster)</h2>
+  <mat-dialog-content>
+    <p>Adjust the clustering parameters for this experiment and launch a new AptaCluster run.</p>
+
+    <div class="dialog-control-grid">
       <mat-form-field appearance="outline">
         <mat-label>Randomized Region Size</mat-label>
         <mat-select [formField]="clusteringForm.randomizedRegionSize">
@@ -47,223 +288,19 @@
         <mat-label>Kmer Cutoff Iterations</mat-label>
         <input matInput type="number" [formField]="clusteringForm.kmerCutoffIterations" />
       </mat-form-field>
-
-      <button matButton="outlined" (click)="runClustering()" [disabled]="clusteringForm().invalid() || isSubmitting()">
-        Run clustering
-      </button>
     </div>
-  </mat-card-content>
-</mat-card>
+  </mat-dialog-content>
 
-<div class="content-grid">
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>History</mat-card-title>
-    </mat-card-header>
-
-    <mat-card-content class="no-padding">
-      <div ngListbox [values]="[activeAnalysis()?.id]" class="m3-expressive-list">
-        @for (analysis of sortedAnalyses(); track analysis.id) {
-          <div
-            ngOption
-            matRipple
-            [value]="analysis.id"
-            (click)="selectAnalysis(analysis.id)">
-            <div class="list-item-content-slot">
-              <div>{{ analysis.id }}</div>
-              <div class="list-item-supporting-text">{{ analysis.createdAt | date:'short' }}</div>
-            </div>
-            <div class="list-item-trailing-slot">
-              <button
-                matIconButton
-                aria-label="Delete motif analysis"
-                (click)="$event.stopPropagation(); deleteAnalysis(analysis.id)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-          </div>
-        } @empty {
-          <div class="state-block">No analyses found.</div>
-        }
-      </div>
-    </mat-card-content>
-  </mat-card>
-
-  <mat-card appearance="outlined">
-    <mat-card-header>
-      <mat-card-title-group>
-        <mat-card-title>Clusters</mat-card-title>
-        <div class="cluster-card-actions">
-          <mat-form-field appearance="outline">
-            <mat-label>Reference cycle</mat-label>
-            <mat-select [formField]="clusterTableForm.referenceCycleRound">
-              @for (cycle of experimentReport().selectionCycles; track cycle.name) {
-                <mat-option [value]="cycle.round">{{ cycle.name }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </mat-card-title-group>
-    </mat-card-header>
-
-    <mat-card-content>
-      <app-cluster-table
-        [rows]="clusters()"
-        [selectedClusterId]="selectedClusterId()"
-        (clusterSelected)="selectCluster($event)">
-      </app-cluster-table>
-    </mat-card-content>
-  </mat-card>
-
-  @if (selectedCluster()) {
-    <mat-card appearance="outlined">
-      <mat-card-header>
-        <mat-card-title-group>
-          <mat-card-title>Cluster Aptamers</mat-card-title>
-          <mat-card-subtitle>Cluster {{ selectedCluster()!.clusterId }}</mat-card-subtitle>
-          <div class="cluster-card-actions">
-            <mat-slide-toggle [formField]="sequenceTableForm.showPrimers" labelPosition="before">
-              Show Primers
-            </mat-slide-toggle>
-            <mat-button-toggle-group
-              aria-label="Count format"
-              [formField]="sequenceTableForm.useCPM"
-              hideSingleSelectionIndicator>
-              <mat-button-toggle [value]="true">CPM</mat-button-toggle>
-              <mat-button-toggle [value]="false">Raw Counts</mat-button-toggle>
-            </mat-button-toggle-group>
-          </div>
-        </mat-card-title-group>
-      </mat-card-header>
-
-      <mat-card-content>
-        <app-aptamer-table
-          [rows]="aptamersInSelectedCluster()"
-          [selectionCycles]="experimentReport().selectionCycles"
-          [showPrimers]="sequenceTableForm.showPrimers().value()"
-          [useCPM]="sequenceTableForm.useCPM().value()"
-          [(selectedRows)]="selectedAptamerRows"
-          [pageSize]="10">
-        </app-aptamer-table>
-      </mat-card-content>
-    </mat-card>
-  }
-
-  <mat-accordion multi>
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>Cluster Sequence Logo</mat-panel-title>
-      </mat-expansion-panel-header>
-      @if (aptamersInSelectedCluster().length > 0) {
-        <div
-          echarts
-          [options]="clusterSequenceLogoChartOptions()"
-          class="chart-container"
-          [autoResize]="true"
-          [theme]="themeService.echartsTheme()">
-        </div>
+  <mat-dialog-actions align="end">
+    <button matButton="text" type="button" mat-dialog-close>
+      Cancel
+    </button>
+    <button matButton="filled" type="button" (click)="runClustering()" [disabled]="clusteringForm().invalid() || isSubmitting()">
+      @if (isSubmitting()) {
+        Running AptaCluster...
       } @else {
-        <div>Select a cluster to view the sequence logo.</div>
+        Run AptaCluster
       }
-    </mat-expansion-panel>
-
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>Mutation Rates from Seed Sequence</mat-panel-title>
-      </mat-expansion-panel-header>
-      @if (aptamersInSelectedCluster().length > 0) {
-        <div
-          echarts
-          [options]="clusterMutationRatesChartOptions()"
-          class="chart-container"
-          [autoResize]="true"
-          [theme]="themeService.echartsTheme()">
-        </div>
-      } @else {
-        <div>Select a cluster to view mutation rates.</div>
-      }
-    </mat-expansion-panel>
-
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>Cardinality Chart (Selected Sequences)</mat-panel-title>
-      </mat-expansion-panel-header>
-      <mat-button-toggle-group
-        aria-label="Count format"
-        hideSingleSelectionIndicator
-        [(ngModel)]="selectedAptamerCardinalityMetric">
-        <mat-button-toggle value="enrichments">Enrichments</mat-button-toggle>
-        <mat-button-toggle value="counts">Counts</mat-button-toggle>
-      </mat-button-toggle-group>
-      @if (selectedAptamerRows().length > 0) {
-        <div
-          echarts
-          [options]="selectedAptamerCardinalityChartOptions()"
-          class="chart-container"
-          [autoResize]="true"
-          [theme]="themeService.echartsTheme()">
-        </div>
-      } @else {
-        <div>Select one or more aptamers to view the cardinality chart.</div>
-      }
-    </mat-expansion-panel>
-
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>Cluster Cardinality Chart</mat-panel-title>
-      </mat-expansion-panel-header>
-      <mat-button-toggle-group
-        aria-label="Cluster cardinality metric"
-        hideSingleSelectionIndicator
-        [(ngModel)]="clusterCardinalityMetric">
-        <mat-button-toggle value="sizes">Sizes</mat-button-toggle>
-        <mat-button-toggle value="diversities">Diversities</mat-button-toggle>
-      </mat-button-toggle-group>
-      @if (aptamersInSelectedCluster().length > 0) {
-        <div
-          echarts
-          [options]="clusterCardinalityChartOptions()"
-          class="chart-container"
-          [autoResize]="true"
-          [theme]="themeService.echartsTheme()">
-        </div>
-      } @else {
-        <div>Select a cluster to view the cardinality chart.</div>
-      }
-    </mat-expansion-panel>
-
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>Cluster Enrichment</mat-panel-title>
-      </mat-expansion-panel-header>
-      <div class="cluster-enrichment-controls">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Compare to cycle</mat-label>
-          <mat-select [(ngModel)]="clusterEnrichmentCompareRound">
-            @for (cycle of experimentReport().selectionCycles; track cycle.name) {
-              <mat-option [value]="cycle.round">{{ cycle.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-button-toggle-group
-          aria-label="Cluster enrichment scale"
-          hideSingleSelectionIndicator
-          [(ngModel)]="clusterEnrichmentScale">
-          <mat-button-toggle value="linear">Linear</mat-button-toggle>
-          <mat-button-toggle value="logarithmic">Logarithmic</mat-button-toggle>
-        </mat-button-toggle-group>
-      </div>
-      @if (aptamersInSelectedCluster().length > 0) {
-        <div
-          echarts
-          [options]="clusterEnrichmentChartOptions()"
-          class="chart-container"
-          [autoResize]="true"
-          [theme]="themeService.echartsTheme()">
-        </div>
-      } @else {
-        <div>Select a cluster to view enrichment.</div>
-      }
-    </mat-expansion-panel>
-  </mat-accordion>
-</div>
+    </button>
+  </mat-dialog-actions>
+</ng-template>

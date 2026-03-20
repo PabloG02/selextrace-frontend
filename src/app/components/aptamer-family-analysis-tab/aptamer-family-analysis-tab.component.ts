@@ -1,4 +1,15 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, input, linkedSignal, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  linkedSignal,
+  signal,
+  TemplateRef,
+  viewChild
+} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
@@ -31,6 +42,7 @@ import {ThemeService} from '../../services/theme.service';
 import {FormsModule} from '@angular/forms';
 import {Listbox, Option} from '@angular/aria/listbox';
 import {MatRipple} from '@angular/material/core';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-aptamer-family-analysis-tab',
@@ -59,7 +71,8 @@ import {MatRipple} from '@angular/material/core';
     FormsModule,
     Listbox,
     MatRipple,
-    Option
+    Option,
+    MatDialogModule
   ],
   templateUrl: './aptamer-family-analysis-tab.component.html',
   styleUrl: './aptamer-family-analysis-tab.component.scss',
@@ -68,16 +81,19 @@ export class AptamerFamilyAnalysisTab {
   readonly themeService = inject(ThemeService);
   private readonly clustersApi = inject(ClustersApiService);
   private readonly chartService = inject(ExperimentChartService);
+  private readonly dialog = inject(MatDialog);
 
   /* Inputs */
   readonly experimentId = input.required<string>();
   readonly experimentReport = input.required<ExperimentReport>();
+  /* View Queries */
+  readonly clusteringDialog = viewChild.required<TemplateRef<void>>('clusteringDialog');
 
   /* Resources */
   /** Resource containing all cluster analyses for the current experiment */
   readonly clusterAnalysesRes = this.clustersApi.getAnalysesRes(this.experimentId);
 
-  /* Form State (AptaCluster Params)  */
+  /* Form State (AptaCluster Params) */
   readonly clusteringFormModel = signal({
     randomizedRegionSize: 0,
     localitySensitiveHashingDimensions: NaN,
@@ -360,7 +376,12 @@ export class AptamerFamilyAnalysisTab {
     this.clustersApi.createAnalysis(experimentId, payload)
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
-        next: () => this.clusterAnalysesRes.reload(),
+        next: () => {
+          this.selectedAnalysisId.set(null);
+          this.selectedClusterId.set(NaN);
+          this.selectedAptamerRows.set([]);
+          this.clusterAnalysesRes.reload();
+        },
         error: (error) => {
           console.error('Failed to run clustering', error);
         }
@@ -389,5 +410,13 @@ export class AptamerFamilyAnalysisTab {
           console.error('Failed to delete clustering analysis', error);
         }
       });
+  }
+
+  openClusteringDialog(): void {
+    this.dialog.open(this.clusteringDialog(), {
+      autoFocus: false,
+      width: '720px',
+      maxWidth: 'calc(100vw - 32px)'
+    });
   }
 }

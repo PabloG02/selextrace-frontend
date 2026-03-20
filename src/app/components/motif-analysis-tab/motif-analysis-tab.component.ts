@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, input, linkedSignal, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  TemplateRef,
+  viewChild
+} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {finalize} from 'rxjs';
 import {form, FormField, min, required} from '@angular/forms/signals';
@@ -28,6 +38,7 @@ import {
   MatExpansionPanelTitle
 } from '@angular/material/expansion';
 import {Listbox, Option} from '@angular/aria/listbox';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
 type RankedMotifProfile = {
   rank: number;
@@ -59,6 +70,7 @@ type RankedMotifProfile = {
     MatExpansionPanelTitle,
     Listbox,
     Option,
+    MatDialogModule,
   ],
   templateUrl: './motif-analysis-tab.component.html',
   styleUrl: './motif-analysis-tab.component.scss',
@@ -67,10 +79,13 @@ export class MotifAnalysisTabComponent {
   readonly themeService = inject(ThemeService);
   private readonly motifsApi = inject(MotifsApiService);
   private readonly chartService = inject(ExperimentChartService);
+  private readonly dialog = inject(MatDialog);
 
   /* Inputs */
   readonly experimentId = input.required<string>();
   readonly experimentReport = input.required<ExperimentReport>();
+  /* View Queries */
+  readonly motifDialog = viewChild.required<TemplateRef<void>>('motifDialog');
 
   /* Resources */
   /** Resource containing all motif analyses for the current experiment */
@@ -353,7 +368,12 @@ export class MotifAnalysisTabComponent {
     this.motifsApi.createAnalysis(experimentId, payload)
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
-        next: () => this.analysesRes.reload(),
+        next: () => {
+          this.selectedAnalysisId.set(null);
+          this.selectedMotifRank.set(null);
+          this.selectedAptamerRows.set([]);
+          this.analysesRes.reload();
+        },
         error: (error) => {
           console.error('Failed to run AptaTRACE', error);
         }
@@ -382,6 +402,12 @@ export class MotifAnalysisTabComponent {
           console.error('Failed to delete motif analysis', error);
         }
       });
+  }
+
+  openAptaTraceDialog(): void {
+    this.dialog.open(this.motifDialog(), {
+      autoFocus: false
+    });
   }
 
   formatAnalysisMeta(analysis: MotifAnalysis) {
