@@ -57,19 +57,6 @@ mat-card-header {
   padding: 16px;
 }
 
-.avatar {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 0;
-  border-radius: var(--mat-sys-corner-medium);
-  background: var(--mat-sys-primary-container);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  color: var(--mat-sys-on-primary-container);
-}
-
 mat-card-content {
   flex: 1;
 }

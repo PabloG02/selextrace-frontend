@@ -89,6 +89,26 @@ body {
   font-family: "Geist Mono", monospace;
 }
 
+[mat-card-avatar].text-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 0;
+  border-radius: var(--mat-sys-corner-medium);
+  background: var(--mat-sys-primary-container);
+  font: var(--mat-sys-title-medium);
+  line-height: normal;
+  font-weight: 600;
+  color: var(--mat-sys-on-primary-container);
+
+  &.selected {
+    background: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
+  }
+}
+
 .title-group {
   h1 {
     margin: 0;

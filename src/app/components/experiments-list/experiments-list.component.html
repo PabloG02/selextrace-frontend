@@ -67,6 +67,8 @@
 @if (filteredExperiments().length) {
   <section class="experiment-grid" role="list" aria-label="Experiments">
     @for (experiment of filteredExperiments(); track experiment.id) {
+      @let isSelected = selectedIds().has(experiment.id);
+
       <mat-card
         appearance="outlined"
         class="experiment-card"
@@ -77,8 +79,8 @@
         [class.selected]="selectedIds().has(experiment.id)"
       >
         <mat-card-header>
-          <div mat-card-avatar class="avatar">
-            @if (selectedIds().has(experiment.id)) {
+          <div mat-card-avatar class="text-avatar" [class.selected]="isSelected">
+            @if (isSelected) {
               <mat-icon aria-hidden="true">check</mat-icon>
             } @else {
               {{ avatarInitials(experiment.name) }}
