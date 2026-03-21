@@ -28,6 +28,10 @@ html {
     typography: Geist,
     density: 0,
   ));
+
+  @include mat.table-overrides((
+    row-item-outline-color: var(--mat-sys-outline-variant),
+  ));
 }
 
 // Include M3 Expressive emphasized type styles
