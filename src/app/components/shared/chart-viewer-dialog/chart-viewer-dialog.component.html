@@ -1,0 +1,77 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+
+<mat-dialog-content>
+  <div #previewElement class="preview-frame">
+    <div
+      echarts
+      [options]="data.options"
+      [autoResize]="true"
+      [theme]="themeService.echartsTheme()"
+      class="chart-preview"
+      [attr.aria-label]="data.title">
+    </div>
+  </div>
+  <p class="hint">
+    Resize this dialog from the bottom-right corner when you need more room for dense data.
+  </p>
+
+  <section class="export-grid" aria-label="Export settings">
+    <mat-form-field appearance="outline">
+      <mat-label>Format</mat-label>
+      <mat-select [value]="exportFormat()" (selectionChange)="updateFormat($event.value)">
+        <mat-option value="png">PNG</mat-option>
+        <mat-option value="svg">SVG</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Aspect ratio</mat-label>
+      <mat-select [value]="aspectRatioPreset()" (selectionChange)="updateAspectRatioPreset($event.value)">
+        @for (option of aspectRatioOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-slide-toggle
+      [checked]="lockAspectRatio()"
+      (change)="updateLockAspectRatio($event.checked)"
+      aria-label="Lock export aspect ratio">
+      Lock aspect ratio
+    </mat-slide-toggle>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Width</mat-label>
+      <input
+        matInput
+        step="1"
+        type="number"
+        [value]="exportWidth()"
+        (input)="updateWidth($any($event.target).value)"
+        aria-describedby="chart-export-size-summary" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Height</mat-label>
+      <input
+        matInput
+        step="1"
+        type="number"
+        [value]="exportHeight()"
+        (input)="updateHeight($any($event.target).value)"
+        aria-describedby="chart-export-size-summary" />
+    </mat-form-field>
+  </section>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button matButton="text" type="button" mat-dialog-close>Close</button>
+  <button matButton="filled" type="button" (click)="exportChart()" [disabled]="isExporting()">
+    <mat-icon>download</mat-icon>
+    @if (isExporting()) {
+      Exporting...
+    } @else {
+      Export {{ exportFormat().toUpperCase() }}
+    }
+  </button>
+</mat-dialog-actions>

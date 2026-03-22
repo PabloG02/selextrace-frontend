@@ -182,13 +182,19 @@
           <mat-panel-title>Motif Sequence Logo</mat-panel-title>
         </mat-expansion-panel-header>
         @if (motifSequenceLogoChartOptions().series) {
-          <div
-            echarts
-            [options]="motifSequenceLogoChartOptions()"
-            class="chart-container detail-chart"
-            [autoResize]="true"
-            [theme]="themeService.echartsTheme()"
-            aria-label="Motif sequence logo chart">
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="Motif Sequence Logo"
+              [options]="motifSequenceLogoChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="motifSequenceLogoChartOptions()"
+              class="chart-container detail-chart"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()"
+              aria-label="Motif sequence logo chart">
+            </div>
           </div>
         } @else {
           <div class="state-block compact">No sequence logo is available for this motif.</div>
@@ -200,13 +206,19 @@
           <mat-panel-title>Motif Context Trace</mat-panel-title>
         </mat-expansion-panel-header>
         @if (motifContextTraceChartOptions().series) {
-          <div
-            echarts
-            [options]="motifContextTraceChartOptions()"
-            class="chart-container detail-chart"
-            [autoResize]="true"
-            [theme]="themeService.echartsTheme()"
-            aria-label="Motif structural context trace chart">
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="Motif Context Trace"
+              [options]="motifContextTraceChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="motifContextTraceChartOptions()"
+              class="chart-container detail-chart"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()"
+              aria-label="Motif structural context trace chart">
+            </div>
           </div>
         } @else {
           <div class="state-block compact">No structural context trace is available for this motif.</div>
@@ -237,13 +249,19 @@
         </div>
 
         @if (motifCoverageChartOptions().series) {
-          <div
-            echarts
-            [options]="motifCoverageChartOptions()"
-            class="chart-container detail-chart"
-            [autoResize]="true"
-            [theme]="themeService.echartsTheme()"
-            aria-label="Motif coverage chart">
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="Motif Coverage"
+              [options]="motifCoverageChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="motifCoverageChartOptions()"
+              class="chart-container detail-chart"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()"
+              aria-label="Motif coverage chart">
+            </div>
           </div>
         } @else {
           <div class="state-block compact">No motif coverage data is available for this motif.</div>
@@ -259,13 +277,19 @@
         </p>
 
         @if (selectedAptamerRows().length > 0) {
-          <div
-            echarts
-            [options]="selectedAptamerCardinalityChartOptions()"
-            class="chart-container detail-chart"
-            [autoResize]="true"
-            [theme]="themeService.echartsTheme()"
-            aria-label="Selected motif aptamer cardinality chart">
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="Selected Sequence Cardinality"
+              [options]="selectedAptamerCardinalityChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="selectedAptamerCardinalityChartOptions()"
+              class="chart-container detail-chart"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()"
+              aria-label="Selected motif aptamer cardinality chart">
+            </div>
           </div>
         } @else {
           <div class="state-block compact">Select one or more aptamers to view the cardinality chart.</div>

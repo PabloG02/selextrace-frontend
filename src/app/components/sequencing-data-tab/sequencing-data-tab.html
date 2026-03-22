@@ -128,8 +128,23 @@
       </mat-card>
     </div>
 
-    <div echarts [options]="forwardReadsNucleotideDistributionRawChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
-    <div echarts [options]="reverseReadsNucleotideDistributionRawChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
-    <div echarts [options]="acceptedReadsNucleotideDistributionChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
+    <div class="chart-overlay-panel">
+      <app-chart-dialog-trigger
+        title="Forward Reads Nucleotide Distribution"
+        [options]="forwardReadsNucleotideDistributionRawChartOptions()"/>
+      <div echarts [options]="forwardReadsNucleotideDistributionRawChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
+    </div>
+    <div class="chart-overlay-panel">
+      <app-chart-dialog-trigger
+        title="Reverse Reads Nucleotide Distribution"
+        [options]="reverseReadsNucleotideDistributionRawChartOptions()"/>
+      <div echarts [options]="reverseReadsNucleotideDistributionRawChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
+    </div>
+    <div class="chart-overlay-panel">
+      <app-chart-dialog-trigger
+        title="Accepted Reads Nucleotide Distribution"
+        [options]="acceptedReadsNucleotideDistributionChartOptions()"/>
+      <div echarts [options]="acceptedReadsNucleotideDistributionChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
+    </div>
   </mat-card-content>
 </mat-card>

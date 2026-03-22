@@ -19,6 +19,7 @@ import {DecimalPipe, KeyValuePipe} from '@angular/common';
 import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {ThemeService} from '../../services/theme.service';
 import {MatIcon} from '@angular/material/icon';
+import {ChartDialogTriggerComponent} from '../shared/chart-dialog-trigger/chart-dialog-trigger.component';
 
 @Component({
   selector: 'app-sequencing-data-tab',
@@ -41,7 +42,8 @@ import {MatIcon} from '@angular/material/icon';
     MatButtonToggle,
     MatCardSubtitle,
     MatCardAvatar,
-    MatIcon
+    MatIcon,
+    ChartDialogTriggerComponent
   ],
   templateUrl: './sequencing-data-tab.html',
   styleUrl: './sequencing-data-tab.scss'

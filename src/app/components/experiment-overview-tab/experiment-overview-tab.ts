@@ -8,6 +8,7 @@ import {ExperimentReport} from '../../models/experiment-report';
 import {FormField, form, max, min, required} from '@angular/forms/signals';
 import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {ThemeService} from '../../services/theme.service';
+import {ChartDialogTriggerComponent} from '../shared/chart-dialog-trigger/chart-dialog-trigger.component';
 
 @Component({
   selector: 'app-experiment-overview-tab',
@@ -23,7 +24,8 @@ import {ThemeService} from '../../services/theme.service';
     NgxEchartsDirective,
     FormField,
     MatButtonToggleGroup,
-    MatButtonToggle
+    MatButtonToggle,
+    ChartDialogTriggerComponent
   ],
   templateUrl: './experiment-overview-tab.html',
   styleUrl: './experiment-overview-tab.scss'

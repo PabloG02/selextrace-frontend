@@ -39,6 +39,7 @@ import {
 } from '@angular/material/expansion';
 import {Listbox, Option} from '@angular/aria/listbox';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {ChartDialogTriggerComponent} from '../shared/chart-dialog-trigger/chart-dialog-trigger.component';
 
 type RankedMotifProfile = {
   rank: number;
@@ -71,6 +72,7 @@ type RankedMotifProfile = {
     Listbox,
     Option,
     MatDialogModule,
+    ChartDialogTriggerComponent,
   ],
   templateUrl: './motif-analysis-tab.component.html',
   styleUrl: './motif-analysis-tab.component.scss',

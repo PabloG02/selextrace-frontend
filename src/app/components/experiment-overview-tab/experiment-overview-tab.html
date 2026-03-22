@@ -122,7 +122,15 @@
       </div>
     </div>
     <mat-divider vertical/>
-    <div echarts [options]="randomizedRegionSizeDistributionChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
+    <div>
+      <div class="chart-overlay-panel">
+        <app-chart-dialog-trigger
+          title="Randomized Region Size Distribution"
+          [options]="randomizedRegionSizeDistributionChartOptions()">
+        </app-chart-dialog-trigger>
+        <div echarts [options]="randomizedRegionSizeDistributionChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
+      </div>
+    </div>
   </mat-card-content>
 </mat-card>
 
@@ -140,6 +148,12 @@
       <mat-label>Cutoff Value</mat-label>
       <input matInput type="number" [formField]="experimentForm.singletonCutoff" />
     </mat-form-field>
-    <div echarts [options]="positiveSelectionCyclesChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
+    <div class="chart-overlay-panel">
+      <app-chart-dialog-trigger
+        title="Positive Selection Cycles"
+        [options]="positiveSelectionCyclesChartOptions()">
+      </app-chart-dialog-trigger>
+      <div echarts [options]="positiveSelectionCyclesChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
+    </div>
   </mat-card-content>
 </mat-card>

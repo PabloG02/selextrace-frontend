@@ -127,12 +127,18 @@
           <mat-panel-title>Cluster Sequence Logo</mat-panel-title>
         </mat-expansion-panel-header>
         @if (aptamersInSelectedCluster().length > 0) {
-          <div
-            echarts
-            [options]="clusterSequenceLogoChartOptions()"
-            class="chart-container"
-            [autoResize]="true"
-            [theme]="themeService.echartsTheme()">
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="Cluster Sequence Logo"
+              [options]="clusterSequenceLogoChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="clusterSequenceLogoChartOptions()"
+              class="chart-container"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()">
+            </div>
           </div>
         } @else {
           <div class="state-block compact">Select a cluster to view the sequence logo.</div>
@@ -144,12 +150,18 @@
           <mat-panel-title>Mutation Rates from Seed Sequence</mat-panel-title>
         </mat-expansion-panel-header>
         @if (aptamersInSelectedCluster().length > 0) {
-          <div
-            echarts
-            [options]="clusterMutationRatesChartOptions()"
-            class="chart-container"
-            [autoResize]="true"
-            [theme]="themeService.echartsTheme()">
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="Cluster Mutation Rates"
+              [options]="clusterMutationRatesChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="clusterMutationRatesChartOptions()"
+              class="chart-container"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()">
+            </div>
           </div>
         } @else {
           <div class="state-block compact">Select a cluster to view mutation rates.</div>
@@ -168,12 +180,18 @@
           <mat-button-toggle value="counts">Counts</mat-button-toggle>
         </mat-button-toggle-group>
         @if (selectedAptamerRows().length > 0) {
-          <div
-            echarts
-            [options]="selectedAptamerCardinalityChartOptions()"
-            class="chart-container"
-            [autoResize]="true"
-            [theme]="themeService.echartsTheme()">
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="Selected Sequence Cardinality"
+              [options]="selectedAptamerCardinalityChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="selectedAptamerCardinalityChartOptions()"
+              class="chart-container"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()">
+            </div>
           </div>
         } @else {
           <div class="state-block compact">Select one or more aptamers to view the cardinality chart.</div>
@@ -192,12 +210,18 @@
           <mat-button-toggle value="diversities">Diversities</mat-button-toggle>
         </mat-button-toggle-group>
         @if (aptamersInSelectedCluster().length > 0) {
-          <div
-            echarts
-            [options]="clusterCardinalityChartOptions()"
-            class="chart-container"
-            [autoResize]="true"
-            [theme]="themeService.echartsTheme()">
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="Cluster Cardinality"
+              [options]="clusterCardinalityChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="clusterCardinalityChartOptions()"
+              class="chart-container"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()">
+            </div>
           </div>
         } @else {
           <div class="state-block compact">Select a cluster to view the cardinality chart.</div>
@@ -226,12 +250,18 @@
           </mat-button-toggle-group>
         </div>
         @if (aptamersInSelectedCluster().length > 0) {
-          <div
-            echarts
-            [options]="clusterEnrichmentChartOptions()"
-            class="chart-container"
-            [autoResize]="true"
-            [theme]="themeService.echartsTheme()">
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="Cluster Enrichment"
+              [options]="clusterEnrichmentChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="clusterEnrichmentChartOptions()"
+              class="chart-container"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()">
+            </div>
           </div>
         } @else {
           <div class="state-block compact">Select a cluster to view enrichment.</div>

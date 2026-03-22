@@ -80,12 +80,18 @@
           <!-- TODO -->
           <div class="not-available">Enrichments chart is coming soon.</div>
         } @else if (selectedRows().length > 0) {
-          <div
-            echarts
-            [options]="selectedCardinalityChartOptions()"
-            class="chart-container"
-            [autoResize]="true"
-            [theme]="themeService.echartsTheme()">
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="Selected Sequence Cardinality"
+              [options]="selectedCardinalityChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="selectedCardinalityChartOptions()"
+              class="chart-container"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()">
+            </div>
           </div>
         } @else {
           <div class="not-available">Select one or more sequences to view the cardinality chart.</div>
@@ -118,21 +124,32 @@
       </mat-expansion-panel>
 
       <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title>Base Pair Probability Matrix (Prediction: RNAFold4J)</mat-panel-title>
-        </mat-expansion-panel-header>
-        @if (hasSingleSelection()) {
+      <mat-expansion-panel-header>
+        <mat-panel-title>Base Pair Probability Matrix (Prediction: RNAFold4J)</mat-panel-title>
+      </mat-expansion-panel-header>
+      @if (hasSingleSelection()) {
+        <div class="chart-overlay-panel">
+          <app-chart-dialog-trigger
+            title="Base Pair Probability Matrix"
+            [options]="basePairProbabilityMatrixHeatmapChartOptions()">
+          </app-chart-dialog-trigger>
           <div echarts [options]="basePairProbabilityMatrixHeatmapChartOptions()" class="chart-container" [autoResize]="true" [theme]="themeService.echartsTheme()"></div>
-        } @else {
-          <div class="not-available">Select exactly one sequence to view the matrix.</div>
+        </div>
+      } @else {
+        <div class="not-available">Select exactly one sequence to view the matrix.</div>
         }
       </mat-expansion-panel>
 
       <mat-expansion-panel>
-        <mat-expansion-panel-header>
-          <mat-panel-title>Structural Context Distribution</mat-panel-title>
-        </mat-expansion-panel-header>
-        @if (hasSingleSelection()) {
+      <mat-expansion-panel-header>
+        <mat-panel-title>Structural Context Distribution</mat-panel-title>
+      </mat-expansion-panel-header>
+      @if (hasSingleSelection()) {
+        <div class="chart-overlay-panel">
+          <app-chart-dialog-trigger
+            title="Structural Context Distribution"
+            [options]="contextProbabilitySequenceLogoChartOptions()">
+          </app-chart-dialog-trigger>
           <div
             echarts
             [options]="contextProbabilitySequenceLogoChartOptions()"
@@ -141,6 +158,7 @@
             [theme]="themeService.echartsTheme()"
             aria-label="Structural context sequence logo">
           </div>
+        </div>
         } @else {
           <div class="not-available">Select exactly one sequence to view structural context distribution.</div>
         }

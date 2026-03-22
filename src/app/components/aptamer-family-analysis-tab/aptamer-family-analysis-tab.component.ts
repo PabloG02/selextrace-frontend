@@ -43,6 +43,7 @@ import {FormsModule} from '@angular/forms';
 import {Listbox, Option} from '@angular/aria/listbox';
 import {MatRipple} from '@angular/material/core';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {ChartDialogTriggerComponent} from '../shared/chart-dialog-trigger/chart-dialog-trigger.component';
 
 @Component({
   selector: 'app-aptamer-family-analysis-tab',
@@ -72,7 +73,8 @@ import {MatDialog, MatDialogModule} from '@angular/material/dialog';
     Listbox,
     MatRipple,
     Option,
-    MatDialogModule
+    MatDialogModule,
+    ChartDialogTriggerComponent
   ],
   templateUrl: './aptamer-family-analysis-tab.component.html',
   styleUrl: './aptamer-family-analysis-tab.component.scss',

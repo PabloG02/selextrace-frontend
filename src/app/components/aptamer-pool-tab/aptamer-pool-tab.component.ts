@@ -20,6 +20,7 @@ import {FornacVisualizationComponent} from '../shared/fornac-visualization/forna
 import {AptamerTableComponent, AptamerTableRow, SelectionCycleMetrics} from '../shared/aptamer-table/aptamer-table.component';
 import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {ThemeService} from '../../services/theme.service';
+import {ChartDialogTriggerComponent} from '../shared/chart-dialog-trigger/chart-dialog-trigger.component';
 
 @Component({
   selector: 'app-aptamer-pool-tab',
@@ -42,7 +43,8 @@ import {ThemeService} from '../../services/theme.service';
     FornacVisualizationComponent,
     AptamerTableComponent,
     MatButtonToggleGroup,
-    MatButtonToggle
+    MatButtonToggle,
+    ChartDialogTriggerComponent
   ],
   templateUrl: './aptamer-pool-tab.component.html',
   styleUrl: './aptamer-pool-tab.component.scss',

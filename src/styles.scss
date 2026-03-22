@@ -135,3 +135,19 @@ body {
   align-items: center;
   gap: 12px;
 }
+
+.chart-overlay-panel {
+  position: relative;
+
+  app-chart-dialog-trigger {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+  }
+}
+
+.chart-viewer-dialog-panel {
+  resize: both;
+  overflow: auto;
+}
