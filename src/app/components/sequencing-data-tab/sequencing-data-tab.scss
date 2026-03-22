@@ -13,6 +13,23 @@
   margin: 0;
 }
 
+.selection-cycle-insights-card {
+  > mat-card-header {
+    padding-bottom: 12px;
+
+    .icon-avatar {
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  > mat-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
 .meta-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

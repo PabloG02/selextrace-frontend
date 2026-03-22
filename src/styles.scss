@@ -93,7 +93,7 @@ body {
   font-family: "Geist Mono", monospace;
 }
 
-[mat-card-avatar].text-avatar {
+[mat-card-avatar]:is(.text-avatar, .icon-avatar) {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -102,15 +102,18 @@ body {
   margin-bottom: 0;
   border-radius: var(--mat-sys-corner-medium);
   background: var(--mat-sys-primary-container);
-  font: var(--mat-sys-title-medium);
-  line-height: normal;
-  font-weight: 600;
   color: var(--mat-sys-on-primary-container);
 
   &.selected {
     background: var(--mat-sys-primary);
     color: var(--mat-sys-on-primary);
   }
+}
+
+[mat-card-avatar].text-avatar {
+  font: var(--mat-sys-title-medium);
+  line-height: normal;
+  font-weight: 600;
 }
 
 .title-group {
