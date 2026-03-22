@@ -65,6 +65,10 @@ export class ExperimentChartService {
       const yAxisName = isPercentage ? 'Percentage of Occurrence' : 'Frequency of Occurrence';
 
       return {
+        grid: {
+          left: 0,
+          right: 0,
+        },
         legend: {
           bottom: 0,
         },
@@ -127,6 +131,10 @@ export class ExperimentChartService {
 
       return {
         title: { text: 'Positive Selection Cycles' },
+        grid: {
+          left: 0,
+          right: 0,
+        },
         legend: { bottom: 0 },
         tooltip: {},
         xAxis: {
@@ -240,6 +248,10 @@ export class ExperimentChartService {
 
       return {
         title: { text: 'Forward Reads Nucleotide Distribution (raw)' },
+        grid: {
+          left: 0,
+          right: 0,
+        },
         legend: { data: ['A', 'C', 'G', 'T'] },
         tooltip: { trigger: 'axis' },
         xAxis: {
@@ -305,6 +317,10 @@ export class ExperimentChartService {
 
       return {
         title: { text: 'Reverse Reads Nucleotide Distribution (raw)' },
+        grid: {
+          left: 0,
+          right: 0,
+        },
         legend: { data: ['A', 'C', 'G', 'T'] },
         tooltip: { trigger: 'axis' },
         xAxis: {
@@ -374,6 +390,10 @@ export class ExperimentChartService {
         title: {
           text: `Randomized Region Nucleotide Distribution (filtered, ${regionSize} nt)`
         },
+        grid: {
+          left: 0,
+          right: 0,
+        },
         legend: { data: ['A', 'C', 'G', 'T'] },
         tooltip: { trigger: 'axis' },
         xAxis: {
@@ -426,6 +446,10 @@ export class ExperimentChartService {
       const yAxisName = useCPM() ? 'Counts per Million (CPM)' : 'Counts';
 
       return {
+        grid: {
+          left: 0,
+          right: 0,
+        },
         tooltip: { trigger: 'axis' },
         legend: { bottom: 0 },
         xAxis: {
@@ -517,6 +541,10 @@ export class ExperimentChartService {
       const data = Array.from({length: maxRegionSize}, (_, index) => occurrences[index] ?? 0);
 
       return {
+        grid: {
+          left: 0,
+          right: 0,
+        },
         tooltip: {trigger: 'axis'},
         xAxis: {
           type: 'category',
@@ -750,6 +778,10 @@ export class ExperimentChartService {
       const colors = LOGO_CONFIGS['nucleotide'].colors;
 
       return {
+        grid: {
+          left: 0,
+          right: 0,
+        },
         tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
         legend: { bottom: 0 },
         dataZoom: [
@@ -876,6 +908,10 @@ export class ExperimentChartService {
     }, {});
 
     return {
+      grid: {
+        left: 0,
+        right: 0,
+      },
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
@@ -1069,6 +1105,10 @@ export class ExperimentChartService {
       const seriesName = showSizes ? 'Cluster Sizes (CPM)' : 'Cluster Diversities (CPM)';
 
       return {
+        grid: {
+          left: 0,
+          right: 0,
+        },
         tooltip: { trigger: 'axis' },
         legend: { bottom: 0 },
         xAxis: {
@@ -1127,6 +1167,10 @@ export class ExperimentChartService {
       });
 
       return {
+        grid: {
+          left: 0,
+          right: 0,
+        },
         tooltip: {
           trigger: 'item',
           formatter: (params: unknown) => {
