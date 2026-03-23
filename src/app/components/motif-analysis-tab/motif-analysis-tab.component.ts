@@ -218,21 +218,27 @@ export class MotifAnalysisTabComponent {
   /* Aptamer Table Data */
   /** All aptamers from the experiment formatted as table rows. */
   private readonly allAptamerRows = computed<AptamerTableRow[]>(() => {
-    const {idToAptamer, idToBounds} = this.experimentReport().pool;
-    const {selectionCycles} = this.experimentReport();
+    const { idToAptamer, idToBounds } = this.experimentReport().pool;
+    const { selectionCycles } = this.experimentReport();
+    const sortedCycles = [...selectionCycles].sort((a, b) => a.round - b.round);
 
     return Object.entries(idToAptamer).map(([id, sequence]) => {
       const aptamerId = Number(id);
+      const cycles: Record<number, SelectionCycleMetrics> = {};
 
-      const cycles: Record<number, SelectionCycleMetrics> = Object.fromEntries(
-        selectionCycles.map((cycle) => {
-          const count = cycle.counts[aptamerId] ?? 0;
-          const frequency = cycle.totalSize > 0 ? count / cycle.totalSize : 0;
-          const cpm = frequency * 1_000_000;
+      let previousFrequency = 0;
 
-          return [cycle.round, {count, cpm, frequency}];
-        })
-      );
+      for (const cycle of sortedCycles) {
+        const count = cycle.counts[aptamerId] ?? 0;
+        const frequency = count / cycle.totalSize;
+        const cpm = frequency * 1_000_000;
+
+        const enrichment = previousFrequency > 0 ? frequency / previousFrequency : null;
+
+        cycles[cycle.round] = { count, cpm, frequency, enrichment };
+
+        previousFrequency = frequency;
+      }
 
       return {
         id: aptamerId,

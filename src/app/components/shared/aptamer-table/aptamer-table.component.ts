@@ -26,24 +26,32 @@ export class AptamerTableComponent {
   readonly pageIndex = signal(0);
   readonly sortState = signal<Sort>({ active: 'id', direction: 'asc' });
 
+  readonly sortedCyclesDesc = computed(() =>
+    [...this.selectionCycles()].sort((a, b) => b.round - a.round)
+  );
+
   /* Top Header Row (Groups): ID, Sequence + 1 Group per Cycle */
   readonly groupedColumns = computed(() => {
-    const cycleGroups = this.selectionCycles()
-      .slice()
-      .sort((a, b) => b.round - a.round)
+    const cycleGroups = this.sortedCyclesDesc()
       .map(cycle => `cycle-${cycle.round}-group`);
     return ['id', 'sequence', ...cycleGroups];
   });
 
-  /* Sub-Header Row: Columns per Cycle (Count & Frequency) */
+  /* Sub-Header Row: Columns per Cycle (Count, Frequency & Enrichment) */
   readonly subcolumns = computed(() => {
-    return this.selectionCycles()
-      .slice()
-      .sort((a, b) => b.round - a.round)
-      .flatMap(cycle => [
-        `cycle-${cycle.round}-count`,
-        `cycle-${cycle.round}-frequency`
-      ]);
+    return this.sortedCyclesDesc()
+      .flatMap((cycle, index, array) => {
+        const columns = [
+          `cycle-${cycle.round}-count`,
+          `cycle-${cycle.round}-frequency`
+        ];
+
+        if (index !== array.length - 1) {
+          columns.push(`cycle-${cycle.round}-enrichment`);
+        }
+
+        return columns;
+      });
   });
 
   /* Data Rows: ID, Sequence + All flattened cycle subcolumns */
@@ -58,16 +66,16 @@ export class AptamerTableComponent {
 
     if (!active || direction === '') return data;
 
-    let sortKey: 'id' | 'sequence' | 'count' | 'frequency' | null = null;
+    let sortKey: 'id' | 'sequence' | 'count' | 'frequency' | 'enrichment' | null = null;
     let round: number | null = null;
 
     if (active === 'id' || active === 'sequence') {
       sortKey = active;
     } else {
-      const match = active.match(/^cycle-(\d+)-(count|frequency)$/);
+      const match = active.match(/^cycle-(\d+)-(count|frequency|enrichment)$/);
       if (match) {
         round = Number(match[1]);
-        sortKey = match[2] as 'count' | 'frequency';
+        sortKey = match[2] as 'count' | 'frequency' | 'enrichment';
       }
     }
 
@@ -86,12 +94,26 @@ export class AptamerTableComponent {
           return (aValue - bValue) * multiplier;
         case 'frequency':
           return (a.cycles[round!].frequency - b.cycles[round!].frequency) * multiplier;
+        case 'enrichment':
+          return this.compareNullableNumbers(
+            a.cycles[round!]?.enrichment,
+            b.cycles[round!]?.enrichment,
+            multiplier
+          );
 
         default:
           return 0;
       }
     });
   });
+
+  private compareNullableNumbers(a: number | null, b: number | null, multiplier: number) {
+    if (a === null && b === null) return 0;
+    if (a === null) return 1;
+    if (b === null) return -1;
+
+    return (a - b) * multiplier;
+  }
 
   // Pipeline: Pagination (Final View Source)
   readonly paginatedData = computed(() => {
@@ -194,6 +216,7 @@ export type SelectionCycleMetrics = {
   count: number;
   cpm: number;
   frequency: number;
+  enrichment: number | null;
 };
 
 export type AptamerTableRow = {
