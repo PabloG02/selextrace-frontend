@@ -80,14 +80,13 @@
         <mat-card-title>Selection Cycle Percentages</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <dl class="meta-list">
-          @for (cycle of selectionCyclePercentagesEntries(); track cycle[0]) {
-            <div>
-              <dt>{{ cycle[0] }}</dt>
-              <dd>{{ cycle[1] }}%</dd>
-            </div>
-          }
-        </dl>
+        <div
+          echarts
+          [options]="selectionCyclePercentagesChartOptions()"
+          class="chart-container"
+          [autoResize]="true"
+          [theme]="themeService.echartsTheme()">
+        </div>
       </mat-card-content>
     </mat-card>
   </mat-card-content>

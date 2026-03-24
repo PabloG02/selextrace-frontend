@@ -45,7 +45,6 @@ export interface ExperimentPool {
 }
 
 export interface ExperimentTechnicalDetails {
-  selectionCyclePercentages: Record<string, number>;
   metadata: Metadata;
 }
 

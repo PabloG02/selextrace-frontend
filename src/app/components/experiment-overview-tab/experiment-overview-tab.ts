@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal} from '@angular/core';
+import {Component, inject, input, signal} from '@angular/core';
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from "@angular/material/card";
 import {MatDivider} from "@angular/material/list";
 import {MatFormField, MatInput, MatLabel} from "@angular/material/input";
@@ -51,15 +51,11 @@ export class ExperimentOverviewTab {
   });
 
   /* Charts */
+  readonly selectionCyclePercentagesChartOptions = this.chartService.getSelectionCyclePercentagesChart(this.experimentReport);
   readonly randomizedRegionSizeDistributionChartOptions = this.chartService.getRandomizedRegionSizeDistributionChart(
     this.experimentReport,
     this.experimentForm.axisUnit().value,
     this.experimentForm.axisScale().value
   );
   readonly positiveSelectionCyclesChartOptions = this.chartService.getPositiveSelectionCyclesChart(this.experimentReport, this.experimentForm.singletonCutoff().value);
-
-  /* Computed */
-  readonly selectionCyclePercentagesEntries = computed(() =>
-    Object.entries(this.experimentReport().technicalDetails.selectionCyclePercentages ?? {})
-  );
 }

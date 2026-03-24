@@ -36,6 +36,89 @@ export class ExperimentChartService {
 
   // --- Experiment Overview tab ---
 
+  getSelectionCyclePercentagesChart(experimentReport: Signal<ExperimentReport | undefined>) {
+    return computed<EChartsOption>(() => {
+      const exp = experimentReport();
+      if (!exp || exp.importStats.totalAcceptedReads <= 0 || !exp.selectionCycles?.length) {
+        return {};
+      }
+
+      const data = exp.selectionCycles
+        .map((cycle) => ({
+          name: cycle.name,
+          value: (cycle.totalSize * 100) / exp.importStats.totalAcceptedReads,
+          round: cycle.round,
+        }))
+        .sort((a, b) => a.round - b.round || a.name.localeCompare(b.name))
+        .map(({ name, value }) => ({ name, value }));
+      if (data.length === 0) {
+        return {};
+      }
+      const percentageByName = new Map(data.map(({ name, value }) => [name, value]));
+
+      return {
+        grid: {
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+        },
+        textStyle: {
+          fontFamily: 'Geist, sans-serif',
+        },
+        tooltip: {
+          show: false,
+        },
+        legend: {
+          orient: 'vertical',
+          left: 0,
+          top: 0,
+          itemGap: 10,
+          textStyle: {
+            fontSize: 14,
+            fontWeight: 600,
+          },
+          formatter: (name: string) => {
+            const percentage = percentageByName.get(name)?.toFixed(3);
+            return percentage === undefined ? name : `${name}: ${percentage}%`;
+          },
+        },
+        series: [
+          {
+            name: 'Selection Cycle',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderRadius: 10,
+              borderColor: '#fff',
+              borderWidth: 4,
+            },
+            label: {
+              show: false,
+              position: 'center',
+              formatter: (params) => {
+                const percentage = percentageByName.get(params.name)?.toFixed(3);
+                return percentage === undefined ? params.name : `${params.name}\n${percentage}%`;
+              },
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: 22,
+                fontWeight: 'bold',
+              },
+            },
+            labelLine: {
+              show: false,
+            },
+            data,
+          },
+        ],
+      };
+    });
+  }
+
   getRandomizedRegionSizeDistributionChart(
     experimentReport: Signal<ExperimentReport | undefined>,
     axisUnit: Signal<'count' | 'percentage'>,
