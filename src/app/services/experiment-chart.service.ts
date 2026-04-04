@@ -4,6 +4,7 @@ import {EChartsOption} from 'echarts';
 import {PredictionsApiService} from './predictions-api.service';
 import {AptamerTableRow} from '../components/shared/aptamer-table/aptamer-table.component';
 import {MotifAnalysisProfile} from '../models/motif-analysis';
+import {FsbcStringResult} from '../models/fsbc-analysis';
 
 type LogoType = 'nucleotide' | 'structure';
 
@@ -737,6 +738,161 @@ export class ExperimentChartService {
   }
 
   // --- Aptamer Family Analysis tab ---
+
+  getFsbcRankedStringsChart(strings: Signal<FsbcStringResult[]>) {
+    return computed<EChartsOption>(() => {
+      const topStrings = strings().slice(0, 20);
+      if (topStrings.length === 0) {
+        return {};
+      }
+
+      const labels = [...topStrings].map((entry) => `${entry.subsequence} (${entry.length})`).reverse();
+      const values = [...topStrings].map((entry) => entry.normalizedZScore).reverse();
+
+      return {
+        grid: {
+          left: 140,
+          right: 16,
+          top: 8,
+          bottom: 24
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' }
+        },
+        xAxis: {
+          type: 'value',
+          name: 'Normalized Z-score'
+        },
+        yAxis: {
+          type: 'category',
+          data: labels
+        },
+        series: [
+          {
+            type: 'bar',
+            data: values,
+            itemStyle: {
+              color: '#0b6e4f'
+            }
+          }
+        ]
+      };
+    });
+  }
+
+  getFsbcStringScatterChart(strings: Signal<FsbcStringResult[]>) {
+    return computed<EChartsOption>(() => {
+      const values = strings();
+      if (values.length === 0) {
+        return {};
+      }
+
+      const observedCounts = values.map((entry) => entry.observedCount);
+      const minObserved = Math.min(...observedCounts);
+      const maxObserved = Math.max(...observedCounts);
+      const normalizeSize = (observedCount: number) => {
+        if (minObserved === maxObserved) {
+          return 18;
+        }
+        return 10 + ((observedCount - minObserved) / (maxObserved - minObserved)) * 22;
+      };
+
+      return {
+        grid: {
+          left: 0,
+          right: 0
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: (params: unknown) => {
+            const entry = params as {
+              data?: {
+                subsequence?: string;
+                length?: number;
+                normalizedZScore?: number;
+                observedCount?: number;
+                zScore?: number;
+              };
+            };
+            const data = entry.data;
+            if (!data) return '';
+            return `${data.subsequence}<br/>Length: ${data.length}<br/>Observed: ${data.observedCount}<br/>Z-score: ${data.zScore?.toFixed(3)}<br/>Normalized Z: ${data.normalizedZScore?.toFixed(3)}`;
+          }
+        },
+        xAxis: {
+          type: 'value',
+          name: 'String Length',
+          minInterval: 1
+        },
+        yAxis: {
+          type: 'value',
+          name: 'Normalized Z-score'
+        },
+        series: [
+          {
+            type: 'scatter',
+            data: values.map((entry) => ({
+              value: [entry.length, entry.normalizedZScore],
+              subsequence: entry.subsequence,
+              length: entry.length,
+              normalizedZScore: entry.normalizedZScore,
+              observedCount: entry.observedCount,
+              zScore: entry.zScore,
+              symbolSize: normalizeSize(entry.observedCount),
+            })),
+            itemStyle: {
+              color: '#1e88e5',
+              opacity: 0.78
+            }
+          }
+        ]
+      };
+    });
+  }
+
+  getFsbcClusterOverviewChart(
+    clusters: Signal<Array<{ clusterId: number; seedString: string; memberCount: number; totalCount: number }>>,
+    metric: Signal<'totalCounts' | 'memberCounts'>
+  ) {
+    return computed<EChartsOption>(() => {
+      const clusterRows = [...clusters()].sort((left, right) => right.totalCount - left.totalCount).slice(0, 20);
+      if (clusterRows.length === 0) {
+        return {};
+      }
+
+      const showTotalCounts = metric() === 'totalCounts';
+      return {
+        grid: {
+          left: 0,
+          right: 0,
+          bottom: 40
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: { type: 'shadow' }
+        },
+        xAxis: {
+          type: 'category',
+          data: clusterRows.map((cluster) => `#${cluster.clusterId}`),
+          name: 'Cluster'
+        },
+        yAxis: {
+          type: 'value',
+          name: showTotalCounts ? 'Total Count' : 'Members'
+        },
+        series: [
+          {
+            type: 'bar',
+            data: clusterRows.map((cluster) => showTotalCounts ? cluster.totalCount : cluster.memberCount),
+            itemStyle: {
+              color: '#fb8c00'
+            }
+          }
+        ]
+      };
+    });
+  }
 
   /**
    * Builds a cluster sequence logo using the first selection cycle for weights.

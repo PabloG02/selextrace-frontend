@@ -1,0 +1,441 @@
+<div class="analysis-layout">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title-group>
+        <mat-card-title>History</mat-card-title>
+        <mat-card-subtitle>Review previous FSBC runs or launch a new fast string-based clustering analysis.</mat-card-subtitle>
+        <div class="mat-card-header-actions">
+          <button matButton="filled" (click)="openFsbcDialog()">
+            <mat-icon>play_arrow</mat-icon>
+            Run FSBC
+          </button>
+        </div>
+      </mat-card-title-group>
+    </mat-card-header>
+
+    <mat-card-content class="no-padding">
+      <div ngListbox [values]="[activeAnalysis()?.id]" class="m3-expressive-list">
+        @for (analysis of sortedAnalyses(); track analysis.id) {
+          <div
+            ngOption
+            matRipple
+            [value]="analysis.id"
+            (click)="selectAnalysis(analysis.id)">
+            <div class="list-item-content-slot">
+              <div>{{ analysis.id }}</div>
+              <div class="list-item-supporting-text">{{ formatAnalysisMeta(analysis) }}</div>
+              <div class="list-item-supporting-text">{{ analysis.createdAt | date:'short' }}</div>
+            </div>
+            <div class="list-item-trailing-slot">
+              <button
+                matIconButton
+                aria-label="Delete FSBC analysis"
+                (click)="$event.stopPropagation(); deleteAnalysis(analysis.id)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <div class="state-block">No FSBC analyses found.</div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="workspace-grid">
+    <mat-card appearance="outlined" class="summary-card">
+      <mat-card-header>
+        <mat-card-title>Run Summary</mat-card-title>
+        <mat-card-subtitle>
+          @if (activeAnalysis()) {
+            Round {{ activeAnalysis()!.requestConfig.selectionCycleRound }} • {{ formatDuration(activeAnalysis()!.durationMs) }}
+          } @else {
+            Select a run to inspect its FSBC summary.
+          }
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (activeAnalysis(); as analysis) {
+          <div class="metrics-grid">
+            <article class="metric-tile">
+              <span class="metric-label">Total sequences</span>
+              <strong class="metric-value">{{ analysis.totalSequenceCount | number }}</strong>
+            </article>
+            <article class="metric-tile">
+              <span class="metric-label">Unique regions</span>
+              <strong class="metric-value">{{ analysis.uniqueSequenceCount | number }}</strong>
+            </article>
+            <article class="metric-tile">
+              <span class="metric-label">Clusters</span>
+              <strong class="metric-value">{{ analysis.clusterCount | number }}</strong>
+            </article>
+            <article class="metric-tile">
+              <span class="metric-label">Ranked strings</span>
+              <strong class="metric-value">{{ analysis.stringCount | number }}</strong>
+            </article>
+            <article class="metric-tile">
+              <span class="metric-label">Length range</span>
+              <strong class="metric-value">{{ analysis.requestConfig.minLength }} - {{ analysis.requestConfig.maxLength }}</strong>
+            </article>
+            <article class="metric-tile">
+              <span class="metric-label">Alphabet</span>
+              <strong class="metric-value">{{ analysis.requestConfig.rnaSequence ? 'RNA' : 'DNA' }}</strong>
+            </article>
+          </div>
+        } @else {
+          <div class="state-block">Run or select an analysis to populate the summary.</div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Clusters</mat-card-title>
+        <mat-card-subtitle>
+          @if (activeAnalysis()) {
+            {{ clusterRows().length }} clusters in the selected run
+          } @else {
+            Select a run to inspect its clusters.
+          }
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (clusterRows().length > 0) {
+          <table mat-table [dataSource]="clusterRows()" class="mat-elevation-z0 compact-table">
+            <ng-container matColumnDef="clusterId">
+              <th mat-header-cell *matHeaderCellDef>Cluster</th>
+              <td mat-cell *matCellDef="let row">#{{ row.clusterId }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="seedString">
+              <th mat-header-cell *matHeaderCellDef>Seed String</th>
+              <td mat-cell *matCellDef="let row" class="monospace">{{ row.seedString }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="memberCount">
+              <th mat-header-cell *matHeaderCellDef>Members</th>
+              <td mat-cell *matCellDef="let row">{{ row.memberCount }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalCount">
+              <th mat-header-cell *matHeaderCellDef>Total Count</th>
+              <td mat-cell *matCellDef="let row">{{ row.totalCount | number }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="clusterTableColumns"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: clusterTableColumns"
+              (click)="selectCluster(row.clusterId)"
+              [class.selected-row]="selectedClusterId() === row.clusterId">
+            </tr>
+          </table>
+        } @else {
+          <div class="state-block">No clusters are available for the selected run.</div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Ranked Strings</mat-card-title>
+        <mat-card-subtitle>
+          @if (activeAnalysis()) {
+            Top overrepresented strings by normalized Z-score
+          } @else {
+            Select a run to inspect ranked strings.
+          }
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (displayedStrings().length > 0) {
+          <div class="table-scroll">
+            <table mat-table [dataSource]="displayedStrings()" class="mat-elevation-z0 compact-table">
+              <ng-container matColumnDef="rank">
+                <th mat-header-cell *matHeaderCellDef>#</th>
+                <td mat-cell *matCellDef="let row">{{ row.rank }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="subsequence">
+                <th mat-header-cell *matHeaderCellDef>String</th>
+                <td mat-cell *matCellDef="let row" class="monospace">{{ row.subsequence }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="length">
+                <th mat-header-cell *matHeaderCellDef>Length</th>
+                <td mat-cell *matCellDef="let row">{{ row.length }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="observedCount">
+                <th mat-header-cell *matHeaderCellDef>Observed</th>
+                <td mat-cell *matCellDef="let row">{{ row.observedCount | number }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="normalizedZScore">
+                <th mat-header-cell *matHeaderCellDef>Norm. Z</th>
+                <td mat-cell *matCellDef="let row">{{ row.normalizedZScore | number:'1.2-3' }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="stringTableColumns"></tr>
+              <tr
+                mat-row
+                *matRowDef="let row; columns: stringTableColumns"
+                (click)="selectString(row.subsequence)"
+                [class.selected-row]="selectedString() === row.subsequence">
+              </tr>
+            </table>
+          </div>
+        } @else {
+          <div class="state-block">No ranked strings are available for the selected run.</div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title-group>
+          <mat-card-title>Cluster Aptamers</mat-card-title>
+          <mat-card-subtitle>
+            @if (selectedCluster()) {
+              Cluster {{ selectedCluster()!.clusterId }} • seed {{ selectedCluster()!.seedString }}
+            } @else {
+              Select a cluster to inspect its aptamers.
+            }
+          </mat-card-subtitle>
+          <div class="mat-card-header-actions">
+            <mat-slide-toggle [formField]="sequenceTableForm.showPrimers" labelPosition="before">
+              Show Primers
+            </mat-slide-toggle>
+            <mat-button-toggle-group
+              aria-label="Count format"
+              [formField]="sequenceTableForm.useCPM"
+              hideSingleSelectionIndicator>
+              <mat-button-toggle [value]="true">CPM</mat-button-toggle>
+              <mat-button-toggle [value]="false">Raw Counts</mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+        </mat-card-title-group>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (selectedCluster()) {
+          <app-aptamer-table
+            [rows]="aptamersInSelectedCluster()"
+            [selectionCycles]="experimentReport().selectionCycles"
+            [showPrimers]="sequenceTableForm.showPrimers().value()"
+            [useCPM]="sequenceTableForm.useCPM().value()"
+            [searchTerms]="selectedString() ? [selectedString()!] : []"
+            [(selectedRows)]="selectedAptamerRows"
+            [pageSize]="10">
+          </app-aptamer-table>
+        } @else {
+          <div class="state-block">Choose a cluster to populate the aptamer table.</div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-accordion multi>
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Top Overrepresented Strings</mat-panel-title>
+        </mat-expansion-panel-header>
+        @if (rankedStringsChartOptions().series) {
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="Top Overrepresented Strings"
+              [options]="rankedStringsChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="rankedStringsChartOptions()"
+              class="chart-container"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()">
+            </div>
+          </div>
+        } @else {
+          <div class="state-block compact">Run or select an analysis to view ranked strings.</div>
+        }
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>String Length vs Normalized Z-score</mat-panel-title>
+        </mat-expansion-panel-header>
+        @if (stringScatterChartOptions().series) {
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="FSBC String Scatter"
+              [options]="stringScatterChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="stringScatterChartOptions()"
+              class="chart-container"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()">
+            </div>
+          </div>
+        } @else {
+          <div class="state-block compact">Run or select an analysis to view the scatter plot.</div>
+        }
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Cluster Overview</mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-button-toggle-group
+          aria-label="Cluster overview metric"
+          hideSingleSelectionIndicator
+          [(ngModel)]="clusterOverviewMetric">
+          <mat-button-toggle value="totalCounts">Total Counts</mat-button-toggle>
+          <mat-button-toggle value="memberCounts">Members</mat-button-toggle>
+        </mat-button-toggle-group>
+        @if (clusterOverviewChartOptions().series) {
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="FSBC Cluster Overview"
+              [options]="clusterOverviewChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="clusterOverviewChartOptions()"
+              class="chart-container"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()">
+            </div>
+          </div>
+        } @else {
+          <div class="state-block compact">Run or select an analysis to view cluster overview.</div>
+        }
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Cluster Sequence Logo</mat-panel-title>
+        </mat-expansion-panel-header>
+        @if (aptamersInSelectedCluster().length > 0) {
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="FSBC Cluster Sequence Logo"
+              [options]="clusterSequenceLogoChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="clusterSequenceLogoChartOptions()"
+              class="chart-container"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()">
+            </div>
+          </div>
+        } @else {
+          <div class="state-block compact">Select a cluster to view the sequence logo.</div>
+        }
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Mutation Rates from Seed Sequence</mat-panel-title>
+        </mat-expansion-panel-header>
+        @if (aptamersInSelectedCluster().length > 0) {
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="FSBC Cluster Mutation Rates"
+              [options]="clusterMutationRatesChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="clusterMutationRatesChartOptions()"
+              class="chart-container"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()">
+            </div>
+          </div>
+        } @else {
+          <div class="state-block compact">Select a cluster to view mutation rates.</div>
+        }
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Cardinality Chart (Selected Sequences)</mat-panel-title>
+        </mat-expansion-panel-header>
+        @if (selectedAptamerRows().length > 0) {
+          <div class="chart-overlay-panel">
+            <app-chart-dialog-trigger
+              title="FSBC Selected Sequence Cardinality"
+              [options]="selectedAptamerCardinalityChartOptions()">
+            </app-chart-dialog-trigger>
+            <div
+              echarts
+              [options]="selectedAptamerCardinalityChartOptions()"
+              class="chart-container"
+              [autoResize]="true"
+              [theme]="themeService.echartsTheme()">
+            </div>
+          </div>
+        } @else {
+          <div class="state-block compact">Select one or more aptamers to view the cardinality chart.</div>
+        }
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+</div>
+
+<ng-template #fsbcDialog>
+  <h2 mat-dialog-title>FSBC Options</h2>
+  <mat-dialog-content>
+    <p>Configure the selection cycle and string search parameters, then launch an FSBC run for this experiment.</p>
+
+    <div class="dialog-control-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Selection cycle</mat-label>
+        <mat-select [formField]="runForm.selectionCycleRound">
+          @for (cycle of positiveSelectionCycles(); track cycle.round) {
+            <mat-option [value]="cycle.round">{{ cycle.name }} (Round {{ cycle.round }})</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Minimum string length</mat-label>
+        <input matInput type="number" [formField]="runForm.minLength" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Maximum string length</mat-label>
+        <input matInput type="number" [formField]="runForm.maxLength" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Thread count</mat-label>
+        <input matInput type="number" [formField]="runForm.threadCount" />
+      </mat-form-field>
+
+      <mat-slide-toggle [formField]="runForm.rnaSequence" labelPosition="before">
+        RNA alphabet
+      </mat-slide-toggle>
+    </div>
+
+    @if (runForm.minLength().value() > runForm.maxLength().value()) {
+      <p class="validation-error">Maximum string length must be greater than or equal to the minimum length.</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button matButton="text" type="button" mat-dialog-close>
+      Cancel
+    </button>
+    <button matButton="filled" type="button" (click)="runFsbcAnalysis()" [disabled]="fsbcRunInvalid() || isSubmitting()">
+      @if (isSubmitting()) {
+        Running FSBC...
+      } @else {
+        Run FSBC
+      }
+    </button>
+  </mat-dialog-actions>
+</ng-template>
