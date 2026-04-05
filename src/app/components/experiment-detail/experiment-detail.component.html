@@ -79,6 +79,14 @@
         </div>
       </mat-tab>
 
+      <mat-tab label="FSBC Analysis">
+        <div class="tab-content">
+          <app-fsbc-analysis-tab
+            [experimentReport]="experimentReport()!"
+            [experimentId]="experimentId()"/>
+        </div>
+      </mat-tab>
+
       <mat-tab label="Motif Analysis">
         <div class="tab-content">
           <app-motif-analysis-tab
