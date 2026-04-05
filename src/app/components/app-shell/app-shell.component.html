@@ -1,0 +1,66 @@
+<mat-sidenav-container class="layout-container" autosize>
+  <mat-sidenav
+    class="layout-sidenav"
+    [class.collapsed]="drawerState() === 'collapsed'"
+    [mode]="isMobileView() ? 'over' : 'side'"
+    [opened]="drawerState() !== 'closed'"
+    (closedStart)="onDrawerClosed()"
+  >
+    <div class="nav-header">
+      <div class="nav-brand">
+        <img
+          ngSrc="favicon.svg"
+          width="48"
+          height="48"
+          alt="SELEXTrace logo"
+        />
+        <div class="nav-title">
+          <span class="brand">SELEXTrace</span>
+          <span class="subtitle">Experiment Manager</span>
+        </div>
+      </div>
+      <button
+        mat-icon-button
+        type="button"
+        class="nav-toggle"
+        [attr.aria-label]="navToggleLabel()"
+        (click)="toggleDrawer()"
+      >
+        <mat-icon>{{ navToggleIcon() }}</mat-icon>
+      </button>
+    </div>
+
+    <button
+      matFab
+      class="sidenav-fab"
+      [extended]="drawerState() !== 'collapsed'"
+      routerLink="/experiments/new"
+      aria-label="Create new experiment"
+      (click)="onNavigate()"
+    >
+      <mat-icon>add</mat-icon>
+      @if (drawerState() !== 'collapsed') { New Experiment }
+    </button>
+
+    <mat-nav-list>
+      @for (link of navLinks; track link.route) {
+        <a
+          mat-list-item
+          [routerLink]="link.route"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="{ exact: link.exact ?? false }"
+          (click)="onNavigate()"
+        >
+          <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
+          <span matListItemTitle>{{ link.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="layout-content">
+    <main class="page-content" role="main">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

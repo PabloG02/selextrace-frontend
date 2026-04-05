@@ -3,40 +3,49 @@ import { ExperimentsListComponent } from './components/experiments-list/experime
 import { NewExperimentWizardComponent } from './components/new-experiment-wizard/new-experiment-wizard.component';
 import { ExperimentDetailComponent } from './components/experiment-detail/experiment-detail.component';
 import { SettingsComponent } from './components/settings/settings.component';
+import { LandingComponent } from './components/landing/landing.component';
+import { AppShellComponent } from './components/app-shell/app-shell.component';
 
 export const routes: Routes = [
 	{
 		path: '',
 		pathMatch: 'full',
-		redirectTo: 'experiments',
+		component: LandingComponent,
+		title: 'SELEXTrace',
 	},
 	{
-		path: 'experiments',
+		path: '',
+		component: AppShellComponent,
 		children: [
 			{
-				path: '',
-				component: ExperimentsListComponent,
-				title: 'Experiments • SELEXTrace',
+				path: 'experiments',
+				children: [
+					{
+						path: '',
+						component: ExperimentsListComponent,
+						title: 'Experiments • SELEXTrace',
+					},
+					{
+						path: 'new',
+						component: NewExperimentWizardComponent,
+						title: 'Create Experiment • SELEXTrace',
+					},
+					{
+						path: ':experimentId',
+						component: ExperimentDetailComponent,
+						title: 'Experiment Details • SELEXTrace',
+					},
+				],
 			},
 			{
-				path: 'new',
-				component: NewExperimentWizardComponent,
-				title: 'Create Experiment • SELEXTrace',
-			},
-			{
-				path: ':experimentId',
-				component: ExperimentDetailComponent,
-				title: 'Experiment Details • SELEXTrace',
+				path: 'settings',
+				component: SettingsComponent,
+				title: 'Settings • SELEXTrace',
 			},
 		],
 	},
 	{
-		path: 'settings',
-		component: SettingsComponent,
-		title: 'Settings • SELEXTrace',
-	},
-	{
 		path: '**',
-		redirectTo: 'experiments',
+		redirectTo: '',
 	},
 ];
