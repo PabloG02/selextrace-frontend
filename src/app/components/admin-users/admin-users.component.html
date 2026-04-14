@@ -1,0 +1,50 @@
+<section class="page-header">
+  <div>
+    <h1>User Administration</h1>
+    <p class="subtitle">Manage system roles, account status, and temporary password resets.</p>
+  </div>
+</section>
+
+@if (isLoading()) {
+  <p>Loading users...</p>
+} @else {
+  <section class="users-grid">
+    @for (user of users(); track user.id) {
+      <mat-card appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>{{ user.displayName }}</mat-card-title>
+          <mat-card-subtitle>{{ user.email }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content class="user-card-content">
+          <mat-form-field appearance="outline">
+            <mat-label>System role</mat-label>
+            <mat-select [ngModel]="user.systemRole" (ngModelChange)="updateRole(user, $event)">
+              @for (role of roleOptions; track role) {
+                <mat-option [value]="role">{{ role }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-slide-toggle [ngModel]="user.active" (ngModelChange)="updateActive(user, $event)">
+            Account active
+          </mat-slide-toggle>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Temporary password</mat-label>
+            <input
+              matInput
+              type="password"
+              [ngModel]="tempPasswords()[user.id] || ''"
+              (ngModelChange)="updateTempPassword(user.id, $event)"
+            />
+          </mat-form-field>
+
+          <button mat-stroked-button type="button" (click)="resetPassword(user)">
+            <mat-icon>password</mat-icon>
+            Reset password
+          </button>
+        </mat-card-content>
+      </mat-card>
+    }
+  </section>
+}

@@ -2,6 +2,56 @@
   <h1>Settings</h1>
 </div>
 
+@if (currentUser(); as user) {
+  <div class="settings-section">
+    <h2>Account</h2>
+
+    <div class="setting-item">
+      <label>Signed in as</label>
+      <p>{{ user.displayName }} · {{ user.email }}</p>
+      <p class="hint">Role: {{ user.systemRole }}</p>
+      @if (user.mustChangePassword) {
+        <p class="hint warning">A password change is required before continuing.</p>
+      }
+    </div>
+
+    <div class="setting-item">
+      <label>Change password</label>
+      <mat-form-field appearance="outline" class="backend-url-field">
+        <input
+          matInput
+          [ngModel]="currentPassword()"
+          (ngModelChange)="currentPassword.set($event)"
+          placeholder="Current password"
+          type="password" />
+        <mat-icon matIconPrefix>lock</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="backend-url-field">
+        <input
+          matInput
+          [ngModel]="newPassword()"
+          (ngModelChange)="newPassword.set($event)"
+          placeholder="New password"
+          type="password" />
+        <mat-icon matIconPrefix>password</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="backend-url-field">
+        <input
+          matInput
+          [ngModel]="confirmPassword()"
+          (ngModelChange)="confirmPassword.set($event)"
+          placeholder="Confirm new password"
+          type="password" />
+        <mat-icon matIconPrefix>lock_reset</mat-icon>
+      </mat-form-field>
+      <button matButton="filled" (click)="changePassword()">
+        <mat-icon>check</mat-icon>
+        Update password
+      </button>
+    </div>
+  </div>
+}
+
 <div class="settings-section">
   <h2>Appearance</h2>
 

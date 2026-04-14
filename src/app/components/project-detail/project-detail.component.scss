@@ -1,0 +1,52 @@
+:host {
+  display: block;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.subtitle {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.members-card {
+  margin-top: 24px;
+}
+
+.project-form,
+.member-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.membership-note {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.membership-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.membership-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+}
+
+.membership-row p {
+  margin: 4px 0 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.membership-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

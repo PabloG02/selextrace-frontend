@@ -27,6 +27,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { TitleCasePipe } from '@angular/common';
 import { ExperimentsStore } from '../../stores/experiments.store';
+import { AuthService } from '../../services/auth.service';
 import { FileFormat, ReadType } from '../../models/experiment';
 import { ProgressDialogComponent } from '../shared/progress-dialog/progress-dialog.component';
 import { FileUploadDropzoneComponent } from '../shared/file-upload-dropzone/file-upload-dropzone.component';
@@ -34,6 +35,8 @@ import { catchError, of } from 'rxjs';
 import { CreateExperimentDto, SelectionCycle } from '../../models/create-experiment-dto';
 import { ExperimentCreationParams } from '../../models/experiment-creation-params';
 import {ExperimentCreationParamsSchema} from '../../models/experiment-creation.schema';
+import { ProjectsApiService } from '../../services/projects-api.service';
+import { ProjectSummary } from '../../models/project';
 
 type CycleFormGroup = FormGroup<{
   roundNumber: FormControl<number>;
@@ -81,8 +84,11 @@ export class NewExperimentWizardComponent {
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly authService = inject(AuthService);
+  private readonly projectsApi = inject(ProjectsApiService);
 
   private readonly stepper = viewChild(MatStepper);
+  readonly availableProjects = signal<ProjectSummary[]>([]);
 
   /** Form group for general experiment information and sequencing settings */
   readonly generalForm = this.fb.nonNullable.group({
@@ -90,6 +96,7 @@ export class NewExperimentWizardComponent {
       validators: [Validators.required, this.uniqueExperimentNameValidator()],
     }),
     description: this.fb.nonNullable.control(''),
+    projectId: this.fb.nonNullable.control(''),
     isDemultiplexed: this.fb.nonNullable.control(true),
     readType: this.fb.nonNullable.control<ReadType>('single-end'),
     fileFormat: this.fb.nonNullable.control<FileFormat>('fastq'),
@@ -126,6 +133,23 @@ export class NewExperimentWizardComponent {
     this.generalForm.controls.readType.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.syncReverseValidators());
+
+    this.projectsApi.listProjects().subscribe({
+      next: (projects) => {
+        this.availableProjects.set(projects);
+        const selectedProjectId = this.generalForm.controls.projectId.value;
+        const hasSelectedProject = selectedProjectId && projects.some((project) => project.id === selectedProjectId);
+        if (!hasSelectedProject) {
+          const defaultProjectId = this.resolveDefaultProjectId();
+          if (defaultProjectId) {
+            this.generalForm.controls.projectId.setValue(defaultProjectId);
+          }
+        }
+      },
+      error: () => {
+        this.snackBar.open('Unable to load available projects.', 'Dismiss', { duration: 3500 });
+      },
+    });
   }
 
   /**
@@ -233,10 +257,16 @@ export class NewExperimentWizardComponent {
 
   private applyExperimentParams(params: ExperimentCreationParams): void {
     const { name, description, sequencing } = params;
+    const importedProjectId = params.projectId?.trim() ?? '';
+    const validImportedProjectId = importedProjectId
+      && this.availableProjects().some((project) => project.id === importedProjectId)
+      ? importedProjectId
+      : '';
 
     this.generalForm.patchValue({
       name,
       description,
+      projectId: validImportedProjectId || this.generalForm.controls.projectId.value || this.resolveDefaultProjectId(),
       isDemultiplexed: sequencing.isDemultiplexed,
       readType: sequencing.readType,
       fileFormat: sequencing.fileFormat,
@@ -305,6 +335,7 @@ export class NewExperimentWizardComponent {
     const payload: CreateExperimentDto = {
       name: this.generalForm.controls.name.value,
       description: this.generalForm.controls.description.value,
+      projectId: this.generalForm.controls.projectId.value || undefined,
       sequencing: {
         isDemultiplexed: this.generalForm.controls.isDemultiplexed.value,
         readType: this.generalForm.controls.readType.value,
@@ -476,5 +507,14 @@ export class NewExperimentWizardComponent {
 
       return null;
     };
+  }
+
+  private resolveDefaultProjectId(): string {
+    const projects = this.availableProjects();
+    const personalProjectId = this.authService.currentUser()?.personalProjectId;
+    if (personalProjectId && projects.some((project) => project.id === personalProjectId)) {
+      return personalProjectId;
+    }
+    return projects[0]?.id ?? '';
   }
 }

@@ -1,0 +1,80 @@
+@if (isLoading()) {
+  <p>Loading project...</p>
+} @else if (project(); as project) {
+  <section class="page-header">
+    <div>
+      <a mat-button routerLink="/projects">Back to projects</a>
+      <h1>{{ project.name }}</h1>
+      <p class="subtitle">{{ project.description || 'No description yet.' }}</p>
+    </div>
+  </section>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Project access</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p>Your access level: {{ project.accessLevel }}</p>
+      @if (project.permissions.canManage) {
+        <form class="project-form" [formGroup]="projectForm" (ngSubmit)="saveProject()">
+          <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Description</mat-label>
+            <textarea matInput rows="2" formControlName="description"></textarea>
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit">Save changes</button>
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="members-card">
+    <mat-card-header>
+      <mat-card-title>Members</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (project.personalProject) {
+        <p class="membership-note">Personal workspaces always keep a fixed owner membership. Share individual experiments instead.</p>
+      }
+      @if (project.permissions.canManage && !project.personalProject) {
+        <form class="member-form" [formGroup]="memberForm" (ngSubmit)="addMember()">
+          <mat-form-field appearance="outline">
+            <mat-label>User email</mat-label>
+            <input matInput formControlName="email" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Access level</mat-label>
+            <mat-select formControlName="accessLevel">
+              @for (accessLevel of accessLevels; track accessLevel) {
+                <mat-option [value]="accessLevel">{{ accessLevel }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit">Add or update</button>
+        </form>
+      }
+
+      <div class="membership-list">
+        @for (membership of project.memberships; track membership.userId) {
+          <div class="membership-row">
+            <div>
+              <strong>{{ membership.displayName }}</strong>
+              <p>{{ membership.email }}</p>
+            </div>
+            <div class="membership-actions">
+              <span>{{ membership.accessLevel }}</span>
+              @if (project.permissions.canManage && !project.personalProject) {
+                <button mat-icon-button type="button" color="warn" (click)="removeMember(membership.userId)">
+                  <mat-icon>person_remove</mat-icon>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+}

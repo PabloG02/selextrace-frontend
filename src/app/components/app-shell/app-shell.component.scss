@@ -108,6 +108,43 @@
   background: var(--mat-sys-secondary-container);
 }
 
+.account-card {
+  display: grid;
+  gap: 12px;
+  margin-top: auto;
+  padding: 16px 8px 0;
+}
+
+.account-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.account-avatar {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  font-weight: 700;
+}
+
+.account-copy {
+  display: grid;
+}
+
+.account-copy span {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 12px;
+}
+
+.account-card.compact .account-summary {
+  justify-content: center;
+}
+
 @media (max-width: 960px) {
   .page-content {
     padding: 16px;

@@ -8,12 +8,12 @@
     <p class="hero-subtitle">Experience a fluid, expressive interface for all your aptamer discovery workflows. Powerful algorithms meet beautiful Material 3 design.</p>
     
     <div class="action-group">
-      <button mat-flat-button color="primary" class="primary-action" routerLink="/experiments/new">
-        <mat-icon>add</mat-icon>
-        New Experiment
+      <button mat-flat-button color="primary" class="primary-action" [routerLink]="primaryRoute()">
+        <mat-icon>{{ primaryRoute() === '/signup' ? 'person_add' : 'add' }}</mat-icon>
+        {{ primaryLabel() }}
       </button>
-      <button mat-button class="secondary-action" routerLink="/experiments">
-        Browse Existing
+      <button mat-button class="secondary-action" [routerLink]="secondaryRoute()">
+        {{ secondaryLabel() }}
         <mat-icon iconPositionEnd>arrow_forward</mat-icon>
       </button>
     </div>

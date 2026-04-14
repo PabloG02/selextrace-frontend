@@ -1,8 +1,13 @@
+import { ProjectReference, ResourcePermissions } from './auth';
+
 export interface ExperimentReport {
   id: string;
   createdAt: string;
   name: string;
   description: string;
+  createdByUserId: string;
+  project: ProjectReference | null;
+  permissions: ResourcePermissions;
   sequencing: ExperimentSequencing;
   importStats: ExperimentImportStats;
   selectionCycles: SelectionCycleResponse[];

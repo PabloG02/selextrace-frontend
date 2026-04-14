@@ -17,6 +17,7 @@ import {DateRangeFilter, ExperimentsStore, SortOption} from '../../stores/experi
 import { ExperimentStatus } from '../../models/experiment';
 import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
 import {ExperimentSummary} from '../../models/experiment-summary';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-experiments-list',
@@ -48,6 +49,7 @@ export class ExperimentsListComponent {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  readonly authService = inject(AuthService);
 
   /** Available experiment status filter options */
   readonly statusOptions: ExperimentStatus[] = ['draft', 'running', 'completed', 'error'];
@@ -91,6 +93,10 @@ export class ExperimentsListComponent {
    * @param id - The experiment ID to toggle
    */
   toggleSelection(event: MouseEvent, id: string): void {
+    const experiment = this.filteredExperiments().find((item) => item.id === id);
+    if (!experiment?.permissions.canDelete) {
+      return;
+    }
     if (event.ctrlKey || event.metaKey) {
       const updated = new Set(this.selectedIds());
       if (updated.has(id)) {
@@ -104,7 +110,9 @@ export class ExperimentsListComponent {
 
   /** Select all filtered experiments */
   selectAll(): void {
-    this.selectedIds.set(new Set(this.filteredExperiments().map((experiment) => experiment.id)));
+    this.selectedIds.set(
+      new Set(this.filteredExperiments().filter((experiment) => experiment.permissions.canDelete).map((experiment) => experiment.id)),
+    );
   }
 
   /** Clear all selected experiments */
@@ -146,6 +154,9 @@ export class ExperimentsListComponent {
    * @param experiment - The experiment to delete
    */
   deleteExperiment(experiment: ExperimentSummary): void {
+    if (!experiment.permissions.canDelete) {
+      return;
+    }
     this.confirmDeletion('Delete experiment?', `This will permanently delete "${experiment.name}"`)
       .pipe(exhaustMap(() => this.experimentsStore.deleteExperiment(experiment.id)))
       .subscribe({
@@ -177,6 +188,10 @@ export class ExperimentsListComponent {
       .join('')
       .slice(0, 2)
       .toUpperCase();
+  }
+
+  canDelete(experiment: ExperimentSummary): boolean {
+    return experiment.permissions.canDelete;
   }
 
   /**

@@ -30,20 +30,22 @@
       </button>
     </div>
 
-    <button
-      matFab
-      class="sidenav-fab"
-      [extended]="drawerState() !== 'collapsed'"
-      routerLink="/experiments/new"
-      aria-label="Create new experiment"
-      (click)="onNavigate()"
-    >
-      <mat-icon>add</mat-icon>
-      @if (drawerState() !== 'collapsed') { New Experiment }
-    </button>
+    @if (authService.canCreateExperiments()) {
+      <button
+        matFab
+        class="sidenav-fab"
+        [extended]="drawerState() !== 'collapsed'"
+        type="button"
+        aria-label="Create new experiment"
+        (click)="createExperiment()"
+      >
+        <mat-icon>add</mat-icon>
+        @if (drawerState() !== 'collapsed') { New Experiment }
+      </button>
+    }
 
     <mat-nav-list>
-      @for (link of navLinks; track link.route) {
+      @for (link of navLinks(); track link.route) {
         <a
           mat-list-item
           [routerLink]="link.route"
@@ -56,6 +58,24 @@
         </a>
       }
     </mat-nav-list>
+
+    @if (authService.currentUser(); as user) {
+      <div class="account-card" [class.compact]="drawerState() === 'collapsed'">
+        <div class="account-summary">
+          <div class="account-avatar">{{ user.displayName.slice(0, 2).toUpperCase() }}</div>
+          @if (drawerState() !== 'collapsed') {
+            <div class="account-copy">
+              <strong>{{ user.displayName }}</strong>
+              <span>{{ user.systemRole }}</span>
+            </div>
+          }
+        </div>
+        <button mat-button type="button" (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          @if (drawerState() !== 'collapsed') { Sign out }
+        </button>
+      </div>
+    }
   </mat-sidenav>
 
   <mat-sidenav-content class="layout-content">

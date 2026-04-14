@@ -22,35 +22,86 @@
     </mat-card-header>
     <mat-card-content>
       <div>{{ experimentReportRes.value()!.description }}</div>
-<!--      <dl class="meta-list">-->
-<!--        <div>-->
-<!--          <dt>Created</dt>-->
-<!--          <dd>{{ experiment()!.createdAt | date: 'medium' }}</dd>-->
-<!--        </div>-->
-<!--      </dl>-->
+      @if (experimentReportRes.value()!.project) {
+        <p><strong>Project:</strong> <a mat-button [routerLink]="['/projects', experimentReportRes.value()!.project!.id]">{{ experimentReportRes.value()!.project!.name }}</a></p>
+      }
+      @if (experimentReportRes.value()!.permissions.canManage && availableProjects().length) {
+        <div class="move-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Move to project</mat-label>
+            <mat-select [ngModel]="destinationProjectId()" (ngModelChange)="destinationProjectId.set($event)">
+              @for (project of availableProjects(); track project.id) {
+                <mat-option [value]="project.id">{{ projectOptionLabel(project) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="moveExperimentToProject()"
+            [disabled]="isMovingProject() || !destinationProjectId() || destinationProjectId() === experimentReportRes.value()!.project?.id"
+          >
+            {{ isMovingProject() ? 'Moving...' : 'Move experiment' }}
+          </button>
+        </div>
+      }
     </mat-card-content>
     <mat-card-actions align="end">
-<!--      <mat-chip-set>-->
-<!--        <mat-chip-->
-<!--          [class.status-draft]="experiment()!.status === 'draft'"-->
-<!--          [class.status-running]="experiment()!.status === 'running'"-->
-<!--          [class.status-completed]="experiment()!.status === 'completed'"-->
-<!--          [class.status-error]="experiment()!.status === 'error'"-->
-<!--          aria-label="Status {{ experiment()!.status }}"-->
-<!--        >-->
-<!--          {{ experiment()!.status | titlecase }}-->
-<!--        </mat-chip>-->
-<!--      </mat-chip-set>-->
       <span class="action-spacer"></span>
         <button mat-stroked-button type="button" (click)="exportCreationParams()">
           <mat-icon>file_export</mat-icon>
           Export Recipe
         </button>
-      <button mat-icon-button type="button" color="warn" matTooltip="Delete" (click)="deleteExperiment()">
-        <mat-icon>delete</mat-icon>
-      </button>
+      @if (experimentReportRes.value()!.permissions.canDelete) {
+        <button mat-icon-button type="button" color="warn" matTooltip="Delete" (click)="deleteExperiment()">
+          <mat-icon>delete</mat-icon>
+        </button>
+      }
     </mat-card-actions>
   </mat-card>
+
+  @if (experimentReportRes.value()!.permissions.canShare) {
+    <mat-card appearance="outlined" class="experiment-summary-card">
+      <mat-card-header>
+        <mat-card-title>Access</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="share-form">
+          <mat-form-field appearance="outline">
+            <mat-label>User email</mat-label>
+            <input matInput [ngModel]="shareEmail()" (ngModelChange)="shareEmail.set($event)" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Access level</mat-label>
+            <mat-select [ngModel]="shareAccessLevel()" (ngModelChange)="shareAccessLevel.set($event)">
+              @for (accessLevel of accessLevels; track accessLevel) {
+                <mat-option [value]="accessLevel">{{ accessLevel }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="button" (click)="shareExperiment()">Share</button>
+        </div>
+
+        <div class="access-list">
+          @for (grant of experimentAccess(); track grant.userId) {
+            <div class="access-row">
+              <div>
+                <strong>{{ grant.displayName }}</strong>
+                <p>{{ grant.email }}</p>
+              </div>
+              <div class="access-actions">
+                <span>{{ grant.accessLevel }}</span>
+                <button mat-icon-button type="button" color="warn" (click)="removeAccess(grant.userId)">
+                  <mat-icon>person_remove</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
 
   <section aria-live="polite">
     <mat-tab-group fitInkBarToContent dynamicHeight

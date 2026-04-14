@@ -1,0 +1,22 @@
+:host {
+  display: block;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.subtitle {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.user-card-content {
+  display: grid;
+  gap: 16px;
+}
