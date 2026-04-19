@@ -1,57 +1,133 @@
-<div class="landing-container split-layout">
-  <div class="content-side">
-    <div class="brand-eyebrow">
-      <mat-icon>science</mat-icon>
-      SELEXTrace
-    </div>
-    <h1 class="hero-title">Next-Gen SELEX Analysis</h1>
-    <p class="hero-subtitle">Experience a fluid, expressive interface for all your aptamer discovery workflows. Powerful algorithms meet beautiful Material 3 design.</p>
-    
-    <div class="action-group">
-      <button mat-flat-button color="primary" class="primary-action" routerLink="/experiments/new">
-        <mat-icon>add</mat-icon>
-        New Experiment
-      </button>
-      <button mat-button class="secondary-action" routerLink="/experiments">
-        Browse Existing
-        <mat-icon iconPositionEnd>arrow_forward</mat-icon>
-      </button>
-    </div>
+<div class="landing-page" [class.is-light]="isLightTheme()">
 
-    <div class="stats-row">
-      <div class="stat">
-        <span class="stat-value">10x</span>
-        <span class="stat-label">Faster Processing</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value">M3</span>
-        <span class="stat-label">Expressive UI</span>
-      </div>
-      <div class="stat">
-        <span class="stat-value">100%</span>
-        <span class="stat-label">Open Source</span>
-      </div>
-    </div>
-  </div>
+  <div class="layout-shell">
+    <main class="content-grid" aria-labelledby="landing-title">
+      <section class="hero-section">
+        <div class="hero-top fade-up">
+          <img ngSrc="favicon.svg" width="42" height="42" alt="SELEXTrace logo" />
+          <span class="brand-name">SELEXTrace</span>
+        </div>
 
-  <div class="visual-side">
-    <div class="abstract-graphic">
-      <div class="circle primary-circle"></div>
-      <div class="circle tertiary-circle"></div>
-      <div class="floating-card top-card">
-        <div class="icon-wrap"><mat-icon>hub</mat-icon></div>
-        <div class="text-wrap">
-          <span class="card-title">Motif Identified</span>
-          <span class="card-desc">G-Quadruplex Region</span>
+        <h1 id="landing-title" class="hero-title fade-up delay-2">
+          Decode the <br />
+          <span>Aptamer</span> Universe.
+        </h1>
+
+        <p class="hero-description fade-up delay-3">
+          The definitive bioinformatics platform for SELEX data analysis. Seamlessly analyze
+          secondary structures, discover high-affinity motifs, and perform lightning-fast
+          sequence clustering in a unified, zero-setup browser environment.
+        </p>
+
+        <div class="hero-actions fade-up delay-4">
+          <a
+            class="action-primary"
+            routerLink="/experiments/new"
+            aria-label="Create a new SELEXTrace account"
+          >
+            <mat-icon aria-hidden="true">person_add</mat-icon>
+            <span>Create Account</span>
+          </a>
+          <a class="action-secondary" routerLink="/experiments" aria-label="Sign in to SELEXTrace">
+            <span>Sign In</span>
+            <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+          </a>
         </div>
-      </div>
-      <div class="floating-card bottom-card">
-        <div class="icon-wrap secondary"><mat-icon>trending_up</mat-icon></div>
-        <div class="text-wrap">
-          <span class="card-title">Enrichment</span>
-          <span class="card-desc">+42% in Round 5</span>
-        </div>
-      </div>
-    </div>
+      </section>
+
+      <section class="features-grid" aria-label="Platform highlights">
+        <article class="feature-card feature-clustering m3-card fade-up delay-2">
+          <div class="feature-inner">
+            <div class="feature-icon" aria-hidden="true">
+              <mat-icon>graph_3</mat-icon>
+            </div>
+            <h2>Ultra-Fast Clustering</h2>
+            <p>
+              Evaluate millions of reads in seconds using high-performance sequence processing.
+              Identify dominant aptamer families with near real-time feedback.
+            </p>
+            <div class="cluster-bars" aria-hidden="true">
+              @for (height of barHeights; track $index) {
+                <div class="bar" [style.height.%]="height"></div>
+              }
+            </div>
+          </div>
+        </article>
+
+        <article class="feature-card feature-motif m3-card fade-up delay-3">
+          <div class="feature-sequence" aria-hidden="true">G<br />A<br />T<br />C</div>
+          <div class="feature-inner">
+            <div class="feature-icon" aria-hidden="true">
+              <mat-icon>frame_inspect</mat-icon>
+            </div>
+            <h2>Motif Discovery</h2>
+            <p>
+              Extract high-affinity binding sites using targeted pattern recognition. Pinpoint
+              sequence regions most likely to drive target interaction.
+            </p>
+          </div>
+        </article>
+
+        <article class="feature-card feature-structure m3-card fade-up delay-4">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="288.38 56.8 223.23 356.42" class="structure-illustration">
+            <defs>
+              <!-- Abstract Nucleotide Templates-->
+              <g id="A">
+                <circle r="12" fill="#059669" stroke="#047857" stroke-width="2"></circle>
+              </g>
+              <g id="U">
+                <circle r="12" fill="#2563EB" stroke="#1D4ED8" stroke-width="2"></circle>
+              </g>
+              <g id="G">
+                <circle r="12" fill="#D97706" stroke="#B45309" stroke-width="2"></circle>
+              </g>
+              <g id="C">
+                <circle r="12" fill="#DC2626" stroke="#B91C1C" stroke-width="2"></circle>
+              </g>
+            </defs>
+            <!-- Scaled and Centered Abstract Structure -->
+            <g transform="translate(-20, -82.4) scale(1.2)">
+              <!-- RNA Backbone Core -->
+              <path d="M 270 400 L 280 350 L 290 300 L 300 250 L 279 200 L 300 150 L 350 129 L 400 150 L 421 200 L 400 250 L 410 300 L 420 350 L 430 400 L" fill="none" stroke="#475569" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"></path>
+              <!-- Abstract Connecting Bridges (Core Lines) -->
+              <g stroke="#38BDF8" stroke-width="3" opacity="0.6">
+                <line x1="295" y1="350" x2="405" y2="350"></line>
+                <line x1="305" y1="300" x2="395" y2="300"></line>
+                <line x1="315" y1="250" x2="385" y2="250"></line>
+              </g>
+              <!-- Geometric Nodes -->
+              <!-- 5' Tail -->
+              <use href="#A" x="270" y="400"></use>
+              <!-- Left Stem -->
+              <use href="#G" x="280" y="350"></use>
+              <use href="#C" x="290" y="300"></use>
+              <use href="#U" x="300" y="250"></use>
+              <!-- Apical Loop -->
+              <use href="#A" x="279" y="200"></use>
+              <use href="#C" x="300" y="150"></use>
+              <use href="#G" x="350" y="129"></use>
+              <use href="#U" x="400" y="150"></use>
+              <use href="#A" x="421" y="200"></use>
+              <!-- Right Stem -->
+              <use href="#A" x="400" y="250"></use>
+              <use href="#G" x="410" y="300"></use>
+              <use href="#C" x="420" y="350"></use>
+              <!-- 3' Tail -->
+              <use href="#U" x="430" y="400"></use>
+            </g>
+          </svg>
+          <div class="feature-inner">
+            <div class="feature-icon" aria-hidden="true">
+              <mat-icon>graph_7</mat-icon>
+            </div>
+            <h2>Structure Prediction</h2>
+            <p>
+              Visualize stem-loop formations and minimum free-energy states that are crucial to
+              aptamer structural integrity.
+            </p>
+          </div>
+        </article>
+      </section>
+    </main>
   </div>
 </div>

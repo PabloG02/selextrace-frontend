@@ -1,0 +1,9 @@
+@use '@angular/material' as mat;
+
+/* Used to access tonal palette colors for the theme. */
+$selextrace-theme: mat.define-theme((
+  color: (
+    primary: mat.$azure-palette,
+    tertiary: mat.$blue-palette,
+  )
+));
