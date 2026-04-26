@@ -7,7 +7,7 @@ export class ProjectStore {
 
   private readonly projectsRes = this.projectsApi.getProjectsRes();
 
-  readonly projects = computed(() => this.projectsRes.value());
+  readonly projects = computed(() => this.projectsRes.hasValue() ? this.projectsRes.value() : []);
   readonly isLoading = this.projectsRes.isLoading;
   readonly error = this.projectsRes.error;
 
