@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, computed, effect, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,6 +8,7 @@ import { NgOptimizedImage } from '@angular/common';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
+import { AuthService } from '../../services/auth.service';
 
 interface NavLink {
   label: string;
@@ -34,11 +35,22 @@ interface NavLink {
 })
 export class AppShellComponent {
   private readonly breakpointObserver = inject(BreakpointObserver);
+  private readonly router = inject(Router);
+  readonly authService = inject(AuthService);
 
-  readonly navLinks: NavLink[] = [
-    { label: 'Experiments', icon: 'science', route: '/experiments', exact: true },
-    { label: 'Settings', icon: 'settings', route: '/settings' },
-  ];
+  readonly navLinks = computed<NavLink[]>(() => {
+    const links: NavLink[] = [
+      { label: 'Experiments', icon: 'science', route: '/experiments', exact: true },
+      { label: 'Projects', icon: 'folder_shared', route: '/projects' },
+      { label: 'Settings', icon: 'settings', route: '/settings' },
+    ];
+
+    if (this.authService.isAdmin()) {
+      links.splice(2, 0, { label: 'Admin', icon: 'admin_panel_settings', route: '/admin/users' });
+    }
+
+    return links;
+  });
 
   readonly isMobileView = toSignal(
     this.breakpointObserver
@@ -87,5 +99,12 @@ export class AppShellComponent {
     if (this.isMobileView()) {
       this.drawerState.set('closed');
     }
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => this.router.navigate(['/login']),
+    });
   }
 }

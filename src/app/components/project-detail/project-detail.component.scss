@@ -1,0 +1,68 @@
+mat-card-header {
+  padding: 16px;
+}
+
+.members-card {
+  margin-top: 24px;
+}
+
+.project-form,
+.member-add-row {
+  display: grid;
+  gap: 16px;
+}
+
+.member-add-row {
+  grid-template-columns: minmax(260px, 1fr) 180px auto;
+  align-items: center;
+
+  > button {
+    margin-bottom: 20px;
+  }
+}
+
+.member-add-access {
+  min-width: 0;
+}
+
+.members-divider {
+  margin-block: 4px;
+}
+
+.membership-note {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.members-table {
+  overflow-x: auto;
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+}
+
+.member-name {
+  font: var(--mat-sys-emphasized-body-medium);
+  letter-spacing: var(--mat-sys-emphasized-body-medium-tracking);
+}
+
+.member-email {
+  font: var(--mat-sys-body-medium);
+  letter-spacing: var(--mat-sys-body-medium-tracking);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.member-actions-header,
+.member-actions-cell {
+  text-align: right;
+}
+
+@media (max-width: 860px) {
+  .member-add-row {
+    grid-template-columns: 1fr;
+  }
+}

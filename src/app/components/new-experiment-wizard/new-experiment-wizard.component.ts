@@ -27,6 +27,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { TitleCasePipe } from '@angular/common';
 import { ExperimentsStore } from '../../stores/experiments.store';
+import { AuthService } from '../../services/auth.service';
 import { FileFormat, ReadType } from '../../models/experiment';
 import { ProgressDialogComponent } from '../shared/progress-dialog/progress-dialog.component';
 import { FileUploadDropzoneComponent } from '../shared/file-upload-dropzone/file-upload-dropzone.component';
@@ -34,6 +35,7 @@ import { catchError, of } from 'rxjs';
 import { CreateExperimentDto, SelectionCycle } from '../../models/create-experiment-dto';
 import { ExperimentCreationParams } from '../../models/experiment-creation-params';
 import {ExperimentCreationParamsSchema} from '../../models/experiment-creation.schema';
+import {ProjectStore} from '../../stores/project.store';
 
 type CycleFormGroup = FormGroup<{
   roundNumber: FormControl<number>;
@@ -78,11 +80,14 @@ export class NewExperimentWizardComponent {
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   private readonly experimentsStore = inject(ExperimentsStore);
+  private readonly projectStore = inject(ProjectStore);
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly authService = inject(AuthService);
 
   private readonly stepper = viewChild(MatStepper);
+  readonly availableProjects = this.projectStore.projects;
 
   /** Form group for general experiment information and sequencing settings */
   readonly generalForm = this.fb.nonNullable.group({
@@ -90,6 +95,7 @@ export class NewExperimentWizardComponent {
       validators: [Validators.required, this.uniqueExperimentNameValidator()],
     }),
     description: this.fb.nonNullable.control(''),
+    projectId: this.fb.nonNullable.control(''),
     isDemultiplexed: this.fb.nonNullable.control(true),
     readType: this.fb.nonNullable.control<ReadType>('single-end'),
     fileFormat: this.fb.nonNullable.control<FileFormat>('fastq'),
@@ -233,10 +239,16 @@ export class NewExperimentWizardComponent {
 
   private applyExperimentParams(params: ExperimentCreationParams): void {
     const { name, description, sequencing } = params;
+    const importedProjectId = params.projectId?.trim() ?? '';
+    const validImportedProjectId = importedProjectId
+      && this.availableProjects().some((project) => project.id === importedProjectId)
+      ? importedProjectId
+      : '';
 
     this.generalForm.patchValue({
       name,
       description,
+      projectId: validImportedProjectId || this.generalForm.controls.projectId.value,
       isDemultiplexed: sequencing.isDemultiplexed,
       readType: sequencing.readType,
       fileFormat: sequencing.fileFormat,
@@ -305,6 +317,7 @@ export class NewExperimentWizardComponent {
     const payload: CreateExperimentDto = {
       name: this.generalForm.controls.name.value,
       description: this.generalForm.controls.description.value,
+      projectId: this.generalForm.controls.projectId.value || undefined,
       sequencing: {
         isDemultiplexed: this.generalForm.controls.isDemultiplexed.value,
         readType: this.generalForm.controls.readType.value,

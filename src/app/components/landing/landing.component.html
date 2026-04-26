@@ -20,16 +20,12 @@
         </p>
 
         <div class="hero-actions fade-up delay-4">
-          <a
-            class="action-primary"
-            routerLink="/experiments/new"
-            aria-label="Create a new SELEXTrace account"
-          >
-            <mat-icon aria-hidden="true">person_add</mat-icon>
-            <span>Create Account</span>
+          <a class="action-primary" [routerLink]="primaryRoute()">
+            <mat-icon aria-hidden="true">{{ primaryRoute() === '/signup' ? 'person_add' : 'add' }}</mat-icon>
+            <span>{{ primaryLabel() }}</span>
           </a>
-          <a class="action-secondary" routerLink="/experiments" aria-label="Sign in to SELEXTrace">
-            <span>Sign In</span>
+          <a class="action-secondary" [routerLink]="secondaryRoute()">
+            <span>{{ secondaryLabel() }}</span>
             <mat-icon aria-hidden="true">arrow_forward</mat-icon>
           </a>
         </div>
