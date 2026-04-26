@@ -1,0 +1,20 @@
+<h2 mat-dialog-title>Move Experiment</h2>
+<mat-dialog-content class="dialog-content">
+  <p>Choose a destination project for <strong>{{ data.experimentName }}</strong>.</p>
+
+  <mat-form-field appearance="outline" class="project-field">
+    <mat-label>Destination project</mat-label>
+    <mat-select [value]="selectedProjectId()" (selectionChange)="selectedProjectId.set($event.value)">
+      @for (project of data.projects; track project.id) {
+        <mat-option [value]="project.id">{{ projectLabel(project) }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button matButton="text" type="button" (click)="close()">Cancel</button>
+  <button matButton="filled" type="button" [disabled]="!canMove() || isSaving()" (click)="confirmMove()">
+    Move
+  </button>
+</mat-dialog-actions>

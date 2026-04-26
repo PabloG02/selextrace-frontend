@@ -47,6 +47,11 @@ export class ExperimentsStore {
     return result;
   });
 
+  /** Reload the list of experiments from the API */
+  reload(): void {
+    this.experiments.reload();
+  }
+
   /** Deletes a single experiment and refreshes the list. */
   deleteExperiment(id: string): Observable<void> {
     return this.apiService.deleteExperiment(id).pipe(

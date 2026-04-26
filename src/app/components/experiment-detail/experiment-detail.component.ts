@@ -15,7 +15,6 @@ import {ConfirmDialogComponent} from '../shared/confirm-dialog/confirm-dialog.co
 import {MatDialog} from '@angular/material/dialog';
 import {ExperimentsApiService} from '../../services/experiments-api.service';
 import {AptamerPoolTabComponent} from '../aptamer-pool-tab/aptamer-pool-tab.component';
-import {FormsModule} from '@angular/forms';
 import {SequencingDataTab} from '../sequencing-data-tab/sequencing-data-tab';
 import {ExperimentOverviewTab} from '../experiment-overview-tab/experiment-overview-tab';
 import {AptamerFamilyAnalysisTab} from '../aptamer-family-analysis-tab/aptamer-family-analysis-tab.component';
@@ -23,6 +22,10 @@ import {FsbcAnalysisTabComponent} from '../fsbc-analysis-tab/fsbc-analysis-tab.c
 import {MotifAnalysisTabComponent} from '../motif-analysis-tab/motif-analysis-tab.component';
 import {ExperimentCreationParams, SelectionCycleImport} from '../../models/experiment-creation-params';
 import {DownloadService} from '../../services/download.service';
+import {ProjectSummary} from '../../models/project';
+import {MoveExperimentDialogComponent} from './move-experiment-dialog/move-experiment-dialog.component';
+import {ExperimentAccessDialogComponent} from './experiment-access-dialog/experiment-access-dialog.component';
+import {ProjectStore} from '../../stores/project.store';
 
 @Component({
   selector: 'app-experiment-detail',
@@ -38,7 +41,6 @@ import {DownloadService} from '../../services/download.service';
     MatTooltipModule,
     MatSnackBarModule,
     AptamerPoolTabComponent,
-    FormsModule,
     SequencingDataTab,
     ExperimentOverviewTab,
     AptamerFamilyAnalysisTab,
@@ -50,6 +52,7 @@ import {DownloadService} from '../../services/download.service';
 })
 export class ExperimentDetailComponent {
   private readonly experimentsStore = inject(ExperimentsStore);
+  private readonly projectStore = inject(ProjectStore);
   protected readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
@@ -63,23 +66,7 @@ export class ExperimentDetailComponent {
   readonly experimentReport = this.experimentReportRes.value;
 
   constructor() {
-    effect(
-      () => {
-        document.title = `${this.experimentReport()?.name} • SELEXTrace`;
-      }
-    );
-  }
-
-  randomizedRegionDescription(): string {
-    // const experiment = this.experiment();
-    // if (!experiment) {
-    //   return 'Unknown';
-    // }
-    // const region = experiment.sequencing.randomizedRegion;
-    // return region.type === 'exact'
-    //   ? `${region.exactLength} bases`
-    //   : `${region.min} - ${region.max} bases`;
-    return 'TODO';
+    effect(() => { document.title = `${this.experimentReport()?.name} • SELEXTrace`; });
   }
 
   avatarInitials(owner: string): string {
@@ -93,7 +80,7 @@ export class ExperimentDetailComponent {
 
   deleteExperiment(): void {
     const experiment = this.experimentReport();
-    if (!experiment) return;
+    if (!experiment || !experiment.permissions.canDelete) return;
 
     this.dialog
       .open(ConfirmDialogComponent, {
@@ -117,8 +104,7 @@ export class ExperimentDetailComponent {
           this.snackBar.open('Experiment deleted', 'Dismiss', { duration: 2500 });
           this.router.navigate(['/experiments']);
         },
-        error: (err) => {
-          console.error('Failed to delete experiment', err);
+        error: () => {
           this.snackBar.open('Failed to delete experiment', 'Dismiss', { duration: 3000 });
         }
       });
@@ -162,11 +148,71 @@ export class ExperimentDetailComponent {
     this.snackBar.open('Experiment params exported.', 'Dismiss', { duration: 2500 });
   }
 
+  openAccessDialog(): void {
+    const experiment = this.experimentReport();
+    if (!experiment || !experiment.permissions.canShare) {
+      return;
+    }
+
+    this.dialog.open(ExperimentAccessDialogComponent, {
+      width: '760px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: {
+        experimentId: this.experimentId(),
+        experimentName: experiment.name,
+      },
+    });
+  }
+
+  openMoveDialog(): void {
+    const experiment = this.experimentReport();
+    if (!experiment || !experiment.permissions.canManage) {
+      return;
+    }
+
+    this.openMoveDialogWithProjects(
+      experiment.id,
+      experiment.name,
+      experiment.project?.id ?? null,
+      this.projectStore.projects().filter((p) => p.id !== experiment.project?.id)
+    );
+  }
+
+  private openMoveDialogWithProjects(
+    experimentId: string,
+    experimentName: string,
+    currentProjectId: string | null,
+    projects: ProjectSummary[],
+  ): void {
+    if (!projects.length) {
+      this.snackBar.open('No projects available for transfer.', 'Dismiss', { duration: 3000 });
+      return;
+    }
+
+    this.dialog
+      .open(MoveExperimentDialogComponent, {
+        width: '560px',
+        maxWidth: '95vw',
+        autoFocus: false,
+        data: {
+          experimentId,
+          experimentName,
+          currentProjectId,
+          projects,
+        },
+      })
+      .afterClosed()
+      .pipe(filter(Boolean))
+      .subscribe(() => {
+        this.experimentReportRes.reload();
+        this.experimentsStore.reload();
+      });
+  }
+
   private slugify(value: string): string {
     const trimmed = value.trim().toLocaleLowerCase();
     const slug = trimmed.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     return slug || 'experiment';
   }
-
-  protected readonly Object = Object;
 }
