@@ -1,9 +1,16 @@
-<div class="title-group">
-  <h1>Create a New Experiment</h1>
-  <p class="subtitle">
-    This wizard will guide you through the steps required to set up a new experiment,
-    set the experimental details of the selection, and import your data into SELEXTrace.
-  </p>
+<div class="header-section">
+  <div class="title-container">
+    <div class="icon-avatar">
+      <mat-icon>lab_research</mat-icon>
+    </div>
+    <div>
+      <h1 class="page-title">Create a New Experiment</h1>
+      <p class="page-subtitle">
+        This wizard will guide you through the steps required to set up a new experiment,
+        set the experimental details of the selection, and import your data into SELEXTrace.
+      </p>
+    </div>
+  </div>
 </div>
 <div class="wizard-layout">
   <section class="wizard" aria-label="Create experiment wizard">
@@ -28,6 +35,16 @@
                 <mat-form-field appearance="outline" subscriptSizing="dynamic">
                   <mat-label>Description</mat-label>
                   <textarea matInput rows="3" [formControl]="generalForm.controls.description"></textarea>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Project</mat-label>
+                  <mat-select [formControl]="generalForm.controls.projectId">
+                    @for (project of availableProjects(); track project.id) {
+                      <mat-option [value]="project.id">{{ project.personalProject ? project.name + ' (Personal workspace)' : project.name }}</mat-option>
+                    }
+                  </mat-select>
+                  <mat-hint>Experiments live in a workspace. Your personal workspace is selected by default.</mat-hint>
                 </mat-form-field>
               </div>
             </mat-card-content>
@@ -265,6 +282,7 @@
               <ul class="simple-list">
                 <li><strong>Name:</strong> {{ generalForm.value.name }}</li>
                 <li><strong>Description:</strong> {{ generalForm.value.description || 'No description' }}</li>
+                <li><strong>Project:</strong> {{ availableProjects().find(project => project.id === generalForm.value.projectId)?.name || 'No project' }}</li>
                 <li><strong>Read type:</strong> {{ generalForm.value.readType | titlecase }}</li>
                 <li><strong>File format:</strong> {{ generalForm.value.fileFormat?.toUpperCase() }}</li>
               </ul>
@@ -370,6 +388,10 @@
           <div>
             <dt>Description</dt>
             <dd>{{ generalForm.value.description || 'No description yet' }}</dd>
+          </div>
+          <div>
+            <dt>Project</dt>
+            <dd>{{ availableProjects().find(project => project.id === generalForm.value.projectId)?.name || 'No project' }}</dd>
           </div>
           <div>
             <dt>Read type</dt>

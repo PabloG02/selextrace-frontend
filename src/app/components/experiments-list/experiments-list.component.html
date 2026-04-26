@@ -1,13 +1,18 @@
-<section class="page-header">
-  <div class="title-group">
-    <h1>Experiments</h1>
-    <p class="subtitle">Manage SELEX runs, monitor status, and jump into recent results.</p>
+<div class="header-section">
+  <div class="title-container">
+    <div class="icon-avatar">
+      <mat-icon>science</mat-icon>
+    </div>
+    <div>
+      <h1 class="page-title">Experiments</h1>
+      <p class="page-subtitle">Manage SELEX runs, monitor status, and jump into recent results</p>
+    </div>
   </div>
   <button mat-flat-button color="primary" type="button" (click)="goToCreate()">
     <mat-icon aria-hidden="true">add</mat-icon>
     New experiment
   </button>
-</section>
+</div>
 
 <section class="controls" aria-label="Experiment controls">
   <div class="control-row">
@@ -95,6 +100,12 @@
             <span class="label">Created</span>
             <span>{{ experiment.createdAt | date: 'mediumDate' }}</span>
           </div>
+          @if (experiment.project) {
+            <div class="meta-row">
+              <span class="label">Project</span>
+              <span>{{ experiment.project.name }}</span>
+            </div>
+          }
         </mat-card-content>
 
         <mat-card-actions align="end">
@@ -113,9 +124,11 @@
           <button mat-button type="button" (click)="openExperiment(experiment.id)">
             Open
           </button>
-          <button mat-icon-button type="button" color="warn" matTooltip="Delete" (click)="deleteExperiment(experiment)">
-            <mat-icon>delete</mat-icon>
-          </button>
+          @if (canDelete(experiment)) {
+            <button mat-icon-button type="button" color="warn" matTooltip="Delete" (click)="deleteExperiment(experiment)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
         </mat-card-actions>
       </mat-card>
     }
