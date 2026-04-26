@@ -1,8 +1,13 @@
+import { ResourceAccessLevel } from './auth';
+import { ProjectReference } from './project';
+
 export interface ExperimentReport {
   id: string;
   createdAt: string;
   name: string;
   description: string;
+  project: ProjectReference | null;
+  accessLevel: ResourceAccessLevel;
   sequencing: ExperimentSequencing;
   importStats: ExperimentImportStats;
   selectionCycles: SelectionCycleResponse[];

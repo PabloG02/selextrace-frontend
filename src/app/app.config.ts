@@ -4,7 +4,7 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection
 } from '@angular/core';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import {
   provideRouter,
   withComponentInputBinding,
@@ -16,6 +16,8 @@ import { MatIconRegistry } from '@angular/material/icon';
 import * as echarts from 'echarts';
 
 import { routes } from './app.routes';
+import { authInterceptor } from './auth.interceptor';
+import { AuthService } from './services/auth.service';
 import { ThemeService } from './services/theme.service';
 
 export const appConfig: ApplicationConfig = {
@@ -23,11 +25,12 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withComponentInputBinding(), withExperimentalPlatformNavigation(), withViewTransitions()),
-    provideHttpClient(withFetch()),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     provideEchartsCore({ echarts }),
     provideAppInitializer(() => {
       // Initialize ThemeService to apply stored theme on app startup
       const themeService = inject(ThemeService);
+      const authService = inject(AuthService);
       // Set up Material Icon component to use "Material Symbols Rounded" by default
       const initializerFn = ((iconRegistry: MatIconRegistry) => () => {
         const defaultFontSetClasses = iconRegistry.getDefaultFontSetClass();
@@ -36,7 +39,8 @@ export const appConfig: ApplicationConfig = {
           .concat(['material-symbols-rounded']);
         iconRegistry.setDefaultFontSetClass(...outlinedFontSetClasses);
       })(inject(MatIconRegistry));
-      return initializerFn();
+      initializerFn();
+      return authService.initialize();
     })
   ]
 };

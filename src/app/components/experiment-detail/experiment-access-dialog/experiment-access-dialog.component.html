@@ -1,0 +1,90 @@
+<h2 mat-dialog-title>Share & Manage Access</h2>
+<mat-dialog-content class="dialog-content">
+  <p class="subtitle">Control who can view or manage <strong>{{ data.experimentName }}</strong>.</p>
+
+  <form class="member-add-row" (ngSubmit)="addAccess()">
+    <mat-form-field appearance="outline">
+      <mat-label>User email</mat-label>
+      <input matInput [ngModel]="emailToAdd()" (ngModelChange)="emailToAdd.set($event)" name="email" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="member-add-access">
+      <mat-label>Access level</mat-label>
+      <mat-select [ngModel]="addAccessLevel()" (ngModelChange)="addAccessLevel.set($event)" name="accessLevel">
+        @for (accessLevel of accessLevels; track accessLevel) {
+          <mat-option [value]="accessLevel">{{ accessLevel }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <button matButton="filled" type="submit" [disabled]="isAdding()">
+      {{ isAdding() ? 'Adding...' : 'Add access' }}
+    </button>
+  </form>
+
+  <mat-divider class="members-divider" />
+
+  <div class="members-table">
+    @if (isLoading()) {
+      <p class="empty-state">Loading access entries...</p>
+    } @else {
+      @let displayedColumns = ['member', 'access-level', 'actions'];
+      <table mat-table [dataSource]="grants()" aria-label="Experiment access grants">
+        <ng-container matColumnDef="member">
+          <th mat-header-cell *matHeaderCellDef>Member</th>
+          <td mat-cell *matCellDef="let grant">
+            <div class="member-info">
+              <span class="member-name">{{ grant.username }}</span>
+              <span class="member-email">{{ grant.email }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="access-level">
+          <th mat-header-cell *matHeaderCellDef>Access level</th>
+          <td mat-cell *matCellDef="let grant">
+            <div class="member-access-level-cell">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="member-access-level-field">
+                <mat-select
+                  [value]="grant.accessLevel"
+                  [disabled]="isGrantBusy(grant.userId)"
+                  (selectionChange)="saveGrant(grant.userId, $event.value)"
+                >
+                  @for (accessLevel of accessLevels; track accessLevel) {
+                    <mat-option [value]="accessLevel">{{ accessLevel }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="member-actions-header">Actions</th>
+          <td mat-cell *matCellDef="let grant" class="member-actions-cell">
+            <button
+              matIconButton
+              type="button"
+              [disabled]="isGrantBusy(grant.userId)"
+              (click)="removeGrant(grant)"
+              matTooltip="Remove access"
+            >
+              <mat-icon>person_remove</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <tr class="mat-row no-data-row" *matNoDataRow>
+          <td class="mat-cell" colspan="3">No additional users currently have access.</td>
+        </tr>
+      </table>
+    }
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button matButton="text" type="button" (click)="close()">Close</button>
+</mat-dialog-actions>

@@ -6,6 +6,8 @@ import {map} from 'rxjs/operators';
 import {CreateExperimentDto} from '../models/create-experiment-dto';
 import {BackendConfigService} from './backend-config.service';
 import {ExperimentSummary} from '../models/experiment-summary';
+import { ExperimentAccessGrant } from '../models/project';
+import { ResourceAccessLevel } from '../models/auth';
 
 @Injectable({ providedIn: 'root' })
 export class ExperimentsApiService {
@@ -23,6 +25,25 @@ export class ExperimentsApiService {
 
   deleteExperiment(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl()}/${id}`);
+  }
+
+  listExperimentPermissions(id: string): Observable<ExperimentAccessGrant[]> {
+    return this.http.get<ExperimentAccessGrant[]>(`${this.baseUrl()}/${id}/permissions`);
+  }
+
+  upsertExperimentPermissions(
+    id: string,
+    payload: { userId?: string; email?: string; accessLevel: ResourceAccessLevel },
+  ): Observable<ExperimentAccessGrant[]> {
+    return this.http.post<ExperimentAccessGrant[]>(`${this.baseUrl()}/${id}/permissions`, payload);
+  }
+
+  removeExperimentPermissions(id: string, userId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl()}/${id}/permissions/${userId}`);
+  }
+
+  transferExperimentToProject(id: string, projectId: string): Observable<ExperimentReport> {
+    return this.http.patch<ExperimentReport>(`${this.baseUrl()}/${id}/project`, { projectId });
   }
 
   /**

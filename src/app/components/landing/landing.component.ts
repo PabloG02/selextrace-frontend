@@ -3,6 +3,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import {NgOptimizedImage} from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-landing',
@@ -12,7 +13,23 @@ import {NgOptimizedImage} from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LandingComponent {
+  private readonly authService = inject(AuthService);
   private readonly themeService = inject(ThemeService);
+
+  readonly primaryRoute = computed(() =>
+    this.authService.isAuthenticated()
+      ? (this.authService.canCreateExperiments() ? '/experiments/new' : '/experiments')
+      : '/signup',
+  );
+
+  readonly primaryLabel = computed(() =>
+    this.authService.isAuthenticated()
+      ? (this.authService.canCreateExperiments() ? 'New Experiment' : 'Open Workspace')
+      : 'Create Account',
+  );
+
+  readonly secondaryRoute = computed(() => (this.authService.isAuthenticated() ? '/experiments' : '/login'));
+  readonly secondaryLabel = computed(() => (this.authService.isAuthenticated() ? 'Browse Experiments' : 'Sign In'));
 
   readonly barHeights = [40, 70, 40, 90, 60, 30, 80];
 
