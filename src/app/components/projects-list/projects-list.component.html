@@ -1,0 +1,47 @@
+<div class="header-section">
+  <div class="title-container">
+    <div class="icon-avatar">
+      <mat-icon>folder_shared</mat-icon>
+    </div>
+    <div>
+      <h1 class="page-title">Projects</h1>
+      <p class="page-subtitle">Group experiments, share access with teammates, and keep workspaces organized.</p>
+    </div>
+  </div>
+  <button mat-flat-button color="primary" type="button" (click)="openCreateDialog()">
+    <mat-icon>create_new_folder</mat-icon>
+    New project
+  </button>
+</div>
+
+@if (projectStore.isLoading() && projectStore.projects() === null) {
+  <p>Loading projects...</p>
+}
+@else if (projectStore.error()) {
+  <p class="error-text">Unable to load projects. Please try again later.</p>
+}
+@else if (projectStore.projects()?.length) {
+  <section class="project-grid">
+    @for (project of projectStore.projects(); track project.id) {
+      <mat-card appearance="outlined" class="project-card">
+        <mat-card-header>
+          <mat-card-title>{{ project.name }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ project.personalProject ? 'Personal project' : project.accessLevel + ' access' }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ project.description || 'No description yet.' }}</p>
+          <p class="meta">Created {{ project.createdAt | date: 'mediumDate' }}</p>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <a mat-button [routerLink]="['/projects', project.id]">Open</a>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </section>
+} @else {
+  <mat-card appearance="outlined">
+    <mat-card-content>No projects available yet.</mat-card-content>
+  </mat-card>
+}
