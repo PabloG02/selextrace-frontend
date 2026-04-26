@@ -27,9 +27,7 @@ import {ProjectStore} from '../../stores/project.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectsListComponent {
-  private readonly projectsApi = inject(ProjectsApiService);
   private readonly dialog = inject(MatDialog);
-  private readonly snackBar = inject(MatSnackBar);
   readonly authService = inject(AuthService);
   readonly router = inject(Router);
   readonly projectStore = inject(ProjectStore);
@@ -42,19 +40,10 @@ export class ProjectsListComponent {
         autoFocus: false,
       })
       .afterClosed()
-      .pipe(
-        filter((result): result is ProjectCreateDialogResult => result !== null),
-        switchMap((payload) => this.projectsApi.createProject(payload)),
-      )
-      .subscribe({
-        next: (project) => {
-          this.projectStore.reloadProjects();
-          this.router.navigate(['/projects', project.id]);
-        },
-        error: (error) => {
-          const message = error?.error?.message ?? 'Unable to create the project.';
-          this.snackBar.open(message, 'Dismiss', { duration: 3500 });
-        },
+      .pipe(filter((project) => !!project))
+      .subscribe((project) => {
+        this.projectStore.reloadProjects();
+        this.router.navigate(['/projects', project.id]);
       });
   }
 }
