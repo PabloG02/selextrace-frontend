@@ -1,0 +1,64 @@
+<section class="auth-page">
+  <div class="auth-banner">
+    <div class="banner-content">
+      <h1>Join SELEXTrace</h1>
+      <p>Unlock personal projects, advanced tools, and start managing experiments today.</p>
+    </div>
+  </div>
+
+  <div class="auth-content">
+    <div class="auth-card-container">
+      <div class="auth-header">
+        <h2>Create an account</h2>
+        <p>Get started with your free profile</p>
+      </div>
+
+      <form class="auth-form" (submit)="submit($event)">
+        <mat-form-field appearance="outline">
+          <mat-label>Display name</mat-label>
+          <input matInput type="text" [formField]="signUpForm.displayName" autocomplete="name" />
+          <mat-icon matIconPrefix>badge</mat-icon>
+          @for (error of signUpForm.displayName().errors(); track error.kind) {
+            <mat-error>{{ error.message }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" [formField]="signUpForm.email" autocomplete="email" />
+          <mat-icon matIconPrefix>mail</mat-icon>
+          @for (error of signUpForm.email().errors(); track error.kind) {
+            <mat-error>{{ error.message }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" [formField]="signUpForm.password" autocomplete="new-password" />
+          <mat-icon matIconPrefix>lock</mat-icon>
+          @for (error of signUpForm.password().errors(); track error.kind) {
+            <mat-error>{{ error.message }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Confirm password</mat-label>
+          <input matInput type="password" [formField]="signUpForm.confirmPassword" autocomplete="new-password" />
+          <mat-icon matIconPrefix>lock_reset</mat-icon>
+          @for (error of signUpForm.confirmPassword().errors(); track error.kind) {
+            <mat-error>{{ error.message }}</mat-error>
+          }
+        </mat-form-field>
+
+        <button mat-flat-button type="submit" class="submit-btn" [disabled]="signUpForm().invalid() || authService.isBusy()">
+          Create account
+        </button>
+      </form>
+
+      <div class="auth-actions">
+        <p>Already have an account?</p>
+        <a matButton routerLink="/login">Sign in instead</a>
+      </div>
+    </div>
+  </div>
+</section>

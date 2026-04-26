@@ -1,0 +1,46 @@
+<section class="auth-page">
+  <div class="auth-banner">
+    <div class="banner-content">
+      <h1>SELEXTrace</h1>
+      <p>Your ultimate platform for experiments, projects, and advanced analysis tools.</p>
+    </div>
+  </div>
+
+  <div class="auth-content">
+    <div class="auth-card-container">
+      <div class="auth-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to continue to your account</p>
+      </div>
+
+      <form class="auth-form" (submit)="submit($event)">
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" [formField]="signInForm.email" autocomplete="email" />
+          <mat-icon matIconPrefix>mail</mat-icon>
+          @for (error of signInForm.email().errors(); track error.kind) {
+            <mat-error>{{ error.message }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" [formField]="signInForm.password" autocomplete="current-password" />
+          <mat-icon matIconPrefix>lock</mat-icon>
+          @for (error of signInForm.password().errors(); track error.kind) {
+            <mat-error>{{ error.message }}</mat-error>
+          }
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" type="submit" class="submit-btn" [disabled]="signInForm().invalid() || authService.isBusy()">
+          Sign in
+        </button>
+      </form>
+
+      <div class="auth-actions">
+        <p>Don't have an account?</p>
+        <a matButton routerLink="/signup">Create account</a>
+      </div>
+    </div>
+  </div>
+</section>
