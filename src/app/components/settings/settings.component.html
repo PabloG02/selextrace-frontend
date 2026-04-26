@@ -1,61 +1,175 @@
-<div class="title-group">
-  <h1>Settings</h1>
-</div>
-
-<div class="settings-section">
-  <h2>Appearance</h2>
-
-  <div class="setting-item">
-    <label>Theme</label>
-    <mat-button-toggle-group
-      [value]="currentTheme()"
-      (change)="onThemeChange($event.value)"
-      [hideSingleSelectionIndicator]="true"
-      aria-label="Theme selection">
-      <mat-button-toggle value="light">
-        <mat-icon>light_mode</mat-icon>
-        <span>Light</span>
-      </mat-button-toggle>
-      <mat-button-toggle value="dark">
-        <mat-icon>dark_mode</mat-icon>
-        <span>Dark</span>
-      </mat-button-toggle>
-      <mat-button-toggle value="auto">
-        <mat-icon>brightness_auto</mat-icon>
-        <span>Auto</span>
-      </mat-button-toggle>
-    </mat-button-toggle-group>
-  </div>
-</div>
-
-<div class="settings-section">
-  <h2>Backend Configuration</h2>
-
-  <div class="setting-item">
-    <label>Backend URL</label>
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="backend-url-field">
-      <input
-        matInput
-        [(ngModel)]="backendUrl"
-        (input)="onBackendUrlInput()"
-        placeholder="http://localhost:8080"
-        type="url" />
-      <mat-icon matIconPrefix>dns</mat-icon>
-    </mat-form-field>
-    <div class="button-group">
-      <button
-        matButton="filled"
-        (click)="saveBackendUrl()"
-        [disabled]="!isBackendUrlModified()">
-        <mat-icon>save</mat-icon>
-        Save
-      </button>
-      <button
-        matButton="outlined"
-        (click)="resetBackendUrl()">
-        <mat-icon>restore</mat-icon>
-        Reset to Default
-      </button>
+<div class="header-section">
+  <div class="title-container">
+    <div class="icon-avatar">
+      <mat-icon>settings</mat-icon>
+    </div>
+    <div>
+      <h1 class="page-title">Settings</h1>
+      <p class="page-subtitle">Manage your account and application preferences</p>
     </div>
   </div>
 </div>
+
+<div class="settings-grid">
+  @if (currentUser(); as user) {
+    <mat-card class="settings-card">
+      <mat-card-header>
+        <div mat-card-avatar class="icon-avatar card-avatar">
+          <mat-icon>person</mat-icon>
+        </div>
+        <mat-card-title>Account Profile</mat-card-title>
+        <mat-card-subtitle>Your personal information</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-card appearance="outlined">
+          <mat-card-content class="profile-info">
+            <div class="info-group">
+              <span class="info-label">Name</span>
+              <span class="info-value">{{ user.displayName }}</span>
+            </div>
+            <mat-divider></mat-divider>
+            <div class="info-group">
+              <span class="info-label">Email</span>
+              <span class="info-value">{{ user.email }}</span>
+            </div>
+            <mat-divider></mat-divider>
+            <div class="info-group">
+              <span class="info-label">Role</span>
+              <span class="info-value role-badge">{{ userRoleLabel() }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+        @if (user.mustChangePassword) {
+          <div class="warning-banner">
+            <mat-icon>warning</mat-icon>
+            <span>A password change is required before continuing.</span>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="settings-card elevated-card">
+      <mat-card-header>
+        <div mat-card-avatar class="icon-avatar card-avatar">
+          <mat-icon>security</mat-icon>
+        </div>
+        <mat-card-title>Security</mat-card-title>
+        <mat-card-subtitle>Update your password</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <form class="password-form" (submit)="changePassword(); $event.preventDefault()">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Current password</mat-label>
+            <input
+              matInput
+              [ngModel]="currentPassword()"
+              (ngModelChange)="currentPassword.set($event)"
+              name="currentPassword"
+              type="password" />
+            <mat-icon matIconPrefix>lock</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>New password</mat-label>
+            <input
+              matInput
+              [ngModel]="newPassword()"
+              (ngModelChange)="newPassword.set($event)"
+              name="newPassword"
+              type="password" />
+            <mat-icon matIconPrefix>password</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Confirm new password</mat-label>
+            <input
+              matInput
+              [ngModel]="confirmPassword()"
+              (ngModelChange)="confirmPassword.set($event)"
+              name="confirmPassword"
+              type="password" />
+            <mat-icon matIconPrefix>lock_reset</mat-icon>
+          </mat-form-field>
+        </form>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-flat-button color="primary" (click)="changePassword()">
+          <mat-icon>check</mat-icon>
+          Update password
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  <mat-card class="settings-card elevated-card">
+    <mat-card-header>
+      <div mat-card-avatar class="icon-avatar card-avatar">
+        <mat-icon>palette</mat-icon>
+      </div>
+      <mat-card-title>Appearance</mat-card-title>
+      <mat-card-subtitle>Customize your experience</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="theme-selector">
+        <mat-button-toggle-group
+          [value]="currentTheme()"
+          (change)="onThemeChange($event.value)"
+          [hideSingleSelectionIndicator]="true"
+          aria-label="Theme selection">
+          <mat-button-toggle value="light">
+            <mat-icon>light_mode</mat-icon>
+            <span>Light</span>
+          </mat-button-toggle>
+          <mat-button-toggle value="dark">
+            <mat-icon>dark_mode</mat-icon>
+            <span>Dark</span>
+          </mat-button-toggle>
+          <mat-button-toggle value="auto">
+            <mat-icon>brightness_auto</mat-icon>
+            <span>Auto</span>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="settings-card elevated-card">
+    <mat-card-header>
+      <div mat-card-avatar class="icon-avatar card-avatar">
+        <mat-icon>dns</mat-icon>
+      </div>
+      <mat-card-title>Backend Configuration</mat-card-title>
+      <mat-card-subtitle>API connection settings</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <p class="section-description">Configure the URL where the application will try to reach the backend services.</p>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Backend API URL</mat-label>
+        <input
+          matInput
+          [(ngModel)]="backendUrl"
+          (input)="onBackendUrlInput()"
+          placeholder="http://localhost:8080"
+          type="url" />
+        <mat-icon matIconPrefix>api</mat-icon>
+      </mat-form-field>
+    </mat-card-content>
+    <mat-card-actions align="end">
+      <button
+        mat-button
+        (click)="resetBackendUrl()">
+        <mat-icon>restore</mat-icon>
+        Reset
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="saveBackendUrl()"
+        [disabled]="!isBackendUrlModified()">
+        <mat-icon>save</mat-icon>
+        Save Changes
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+

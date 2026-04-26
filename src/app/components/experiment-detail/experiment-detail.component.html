@@ -22,33 +22,28 @@
     </mat-card-header>
     <mat-card-content>
       <div>{{ experimentReportRes.value()!.description }}</div>
-<!--      <dl class="meta-list">-->
-<!--        <div>-->
-<!--          <dt>Created</dt>-->
-<!--          <dd>{{ experiment()!.createdAt | date: 'medium' }}</dd>-->
-<!--        </div>-->
-<!--      </dl>-->
     </mat-card-content>
     <mat-card-actions align="end">
-<!--      <mat-chip-set>-->
-<!--        <mat-chip-->
-<!--          [class.status-draft]="experiment()!.status === 'draft'"-->
-<!--          [class.status-running]="experiment()!.status === 'running'"-->
-<!--          [class.status-completed]="experiment()!.status === 'completed'"-->
-<!--          [class.status-error]="experiment()!.status === 'error'"-->
-<!--          aria-label="Status {{ experiment()!.status }}"-->
-<!--        >-->
-<!--          {{ experiment()!.status | titlecase }}-->
-<!--        </mat-chip>-->
-<!--      </mat-chip-set>-->
       <span class="action-spacer"></span>
-        <button mat-stroked-button type="button" (click)="exportCreationParams()">
-          <mat-icon>file_export</mat-icon>
-          Export Recipe
-        </button>
-      <button mat-icon-button type="button" color="warn" matTooltip="Delete" (click)="deleteExperiment()">
-        <mat-icon>delete</mat-icon>
+      <button matIconButton type="button" matTooltip="Export Recipe" (click)="exportCreationParams()">
+        <mat-icon>file_export</mat-icon>
       </button>
+      @if (experimentReportRes.value()!.permissions.canManage) {
+        <button matIconButton type="button" matTooltip="Move to project" (click)="openMoveDialog()">
+          <mat-icon>swap_horiz</mat-icon>
+        </button>
+      }
+      @if (experimentReportRes.value()!.permissions.canShare) {
+        <button matIconButton type="button" matTooltip="Share &amp; manage access" (click)="openAccessDialog()">
+          <mat-icon>group_add</mat-icon>
+        </button>
+      }
+
+      @if (experimentReportRes.value()!.permissions.canDelete) {
+        <button matIconButton type="button" color="warn" matTooltip="Delete" (click)="deleteExperiment()">
+          <mat-icon>delete</mat-icon>
+        </button>
+      }
     </mat-card-actions>
   </mat-card>
 

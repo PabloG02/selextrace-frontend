@@ -43,7 +43,7 @@
     </button>
 
     <mat-nav-list>
-      @for (link of navLinks; track link.route) {
+      @for (link of navLinks(); track link.route) {
         <a
           mat-list-item
           [routerLink]="link.route"
@@ -56,6 +56,25 @@
         </a>
       }
     </mat-nav-list>
+
+    @if (authService.currentUser(); as user) {
+      <div class="account-card">
+        <div class="account-summary">
+          <div class="account-avatar">{{ user.displayName.charAt(0).toUpperCase() }}</div>
+          @if (drawerState() !== 'collapsed') {
+            <div class="account-copy">
+              <span>{{ user.displayName }}</span>
+              <span>{{ authService.userRoleLabel() }}</span>
+            </div>
+          }
+        </div>
+        @if (drawerState() !== 'collapsed') {
+          <button matIconButton type="button" class="nav-toggle" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+          </button>
+        }
+      </div>
+    }
   </mat-sidenav>
 
   <mat-sidenav-content class="layout-content">
