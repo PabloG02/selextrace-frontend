@@ -19,14 +19,6 @@ export class ProjectsApiService {
     return httpResource<ProjectDetail>(() => id() ? `${this.baseUrl()}/${id()}` : undefined);
   }
 
-  listProjects(): Observable<ProjectSummary[]> {
-    return this.http.get<ProjectSummary[]>(this.baseUrl());
-  }
-
-  getProject(projectId: string): Observable<ProjectDetail> {
-    return this.http.get<ProjectDetail>(`${this.baseUrl()}/${projectId}`);
-  }
-
   createProject(payload: { name: string; description: string }): Observable<ProjectDetail> {
     return this.http.post<ProjectDetail>(this.baseUrl(), payload);
   }
