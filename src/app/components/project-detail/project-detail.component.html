@@ -1,0 +1,133 @@
+@if (projectRes.isLoading() && !projectRes.hasValue()) {
+  <p>Loading project...</p>
+} @else if (projectRes.hasValue() && projectRes.value(); as project) {
+  <div class="header-section">
+    <div class="title-container">
+      <div class="icon-avatar">
+        <mat-icon>folder_shared</mat-icon>
+      </div>
+      <div>
+        <h1 class="page-title">{{ project.name }}</h1>
+        <p class="page-subtitle">{{ project.description || 'No description yet.' }}</p>
+      </div>
+    </div>
+  </div>
+
+  @if (project.permissions.canManage) {
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Project details</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form class="project-form" [formRoot]="projectForm">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Name</mat-label>
+            <input matInput [formField]="projectForm.name" />
+            @for (error of projectForm.name().errors(); track error.kind) {
+              <mat-error>{{ error.message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Description</mat-label>
+            <textarea matInput rows="2" [formField]="projectForm.description"></textarea>
+          </mat-form-field>
+          <button matButton="filled" type="submit" [disabled]="!projectForm().valid() || projectForm().submitting()">Save changes</button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <mat-card appearance="outlined" class="members-card">
+    <mat-card-header>
+      <mat-card-title>Members</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (project.personalProject) {
+        <p class="membership-note">Personal workspaces always keep a fixed owner membership. Share individual experiments instead.</p>
+      }
+      @if (canManageMembers(project)) {
+        <form class="member-add-row" [formRoot]="memberForm">
+          <mat-form-field appearance="outline">
+            <mat-label>User email</mat-label>
+            <input matInput [formField]="memberForm.email">
+            @for (error of memberForm.email().errors(); track error.kind) {
+              <mat-error>{{ error.message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="member-add-access">
+            <mat-label>Access level</mat-label>
+            <mat-select [formField]="memberForm.accessLevel">
+              @for (accessLevel of accessLevels; track accessLevel) {
+                <mat-option [value]="accessLevel">{{ accessLevel }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button matButton="filled" type="submit" [disabled]="!memberForm().valid() || memberForm().submitting()">Add member</button>
+        </form>
+        <mat-divider class="members-divider" />
+      }
+
+      <div class="members-table">
+        @let displayedColumns = ['member', 'access-level', 'actions'];
+        <table mat-table [dataSource]="project.memberships" aria-label="Project members">
+          <ng-container matColumnDef="member">
+            <th mat-header-cell *matHeaderCellDef>Member</th>
+            <td mat-cell *matCellDef="let membership">
+              <div class="member-info">
+                <span class="member-name">{{ membership.displayName }}</span>
+                <span class="member-email">{{ membership.email }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="access-level">
+            <th mat-header-cell *matHeaderCellDef>Access level</th>
+            <td mat-cell *matCellDef="let membership">
+              <div class="member-access-level-cell">
+                @if (canManageMembers(project)) {
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="member-access-level-field">
+                    <mat-select
+                      [value]="membership.accessLevel"
+                      [disabled]="isMemberBusy(membership.userId)"
+                      (selectionChange)="updateMemberAccess(membership.userId, $event.value)"
+                    >
+                      @for (accessLevel of accessLevels; track accessLevel) {
+                        <mat-option [value]="accessLevel">{{ accessLevel }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                } @else {
+                  <span class="member-access-level-value">{{ membership.accessLevel }}</span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="member-actions-header">Actions</th>
+            <td mat-cell *matCellDef="let membership" class="member-actions-cell">
+              @if (canManageMembers(project)) {
+                <button
+                  matIconButton
+                  type="button"
+                  [disabled]="isMemberBusy(membership.userId)"
+                  (click)="removeMember(membership.userId)"
+                  matTooltip="Remove member"
+                >
+                  <mat-icon>person_remove</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+          <tr class="mat-row no-data-row" *matNoDataRow>
+            <td class="mat-cell" colspan="3">No members found.</td>
+          </tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+}
