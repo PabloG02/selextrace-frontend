@@ -8,7 +8,7 @@ import { SystemRole, UserSummary } from '../models/auth';
 export class AdminUsersApiService {
   private readonly http = inject(HttpClient);
   private readonly backendConfig = inject(BackendConfigService);
-  private readonly baseUrl = computed(() => `${this.backendConfig.backendUrl()}/api/admin/users`);
+  private readonly baseUrl = computed(() => `${this.backendConfig.backendUrl()}/api/users`);
 
   getUsersRes() {
     return httpResource<UserSummary[]>(() => this.baseUrl());
