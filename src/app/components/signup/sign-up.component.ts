@@ -31,14 +31,14 @@ export class SignUpComponent {
   private readonly snackBar = inject(MatSnackBar);
 
   private readonly signUpFormModel = signal({
-    displayName: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
   readonly signUpForm = form(this.signUpFormModel, (schemaPath) => {
-    required(schemaPath.displayName, {message: 'Display name is required'});
-    minLength(schemaPath.displayName, 2, {message: 'Display name must be at least 2 characters'});
+    required(schemaPath.username, {message: 'Username is required'});
+    minLength(schemaPath.username, 2, {message: 'Username must be at least 2 characters'});
 
     required(schemaPath.email, {message: 'Email is required'});
     email(schemaPath.email, {message: 'Please enter a valid email address'});
@@ -73,7 +73,7 @@ export class SignUpComponent {
 
     const value = this.signUpForm().value();
     this.authService.signup({
-      displayName: value.displayName,
+      username: value.username,
       email: value.email,
       password: value.password,
     }).subscribe({

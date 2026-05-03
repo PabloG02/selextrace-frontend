@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 
 export interface ResetPasswordDialogData {
   userId: string;
-  displayName: string;
+  username: string;
 }
 
 @Component({

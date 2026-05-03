@@ -21,7 +21,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { DatePipe } from '@angular/common';
 
 import { AdminUsersApiService } from '../../services/admin-users-api.service';
-import { AppUserRole, toAppUserRole, toAssignableSystemRole, UserSummary } from '../../models/auth';
+import { SystemRole, UserSummary } from '../../models/auth';
 import {
   ResetPasswordDialogComponent,
   ResetPasswordDialogData,
@@ -54,9 +54,9 @@ export class AdminUsersComponent {
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
 
-  readonly roleOptions: Array<{ value: AppUserRole; label: string }> = [
+  readonly roleOptions: Array<{ value: SystemRole; label: string }> = [
     { value: 'ADMIN', label: 'Admin' },
-    { value: 'REGULAR', label: 'Regular user' },
+    { value: 'STANDARD', label: 'Regular user' },
   ];
 
   readonly usersRes = this.adminUsersApi.getUsersRes();
@@ -73,7 +73,7 @@ export class AdminUsersComponent {
       return users;
     }
     return users.filter((user) =>
-      `${user.displayName} ${user.email}`.toLowerCase().includes(filterValue),
+      `${user.username} ${user.email}`.toLowerCase().includes(filterValue),
     );
   });
 
@@ -88,7 +88,7 @@ export class AdminUsersComponent {
     return [...data].sort((left, right) => {
       switch (active) {
         case 'user':
-          return left.displayName.localeCompare(right.displayName) * multiplier;
+          return left.username.localeCompare(right.username) * multiplier;
         case 'role':
           return left.systemRole.localeCompare(right.systemRole) * multiplier;
         case 'active':
@@ -125,16 +125,16 @@ export class AdminUsersComponent {
     this.pageSize.set(event.pageSize);
   }
 
-  userRole(systemRole: UserSummary['systemRole']): AppUserRole {
-    return toAppUserRole(systemRole);
+  userRole(systemRole: UserSummary['systemRole']): SystemRole {
+    return systemRole;
   }
 
-  updateRole(user: UserSummary, role: AppUserRole | null): void {
+  updateRole(user: UserSummary, role: SystemRole | null): void {
     if (role === null) {
       return;
     }
 
-    this.adminUsersApi.updateRole(user.id, toAssignableSystemRole(role)).subscribe({
+    this.adminUsersApi.updateRole(user.id, role).subscribe({
       next: () => this.usersRes.reload(),
       error: () => this.snackBar.open('Unable to update user role.', 'Dismiss', { duration: 3500 }),
     });
@@ -152,7 +152,7 @@ export class AdminUsersComponent {
       ResetPasswordDialogComponent,
       {
         width: '400px',
-        data: { userId: user.id, displayName: user.displayName },
+        data: { userId: user.id, username: user.username },
       },
     );
 

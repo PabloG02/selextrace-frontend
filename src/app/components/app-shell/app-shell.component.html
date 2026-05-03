@@ -60,10 +60,10 @@
     @if (authService.currentUser(); as user) {
       <div class="account-card">
         <div class="account-summary">
-          <div class="account-avatar">{{ user.displayName.charAt(0).toUpperCase() }}</div>
+          <div class="account-avatar">{{ user.username.charAt(0).toUpperCase() }}</div>
           @if (drawerState() !== 'collapsed') {
             <div class="account-copy">
-              <span>{{ user.displayName }}</span>
+              <span>{{ user.username }}</span>
               <span>{{ authService.userRoleLabel() }}</span>
             </div>
           }

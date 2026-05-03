@@ -15,10 +15,10 @@
 
       <form class="auth-form" (submit)="submit($event)">
         <mat-form-field appearance="outline">
-          <mat-label>Display name</mat-label>
-          <input matInput type="text" [formField]="signUpForm.displayName" autocomplete="name" />
+          <mat-label>Username</mat-label>
+          <input matInput type="text" [formField]="signUpForm.username" autocomplete="name" />
           <mat-icon matIconPrefix>badge</mat-icon>
-          @for (error of signUpForm.displayName().errors(); track error.kind) {
+          @for (error of signUpForm.username().errors(); track error.kind) {
             <mat-error>{{ error.message }}</mat-error>
           }
         </mat-form-field>
