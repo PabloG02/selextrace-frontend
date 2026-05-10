@@ -100,7 +100,6 @@ export class FsbcAnalysisTabComponent {
     min(path.minLength, 1);
     required(path.maxLength);
     min(path.maxLength, 1);
-    required(path.rnaSequence);
   });
 
   readonly sequenceTableFormModel = signal({
