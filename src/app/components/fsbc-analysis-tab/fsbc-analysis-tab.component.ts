@@ -34,11 +34,13 @@ import { MatTableModule } from '@angular/material/table';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import { AptamerTableComponent, AptamerTableRow, SelectionCycleMetrics } from '../shared/aptamer-table/aptamer-table.component';
 import { ChartDialogTriggerComponent } from '../shared/chart-dialog-trigger/chart-dialog-trigger.component';
+import { FornacVisualizationComponent } from '../shared/fornac-visualization/fornac-visualization.component';
 import { ExperimentReport, SelectionCycleResponse } from '../../models/experiment-report';
 import { FsbcAnalysis, FsbcClusterSeed, FsbcStringResult } from '../../models/fsbc-analysis';
 import { FsbcConfiguration } from '../../models/fsbc-configuration';
 import { ExperimentChartService } from '../../services/experiment-chart.service';
 import { FsbcApiService } from '../../services/fsbc-api.service';
+import { PredictionsApiService } from '../../services/predictions-api.service';
 import { ThemeService } from '../../services/theme.service';
 
 type FsbcClusterRow = FsbcClusterSeed & {
@@ -71,6 +73,7 @@ type FsbcClusterRow = FsbcClusterSeed & {
     AptamerTableComponent,
     Listbox,
     Option,
+    FornacVisualizationComponent,
     ChartDialogTriggerComponent
   ],
   templateUrl: './fsbc-analysis-tab.component.html',
@@ -80,6 +83,7 @@ export class FsbcAnalysisTabComponent {
   readonly themeService = inject(ThemeService);
   private readonly fsbcApi = inject(FsbcApiService);
   private readonly chartService = inject(ExperimentChartService);
+  private readonly predictionsApiService = inject(PredictionsApiService);
   private readonly dialog = inject(MatDialog);
 
   readonly experimentId = input.required<string>();
@@ -169,7 +173,9 @@ export class FsbcAnalysisTabComponent {
   readonly selectedClusterId = signal<number | null>(null);
   readonly selectedString = signal<string | null>(null);
   readonly selectedAptamerRows = signal<AptamerTableRow[]>([]);
+  readonly selectedAptamer = computed(() => this.selectedAptamerRows()[0]?.sequence ?? null);
   readonly clusterOverviewMetric = signal<'totalCounts' | 'memberCounts'>('totalCounts');
+  readonly mfeResource = this.predictionsApiService.getMfe(this.selectedAptamer);
 
   readonly selectedCluster = computed<FsbcClusterRow | null>(() => {
     const clusterId = this.selectedClusterId();

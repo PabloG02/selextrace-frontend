@@ -339,6 +339,32 @@
 
       <mat-expansion-panel>
         <mat-expansion-panel-header>
+          <mat-panel-title>Selected String Secondary Structure (RNAfold/Fornac)</mat-panel-title>
+        </mat-expansion-panel-header>
+        @if (selectedString() && selectedAptamer()) {
+          @if (mfeResource.isLoading()) {
+            <div class="state-block compact">Loading structure prediction...</div>
+          } @else if (mfeResource.hasValue()) {
+            <div>
+              <pre class="monospace">{{ selectedAptamer() }}</pre>
+              <pre class="monospace">{{ mfeResource.value().structure }}</pre>
+              <pre class="monospace">Binding Free Energy: {{ mfeResource.value().mfe }} kcal/mol</pre>
+              <app-fornac-visualization
+                [sequence]="selectedAptamer()"
+                [highlightedSequence]="selectedString()"
+                [structure]="mfeResource.value().structure">
+              </app-fornac-visualization>
+            </div>
+          } @else {
+            <div class="state-block compact">Structure prediction is unavailable for the selected string.</div>
+          }
+        } @else {
+          <div class="state-block compact">Select a cluster or string to view its secondary structure.</div>
+        }
+      </mat-expansion-panel>
+
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
           <mat-panel-title>Mutation Rates from Seed Sequence</mat-panel-title>
         </mat-expansion-panel-header>
         @if (aptamersInSelectedCluster().length > 0) {
