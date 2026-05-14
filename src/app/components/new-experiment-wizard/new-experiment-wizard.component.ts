@@ -95,7 +95,7 @@ export class NewExperimentWizardComponent {
       validators: [Validators.required, this.uniqueExperimentNameValidator()],
     }),
     description: this.fb.nonNullable.control(''),
-    projectId: this.fb.nonNullable.control(''),
+    projectId: this.fb.control<number | null>(null),
     isDemultiplexed: this.fb.nonNullable.control(true),
     readType: this.fb.nonNullable.control<ReadType>('single-end'),
     fileFormat: this.fb.nonNullable.control<FileFormat>('fastq'),
@@ -239,16 +239,16 @@ export class NewExperimentWizardComponent {
 
   private applyExperimentParams(params: ExperimentCreationParams): void {
     const { name, description, sequencing } = params;
-    const importedProjectId = params.projectId?.trim() ?? '';
-    const validImportedProjectId = importedProjectId
+    const importedProjectId = params.projectId ?? null;
+    const validImportedProjectId = importedProjectId !== null
       && this.availableProjects().some((project) => project.id === importedProjectId)
       ? importedProjectId
-      : '';
+      : null;
 
     this.generalForm.patchValue({
       name,
       description,
-      projectId: validImportedProjectId || this.generalForm.controls.projectId.value,
+      projectId: validImportedProjectId ?? this.generalForm.controls.projectId.value,
       isDemultiplexed: sequencing.isDemultiplexed,
       readType: sequencing.readType,
       fileFormat: sequencing.fileFormat,
@@ -317,7 +317,7 @@ export class NewExperimentWizardComponent {
     const payload: CreateExperimentDto = {
       name: this.generalForm.controls.name.value,
       description: this.generalForm.controls.description.value,
-      projectId: this.generalForm.controls.projectId.value || undefined,
+      projectId: this.generalForm.controls.projectId.value ?? undefined,
       sequencing: {
         isDemultiplexed: this.generalForm.controls.isDemultiplexed.value,
         readType: this.generalForm.controls.readType.value,

@@ -11,26 +11,26 @@ export class ClustersApiService {
   private readonly backendConfig = inject(BackendConfigService);
   private readonly baseUrl = computed(() => `${this.backendConfig.backendUrl()}/api/experiments`);
 
-  getAnalysesRes(experimentId: Signal<string | undefined>) {
+  getAnalysesRes(experimentId: Signal<number | undefined>) {
     return httpResource<ClusterAnalysis[]>(() =>
       experimentId() ? `${this.baseUrl()}/${experimentId()}/clusters` : undefined
     );
   }
 
-  getAnalysisRes(experimentId: Signal<string | undefined>, analysisId: Signal<string | undefined>) {
+  getAnalysisRes(experimentId: Signal<number | undefined>, analysisId: Signal<number | undefined>) {
     return httpResource<ClusterAnalysis>(() =>
       experimentId() && analysisId() ? `${this.baseUrl()}/${experimentId()}/clusters/${analysisId()}` : undefined
     );
   }
 
-  createAnalysis(experimentId: string, payload: AptaClusterConfiguration): Observable<ClusterAnalysis> {
+  createAnalysis(experimentId: number, payload: AptaClusterConfiguration): Observable<ClusterAnalysis> {
     return this.http.post<ClusterAnalysis>(
       `${this.baseUrl()}/${experimentId}/clusters`,
       payload
     );
   }
 
-  deleteAnalysis(experimentId: string, analysisId: string): Observable<void> {
+  deleteAnalysis(experimentId: number, analysisId: number): Observable<void> {
     return this.http.delete<void>(
       `${this.baseUrl()}/${experimentId}/clusters/${analysisId}`
     );

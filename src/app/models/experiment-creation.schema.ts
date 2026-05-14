@@ -59,7 +59,7 @@ export const SelectionCycleImportSchema = SelectionCycleBaseSchema;
 export const ExperimentCreationParamsSchema = z.object({
   name: z.string(),
   description: z.string(),
-  projectId: z.string().optional(),
+  projectId: z.coerce.number().optional(),
   sequencing: ExperimentSequencingSchema,
   selectionCycles: z.array(SelectionCycleImportSchema),
 });

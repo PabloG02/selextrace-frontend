@@ -3,7 +3,7 @@ import { ProjectReference } from './project';
 import {ExperimentStatus} from './experiment';
 
 export interface ExperimentSummary {
-  id: string;
+  id: number;
   name: string;
   description: string;
   status: ExperimentStatus;

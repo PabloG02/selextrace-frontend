@@ -8,9 +8,9 @@ import {ExperimentsApiService} from '../../../services/experiments-api.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 
 export interface MoveExperimentDialogData {
-  experimentId: string;
+  experimentId: number;
   experimentName: string;
-  currentProjectId: string | null;
+  currentProjectId: number | null;
   projects: ProjectSummary[];
 }
 
@@ -28,7 +28,7 @@ export class MoveExperimentDialogComponent {
   private readonly snackBar = inject(MatSnackBar);
 
   readonly isSaving = signal(false);
-  readonly selectedProjectId = signal<string | null>(this.data.currentProjectId);
+  readonly selectedProjectId = signal<number | null>(this.data.currentProjectId);
 
   readonly canMove = computed(() => {
     const selectedProjectId = this.selectedProjectId();

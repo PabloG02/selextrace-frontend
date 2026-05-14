@@ -42,7 +42,7 @@ export class ProjectDetailComponent {
   private readonly projectsApi = inject(ProjectsApiService);
   private readonly snackBar = inject(MatSnackBar);
 
-  readonly projectId = input.required<string>();
+  readonly projectId = input.required<number>();
   readonly projectRes = this.projectsApi.getProjectRes(this.projectId);
   readonly busyMemberIds = signal<Set<string>>(new Set());
   readonly accessLevels: ResourceAccessLevel[] = ['VIEWER', 'MANAGER'];

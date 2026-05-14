@@ -17,7 +17,7 @@ import { MatTableModule } from '@angular/material/table';
 import {MatTooltip} from '@angular/material/tooltip';
 
 export interface ExperimentAccessDialogData {
-  experimentId: string;
+  experimentId: number;
   experimentName: string;
 }
 

@@ -1,8 +1,8 @@
 import { FsbcConfiguration } from './fsbc-configuration';
 
 export interface FsbcAnalysis {
-  id: string;
-  experimentId: string;
+  id: number;
+  experimentId: number;
   requestConfig: FsbcConfiguration;
   aptamerToCluster: Record<number, number>;
   rankedStrings: FsbcStringResult[];
@@ -12,7 +12,7 @@ export interface FsbcAnalysis {
   clusterCount: number;
   stringCount: number;
   durationMs: number;
-  createdAt?: string;
+  createdAt: string;
 }
 
 export interface FsbcStringResult {

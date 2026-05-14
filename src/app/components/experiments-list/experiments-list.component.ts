@@ -69,7 +69,7 @@ export class ExperimentsListComponent {
   ];
 
   /** Set of currently selected experiment IDs */
-  readonly selectedIds = signal<Set<string>>(new Set());
+  readonly selectedIds = signal<Set<number>>(new Set());
 
   /** Filtered and sorted experiments based on current filters and search term */
   readonly filteredExperiments = this.experimentsStore.filteredExperiments;
@@ -92,7 +92,7 @@ export class ExperimentsListComponent {
    * @param event - The mouse event
    * @param id - The experiment ID to toggle
    */
-  toggleSelection(event: MouseEvent, id: string): void {
+  toggleSelection(event: MouseEvent, id: number): void {
     const experiment = this.filteredExperiments().find((item) => item.id === id);
     if (experiment?.accessLevel !== 'MANAGER') {
       return;
@@ -145,7 +145,7 @@ export class ExperimentsListComponent {
    * Navigate to the experiment detail page
    * @param id - The experiment ID to open
    */
-  openExperiment(id: string): void {
+  openExperiment(id: number): void {
     this.router.navigate(['/experiments', id]);
   }
 

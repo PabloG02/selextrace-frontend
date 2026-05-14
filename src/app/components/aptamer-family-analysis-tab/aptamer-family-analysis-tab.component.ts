@@ -86,7 +86,7 @@ export class AptamerFamilyAnalysisTab {
   private readonly dialog = inject(MatDialog);
 
   /* Inputs */
-  readonly experimentId = input.required<string>();
+  readonly experimentId = input.required<number>();
   readonly experimentReport = input.required<ExperimentReport>();
   /* View Queries */
   readonly clusteringDialog = viewChild.required<TemplateRef<void>>('clusteringDialog');
@@ -129,7 +129,7 @@ export class AptamerFamilyAnalysisTab {
   /** Tracks whether the clustering analysis is running */
   readonly isSubmitting = signal(false);
   /** Tracks which analysis is being deleted */
-  readonly deletingAnalysisId = signal<string | null>(null);
+  readonly deletingAnalysisId = signal<number | null>(null);
 
   /* Form: Select options */
   readonly randomizedRegionSizes = computed(() => {
@@ -165,7 +165,7 @@ export class AptamerFamilyAnalysisTab {
   });
 
   /** User-selected analysis ID */
-  readonly selectedAnalysisId = signal<string | null>(null);
+  readonly selectedAnalysisId = signal<number | null>(null);
 
   /**
    * Currently active analysis for display.
@@ -353,7 +353,7 @@ export class AptamerFamilyAnalysisTab {
    * Selects a specific cluster analysis for viewing.
    * Resets cluster selection when switching analyses.
    */
-  selectAnalysis(analysisId: string) {
+  selectAnalysis(analysisId: number) {
     this.selectedAnalysisId.set(analysisId);
     this.selectedClusterId.set(NaN);
   }
@@ -397,7 +397,7 @@ export class AptamerFamilyAnalysisTab {
       });
   }
 
-  deleteAnalysis(analysisId: string): void {
+  deleteAnalysis(analysisId: number): void {
     const experimentId = this.experimentId();
     if (!experimentId || !analysisId || this.deletingAnalysisId()) {
       return;

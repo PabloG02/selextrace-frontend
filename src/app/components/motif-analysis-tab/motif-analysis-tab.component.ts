@@ -84,7 +84,7 @@ export class MotifAnalysisTabComponent {
   private readonly dialog = inject(MatDialog);
 
   /* Inputs */
-  readonly experimentId = input.required<string>();
+  readonly experimentId = input.required<number>();
   readonly experimentReport = input.required<ExperimentReport>();
   /* View Queries */
   readonly motifDialog = viewChild.required<TemplateRef<void>>('motifDialog');
@@ -123,7 +123,7 @@ export class MotifAnalysisTabComponent {
   /** Tracks whether the motif analysis is running */
   readonly isSubmitting = signal(false);
   /** Tracks which analysis is being deleted */
-  readonly deletingAnalysisId = signal<string | null>(null);
+  readonly deletingAnalysisId = signal<number | null>(null);
 
   /* Form: Select options */
   readonly maxRandomizedRegionSize = computed(() => {
@@ -154,7 +154,7 @@ export class MotifAnalysisTabComponent {
   });
 
   /** User-selected analysis ID */
-  readonly selectedAnalysisId = signal<string | null>(null);
+  readonly selectedAnalysisId = signal<number | null>(null);
 
   /**
    * Currently active analysis for display.
@@ -344,7 +344,7 @@ export class MotifAnalysisTabComponent {
    * Selects a specific analysis for viewing.
    * Resets motif selection when switching analyses.
    */
-  selectAnalysis(analysisId: string) {
+  selectAnalysis(analysisId: number) {
     this.selectedAnalysisId.set(analysisId);
     this.selectedMotifRank.set(null);
     this.selectedAptamerRows.set([]);
@@ -388,7 +388,7 @@ export class MotifAnalysisTabComponent {
       });
   }
 
-  deleteAnalysis(analysisId: string): void {
+  deleteAnalysis(analysisId: number): void {
     const experimentId = this.experimentId();
     if (!experimentId || !analysisId || this.deletingAnalysisId()) {
       return;

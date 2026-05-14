@@ -2,7 +2,7 @@ import { ResourceAccessLevel } from './auth';
 import { ProjectReference } from './project';
 
 export interface ExperimentReport {
-  id: string;
+  id: number;
   createdAt: string;
   name: string;
   description: string;

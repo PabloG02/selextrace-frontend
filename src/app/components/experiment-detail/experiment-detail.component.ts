@@ -61,7 +61,7 @@ export class ExperimentDetailComponent {
 
   readonly activeTab = signal(0);
 
-  readonly experimentId = input.required<string>();
+  readonly experimentId = input.required<number>();
   readonly experimentReportRes = this.apiService.getExperimentReportRes(this.experimentId);
   readonly experimentReport = this.experimentReportRes.value;
 
@@ -180,9 +180,9 @@ export class ExperimentDetailComponent {
   }
 
   private openMoveDialogWithProjects(
-    experimentId: string,
+    experimentId: number,
     experimentName: string,
-    currentProjectId: string | null,
+    currentProjectId: number | null,
     projects: ProjectSummary[],
   ): void {
     if (!projects.length) {

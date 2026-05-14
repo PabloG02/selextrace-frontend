@@ -15,7 +15,7 @@ export class ProjectsApiService {
     return httpResource<ProjectSummary[]>(() => this.baseUrl());
   }
 
-  getProjectRes(id: Signal<string | undefined>) {
+  getProjectRes(id: Signal<number | undefined>) {
     return httpResource<ProjectDetail>(() => id() ? `${this.baseUrl()}/${id()}` : undefined);
   }
 
@@ -23,18 +23,18 @@ export class ProjectsApiService {
     return this.http.post<ProjectDetail>(this.baseUrl(), payload);
   }
 
-  updateProject(projectId: string, payload: { name: string; description: string }): Observable<ProjectDetail> {
+  updateProject(projectId: number, payload: { name: string; description: string }): Observable<ProjectDetail> {
     return this.http.patch<ProjectDetail>(`${this.baseUrl()}/${projectId}`, payload);
   }
 
   upsertMembership(
-    projectId: string,
+    projectId: number,
     payload: { userId?: string; email?: string; accessLevel: ResourceAccessLevel },
   ): Observable<ProjectDetail> {
     return this.http.post<ProjectDetail>(`${this.baseUrl()}/${projectId}/members`, payload);
   }
 
-  removeMembership(projectId: string, userId: string): Observable<void> {
+  removeMembership(projectId: number, userId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl()}/${projectId}/members/${userId}`);
   }
 }

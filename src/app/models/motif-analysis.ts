@@ -1,8 +1,8 @@
 import {AptaTraceConfiguration} from './aptatrace-configuration';
 
 export interface MotifAnalysis {
-  id: string;
-  experimentId: string;
+  id: number;
+  experimentId: number;
   requestConfig: AptaTraceConfiguration;
   roundNames: string[];
   profiles: MotifAnalysisProfile[];

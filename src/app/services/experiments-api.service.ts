@@ -19,30 +19,30 @@ export class ExperimentsApiService {
     return httpResource<ExperimentSummary[]>(() => this.baseUrl());
   }
 
-  getExperimentReportRes(id: Signal<string | undefined>) {
+  getExperimentReportRes(id: Signal<number | undefined>) {
     return httpResource<ExperimentReport>(() => id() ? `${this.baseUrl()}/${id()}` : undefined);
   }
 
-  deleteExperiment(id: string): Observable<void> {
+  deleteExperiment(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl()}/${id}`);
   }
 
-  listExperimentPermissions(id: string): Observable<ExperimentAccessGrant[]> {
+  listExperimentPermissions(id: number): Observable<ExperimentAccessGrant[]> {
     return this.http.get<ExperimentAccessGrant[]>(`${this.baseUrl()}/${id}/permissions`);
   }
 
   upsertExperimentPermissions(
-    id: string,
+    id: number,
     payload: { userId?: string; email?: string; accessLevel: ResourceAccessLevel },
   ): Observable<ExperimentAccessGrant[]> {
     return this.http.post<ExperimentAccessGrant[]>(`${this.baseUrl()}/${id}/permissions`, payload);
   }
 
-  removeExperimentPermissions(id: string, userId: string): Observable<void> {
+  removeExperimentPermissions(id: number, userId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl()}/${id}/permissions/${userId}`);
   }
 
-  transferExperimentToProject(id: string, projectId: string): Observable<ExperimentReport> {
+  transferExperimentToProject(id: number, projectId: number): Observable<ExperimentReport> {
     return this.http.patch<ExperimentReport>(`${this.baseUrl()}/${id}/project`, { projectId });
   }
 

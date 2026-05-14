@@ -11,23 +11,23 @@ export class FsbcApiService {
   private readonly backendConfig = inject(BackendConfigService);
   private readonly baseUrl = computed(() => `${this.backendConfig.backendUrl()}/api/experiments`);
 
-  getAnalysesRes(experimentId: Signal<string | undefined>) {
+  getAnalysesRes(experimentId: Signal<number | undefined>) {
     return httpResource<FsbcAnalysis[]>(() =>
       experimentId() ? `${this.baseUrl()}/${experimentId()}/fsbc` : undefined
     );
   }
 
-  getAnalysisRes(experimentId: Signal<string | undefined>, analysisId: Signal<string | undefined>) {
+  getAnalysisRes(experimentId: Signal<number | undefined>, analysisId: Signal<number | undefined>) {
     return httpResource<FsbcAnalysis>(() =>
       experimentId() && analysisId() ? `${this.baseUrl()}/${experimentId()}/fsbc/${analysisId()}` : undefined
     );
   }
 
-  createAnalysis(experimentId: string, payload: FsbcConfiguration): Observable<FsbcAnalysis> {
+  createAnalysis(experimentId: number, payload: FsbcConfiguration): Observable<FsbcAnalysis> {
     return this.http.post<FsbcAnalysis>(`${this.baseUrl()}/${experimentId}/fsbc`, payload);
   }
 
-  deleteAnalysis(experimentId: string, analysisId: string): Observable<void> {
+  deleteAnalysis(experimentId: number, analysisId: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl()}/${experimentId}/fsbc/${analysisId}`);
   }
 }

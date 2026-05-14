@@ -86,7 +86,7 @@ export class FsbcAnalysisTabComponent {
   private readonly predictionsApiService = inject(PredictionsApiService);
   private readonly dialog = inject(MatDialog);
 
-  readonly experimentId = input.required<string>();
+  readonly experimentId = input.required<number>();
   readonly experimentReport = input.required<ExperimentReport>();
   readonly fsbcDialog = viewChild.required<TemplateRef<void>>('fsbcDialog');
 
@@ -113,7 +113,7 @@ export class FsbcAnalysisTabComponent {
   readonly sequenceTableForm = form(this.sequenceTableFormModel);
 
   readonly isSubmitting = signal(false);
-  readonly deletingAnalysisId = signal<string | null>(null);
+  readonly deletingAnalysisId = signal<number | null>(null);
 
   readonly positiveSelectionCycles = computed(() =>
     [...this.experimentReport().selectionCycles]
@@ -128,7 +128,7 @@ export class FsbcAnalysisTabComponent {
     );
   });
 
-  readonly selectedAnalysisId = signal<string | null>(null);
+  readonly selectedAnalysisId = signal<number | null>(null);
   readonly activeAnalysis = computed<FsbcAnalysis | null>(() => {
     const analyses = this.sortedAnalyses();
     if (analyses.length === 0) {
@@ -301,7 +301,7 @@ export class FsbcAnalysisTabComponent {
     });
   }
 
-  selectAnalysis(analysisId: string) {
+  selectAnalysis(analysisId: number) {
     this.selectedAnalysisId.set(analysisId);
     this.selectedClusterId.set(null);
     this.selectedString.set(null);
@@ -351,7 +351,7 @@ export class FsbcAnalysisTabComponent {
       });
   }
 
-  deleteAnalysis(analysisId: string) {
+  deleteAnalysis(analysisId: number) {
     const experimentId = this.experimentId();
     if (!experimentId || !analysisId || this.deletingAnalysisId()) {
       return;

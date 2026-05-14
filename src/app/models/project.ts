@@ -1,7 +1,7 @@
 import { ResourceAccessLevel } from './auth';
 
 export interface ProjectReference {
-  id: string;
+  id: number;
   name: string;
 }
 

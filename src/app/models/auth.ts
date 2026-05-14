@@ -11,7 +11,7 @@ export interface AuthUser {
   username: string;
   systemRole: SystemRole;
   mustChangePassword: boolean;
-  personalProjectId: string | null;
+  personalProjectId: number | null;
   createdAt: string;
 }
 
@@ -28,6 +28,6 @@ export interface UserSummary {
   systemRole: SystemRole;
   active: boolean;
   mustChangePassword: boolean;
-  personalProjectId: string | null;
+  personalProjectId: number | null;
   createdAt: string;
 }

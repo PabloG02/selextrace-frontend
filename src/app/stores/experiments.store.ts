@@ -53,14 +53,14 @@ export class ExperimentsStore {
   }
 
   /** Deletes a single experiment and refreshes the list. */
-  deleteExperiment(id: string): Observable<void> {
+  deleteExperiment(id: number): Observable<void> {
     return this.apiService.deleteExperiment(id).pipe(
       tap(() => this.experiments.reload())
     );
   }
 
   /** Deletes multiple experiments in parallel and refreshes the list once. */
-  deleteExperiments(ids: string[]): Observable<void> {
+  deleteExperiments(ids: Array<number>): Observable<void> {
     if (ids.length === 0) return of(void 0);
 
     const tasks$ = ids.map(id => this.apiService.deleteExperiment(id));
@@ -84,7 +84,7 @@ export class ExperimentsStore {
     );
   }
 
-  isNameAvailable(name: string, ignoreId?: string): boolean {
+  isNameAvailable(name: string, ignoreId?: number): boolean {
     return !this.experiments.value()?.some(
       (experiment) =>
         experiment.name.toLocaleLowerCase() === name.toLocaleLowerCase() && experiment.id !== ignoreId,
