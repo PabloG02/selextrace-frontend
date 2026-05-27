@@ -435,15 +435,3 @@
     inset-inline-end: -0.1rem;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .fade-up,
-  .m3-card,
-  .action-primary,
-  .action-secondary,
-  .action-secondary mat-icon {
-    animation: none;
-    transition: none;
-    transform: none;
-  }
-}
