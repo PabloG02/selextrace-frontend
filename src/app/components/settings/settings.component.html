@@ -48,70 +48,72 @@
       </mat-card-content>
     </mat-card>
 
-    <form [formRoot]="passwordForm">
-      <mat-card class="settings-card elevated-card">
-        <mat-card-header>
-          <div mat-card-avatar class="icon-avatar card-avatar">
-            <mat-icon>security</mat-icon>
-          </div>
-          <mat-card-title>Security</mat-card-title>
-          <mat-card-subtitle>Update your password</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="password-form">
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Current password</mat-label>
-              <input
-                matInput
-                [formField]="passwordForm.currentPassword"
-                type="password" />
-              <mat-icon matIconPrefix>lock</mat-icon>
-              @for (error of passwordForm.currentPassword().errors(); track error.kind) {
-                <mat-error>{{ error.message }}</mat-error>
-              }
-            </mat-form-field>
+    @if (user.linkedProviders.includes('PASSWORD')) {
+      <form [formRoot]="passwordForm">
+        <mat-card class="settings-card elevated-card">
+          <mat-card-header>
+            <div mat-card-avatar class="icon-avatar card-avatar">
+              <mat-icon>security</mat-icon>
+            </div>
+            <mat-card-title>Security</mat-card-title>
+            <mat-card-subtitle>Update your password</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="password-form">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Current password</mat-label>
+                <input
+                  matInput
+                  [formField]="passwordForm.currentPassword"
+                  type="password" />
+                <mat-icon matIconPrefix>lock</mat-icon>
+                @for (error of passwordForm.currentPassword().errors(); track error.kind) {
+                  <mat-error>{{ error.message }}</mat-error>
+                }
+              </mat-form-field>
 
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>New password</mat-label>
-              <input
-                matInput
-                [formField]="passwordForm.newPassword"
-                type="password" />
-              <mat-icon matIconPrefix>password</mat-icon>
-              @for (error of passwordForm.newPassword().errors(); track error.kind) {
-                <mat-error>{{ error.message }}</mat-error>
-              }
-            </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>New password</mat-label>
+                <input
+                  matInput
+                  [formField]="passwordForm.newPassword"
+                  type="password" />
+                <mat-icon matIconPrefix>password</mat-icon>
+                @for (error of passwordForm.newPassword().errors(); track error.kind) {
+                  <mat-error>{{ error.message }}</mat-error>
+                }
+              </mat-form-field>
 
-            <mat-form-field appearance="outline" subscriptSizing="dynamic">
-              <mat-label>Confirm new password</mat-label>
-              <input
-                matInput
-                [formField]="passwordForm.confirmPassword"
-                type="password" />
-              <mat-icon matIconPrefix>lock_reset</mat-icon>
-              @for (error of passwordForm.confirmPassword().errors(); track error.kind) {
-                <mat-error>{{ error.message }}</mat-error>
-              }
-            </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Confirm new password</mat-label>
+                <input
+                  matInput
+                  [formField]="passwordForm.confirmPassword"
+                  type="password" />
+                <mat-icon matIconPrefix>lock_reset</mat-icon>
+                @for (error of passwordForm.confirmPassword().errors(); track error.kind) {
+                  <mat-error>{{ error.message }}</mat-error>
+                }
+              </mat-form-field>
 
-            @if (passwordSubmissionError(); as submissionError) {
-              <p class="field-error">{{ submissionError }}</p>
-            }
-          </div>
-        </mat-card-content>
-        <mat-card-actions align="end">
-          <button matButton="filled" type="submit" [disabled]="passwordForm().invalid() || passwordForm().submitting()">
-            <mat-icon>check</mat-icon>
-            @if (passwordForm().submitting()) {
-              Updating...
-            } @else {
-              Update password
-            }
-          </button>
-        </mat-card-actions>
-      </mat-card>
-    </form>
+              @if (passwordSubmissionError(); as submissionError) {
+                <p class="field-error">{{ submissionError }}</p>
+              }
+            </div>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button matButton="filled" type="submit" [disabled]="passwordForm().invalid() || passwordForm().submitting()">
+              <mat-icon>check</mat-icon>
+              @if (passwordForm().submitting()) {
+                Updating...
+              } @else {
+                Update password
+              }
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </form>
+    }
   }
 
   <mat-card class="settings-card elevated-card">

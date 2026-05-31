@@ -76,6 +76,7 @@ export class AuthService {
     return this.ensureCsrfToken().pipe(
       tap(() => this.isBusy.set(true)),
       switchMap(() => this.http.post<AuthUser>(`${this.apiBaseUrl()}/auth/signin`, payload)),
+      switchMap((user) => this.ensureCsrfToken().pipe(map(() => user))),
       tap((user) => {
         this.currentUser.set(user);
         this.isBusy.set(false);
@@ -91,6 +92,7 @@ export class AuthService {
     return this.ensureCsrfToken().pipe(
       tap(() => this.isBusy.set(true)),
       switchMap(() => this.http.post<AuthUser>(`${this.apiBaseUrl()}/auth/signup`, payload)),
+      switchMap((user) => this.ensureCsrfToken().pipe(map(() => user))),
       tap((user) => {
         this.currentUser.set(user);
         this.isBusy.set(false);
@@ -114,6 +116,10 @@ export class AuthService {
       switchMap(() => this.http.post<AuthUser>(`${this.apiBaseUrl()}/auth/change-password`, payload)),
       tap((user) => this.currentUser.set(user)),
     );
+  }
+
+  startGoogleLogin(): void {
+    window.location.assign(`${this.backendConfig.backendUrl()}/oauth2/authorization/google`);
   }
 
   private storeCsrfMetadata(response: CsrfResponse): void {

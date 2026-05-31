@@ -37,6 +37,15 @@
         </button>
       </form>
 
+      <div class="auth-divider">
+        <span>or continue with</span>
+      </div>
+
+      <button mat-stroked-button type="button" class="google-btn" (click)="signInWithGoogle()">
+        <mat-icon svgIcon="google"></mat-icon>
+        Continue with Google
+      </button>
+
       <div class="auth-actions">
         <p>Don't have an account?</p>
         <a matButton routerLink="/signup">Create account</a>

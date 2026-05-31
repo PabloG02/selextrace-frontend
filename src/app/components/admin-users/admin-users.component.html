@@ -67,7 +67,12 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef class="actions-header"> Actions </th>
         <td mat-cell *matCellDef="let user" class="actions-cell" (click)="$event.stopPropagation()">
-          <button mat-icon-button color="primary" matTooltip="Reset password" (click)="resetPassword(user)">
+          <button
+            mat-icon-button
+            color="primary"
+            matTooltip="Reset password"
+            [disabled]="!user.linkedProviders.includes('PASSWORD')"
+            (click)="resetPassword(user)">
             <mat-icon>lock_reset</mat-icon>
           </button>
         </td>

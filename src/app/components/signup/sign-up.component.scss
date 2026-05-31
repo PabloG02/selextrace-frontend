@@ -155,6 +155,33 @@
   }
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.25rem 0;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+  
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+  
+  &::before {
+    margin-right: 0.75rem;
+  }
+  
+  &::after {
+    margin-left: 0.75rem;
+  }
+}
+
+.google-btn {
+  width: 100%;
+  height: 48px;
+}
+
 .auth-actions {
   margin-top: 2.5rem;
   display: flex;

@@ -13,6 +13,15 @@
         <p>Get started with your free profile</p>
       </div>
 
+      <button mat-stroked-button type="button" class="google-btn" (click)="signUpWithGoogle()">
+        <mat-icon svgIcon="google"></mat-icon>
+        Continue with Google
+      </button>
+
+      <div class="auth-divider">
+        <span>or</span>
+      </div>
+
       <form class="auth-form" (submit)="submit($event)">
         <mat-form-field appearance="outline">
           <mat-label>Username</mat-label>

@@ -1,5 +1,6 @@
 export type SystemRole = 'ADMIN' | 'STANDARD';
 export type ResourceAccessLevel = 'MANAGER' | 'VIEWER';
+export type IdentityProvider = 'PASSWORD' | 'GOOGLE';
 
 export function userRoleLabel(systemRole: SystemRole | null | undefined): string {
   return systemRole === 'ADMIN' ? 'Admin' : 'Regular user';
@@ -11,6 +12,7 @@ export interface AuthUser {
   username: string;
   systemRole: SystemRole;
   mustChangePassword: boolean;
+  linkedProviders: IdentityProvider[];
   personalProjectId: number | null;
   createdAt: string;
 }
@@ -28,6 +30,7 @@ export interface UserSummary {
   systemRole: SystemRole;
   active: boolean;
   mustChangePassword: boolean;
+  linkedProviders: IdentityProvider[];
   personalProjectId: number | null;
   createdAt: string;
 }

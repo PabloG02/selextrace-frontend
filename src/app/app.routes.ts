@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { adminGuard, authGuard, guestOnlyGuard } from './auth.guards';
 import { AdminUsersComponent } from './components/admin-users/admin-users.component';
+import { AuthCallbackComponent } from './components/auth-callback/auth-callback.component';
 import { AppShellComponent } from './components/app-shell/app-shell.component';
 import { ExperimentDetailComponent } from './components/experiment-detail/experiment-detail.component';
 import { ExperimentsListComponent } from './components/experiments-list/experiments-list.component';
@@ -18,6 +19,11 @@ export const routes: Routes = [
     pathMatch: 'full',
     component: LandingComponent,
     title: 'SELEXTrace',
+  },
+  {
+    path: 'auth/callback',
+    component: AuthCallbackComponent,
+    title: 'Signing in - SELEXTrace',
   },
   {
     path: 'login',
