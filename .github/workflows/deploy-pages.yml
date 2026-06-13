@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -40,10 +40,28 @@ jobs:
       - name: Disable Jekyll processing
         run: touch dist/browser/.nojekyll
 
-      - name: Upload artifact
+      - name: Upload artifact for GH Pages
         uses: actions/upload-pages-artifact@v4
         with:
           path: dist/browser
+
+      - name: Zip frontend build for Release
+        run: |
+          cd dist/browser
+          zip -r ../../frontend-build.zip .
+
+      - name: Create release and upload Zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Delete the existing release and tag (ignore failure if it's the first run)
+          gh release delete latest --cleanup-tag -y || true
+
+          # Create a new release pointing to the current commit and upload the zip
+          gh release create latest frontend-build.zip \
+            --title "Latest build" \
+            --notes "Continuous frontend build generated from commit ${{ github.sha }}" \
+            --prerelease
 
   deploy:
     needs: build
