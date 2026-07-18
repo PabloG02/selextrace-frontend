@@ -33,8 +33,10 @@ interface ChartViewerDialogData {
 
 const DEFAULT_EXPORT_WIDTH = 1200;
 const DEFAULT_EXPORT_HEIGHT = 675;
-const MIN_EXPORT_WIDTH = 320;
-const MIN_EXPORT_HEIGHT = 240;
+const DEFAULT_ASPECT_RATIO = 16 / 9;
+const MIN_EXPORT_DIMENSION = 64;
+const MAX_EXPORT_DIMENSION = 8000;
+const DEFAULT_BACKGROUND_COLOR = '#ffffff';
 
 const ASPECT_RATIO_VALUES: Record<Exclude<AspectRatioPreset, 'current' | 'custom'>, number> = {
   '16:9': 16 / 9,
@@ -71,20 +73,22 @@ export class ChartViewerDialogComponent implements AfterViewInit, OnDestroy {
   readonly lockAspectRatio = signal(true);
   readonly exportWidth = signal(DEFAULT_EXPORT_WIDTH);
   readonly exportHeight = signal(DEFAULT_EXPORT_HEIGHT);
-  readonly previewWidth = signal(DEFAULT_EXPORT_WIDTH);
-  readonly previewHeight = signal(DEFAULT_EXPORT_HEIGHT);
+  readonly transparentBackground = signal(true);
+  readonly backgroundColor = signal(DEFAULT_BACKGROUND_COLOR);
   readonly isExporting = signal(false);
   readonly exportError = signal<string | null>(null);
 
+  private previewWidth = DEFAULT_EXPORT_WIDTH;
+  private previewHeight = DEFAULT_EXPORT_HEIGHT;
   private previewObserver?: ResizeObserver;
   private didInitializeDimensions = false;
 
   readonly aspectRatioOptions = [
-    { value: 'current' as const, label: 'Current preview' },
-    { value: '16:9' as const, label: '16:9 widescreen' },
-    { value: '4:3' as const, label: '4:3 standard' },
-    { value: '1:1' as const, label: '1:1 square' },
-    { value: '21:9' as const, label: '21:9 ultrawide' },
+    { value: 'current' as const, label: 'Current' },
+    { value: '16:9' as const, label: '16:9' },
+    { value: '4:3' as const, label: '4:3' },
+    { value: '1:1' as const, label: '1:1' },
+    { value: '21:9' as const, label: '21:9' },
     { value: 'custom' as const, label: 'Custom' },
   ];
 
@@ -94,8 +98,13 @@ export class ChartViewerDialogComponent implements AfterViewInit, OnDestroy {
     this.previewObserver = new ResizeObserver(([entry]) => {
       const width = Math.round(entry.contentRect.width);
       const height = Math.round(entry.contentRect.height);
-      this.previewWidth.set(width);
-      this.previewHeight.set(height);
+
+      if (width <= 0 || height <= 0) {
+        return;
+      }
+
+      this.previewWidth = width;
+      this.previewHeight = height;
 
       if (!this.didInitializeDimensions) {
         this.exportWidth.set(width);
@@ -133,7 +142,7 @@ export class ChartViewerDialogComponent implements AfterViewInit, OnDestroy {
   }
 
   protected updateWidth(rawValue: string): void {
-    const nextWidth = this.parseWidth(rawValue, this.exportWidth());
+    const nextWidth = this.parseDimension(rawValue, this.exportWidth());
     this.exportWidth.set(nextWidth);
 
     if (this.lockAspectRatio()) {
@@ -145,7 +154,7 @@ export class ChartViewerDialogComponent implements AfterViewInit, OnDestroy {
   }
 
   protected updateHeight(rawValue: string): void {
-    const nextHeight = this.parseHeight(rawValue, this.exportHeight());
+    const nextHeight = this.parseDimension(rawValue, this.exportHeight());
     this.exportHeight.set(nextHeight);
 
     if (this.lockAspectRatio()) {
@@ -167,6 +176,14 @@ export class ChartViewerDialogComponent implements AfterViewInit, OnDestroy {
     this.syncHeightToWidth(this.activeAspectRatio());
   }
 
+  protected updateTransparentBackground(checked: boolean): void {
+    this.transparentBackground.set(checked);
+  }
+
+  protected updateBackgroundColor(value: string): void {
+    this.backgroundColor.set(value);
+  }
+
   protected async exportChart(): Promise<void> {
     this.isExporting.set(true);
     this.exportError.set(null);
@@ -178,6 +195,7 @@ export class ChartViewerDialogComponent implements AfterViewInit, OnDestroy {
         height: this.exportHeight(),
         options: this.data.options,
         theme: this.themeService.echartsTheme(),
+        background: this.transparentBackground() ? 'transparent' : this.backgroundColor(),
       });
 
       this.downloadBlob(blob, `${this.slugify(this.data.exportFileName ?? this.data.title)}.${this.exportFormat()}`);
@@ -191,13 +209,13 @@ export class ChartViewerDialogComponent implements AfterViewInit, OnDestroy {
 
   private syncHeightToWidth(aspectRatio: number): void {
     this.exportHeight.set(
-      Math.round(this.exportWidth() / aspectRatio)
+      this.clampDimension(Math.round(this.exportWidth() / aspectRatio))
     );
   }
 
   private syncWidthToHeight(aspectRatio: number): void {
     this.exportWidth.set(
-      Math.round(this.exportHeight() * aspectRatio)
+      this.clampDimension(Math.round(this.exportHeight() * aspectRatio))
     );
   }
 
@@ -207,34 +225,34 @@ export class ChartViewerDialogComponent implements AfterViewInit, OnDestroy {
 
   private resolveAspectRatio(preset: AspectRatioPreset): number {
     if (preset === 'custom') {
-      return this.exportWidth() / this.exportHeight();
+      return this.safeAspectRatio(this.exportWidth(), this.exportHeight());
     }
 
     if (preset === 'current') {
-      return this.previewWidth() / this.previewHeight();
+      return this.safeAspectRatio(this.previewWidth, this.previewHeight);
     }
 
     return ASPECT_RATIO_VALUES[preset];
   }
 
-  private parseWidth(rawValue: string, fallback: number): number {
-    const parsed = Number.parseInt(rawValue, 10);
-
-    if (!Number.isFinite(parsed)) {
-      return fallback;
-    }
-
-    return parsed;
+  /** Falls back to a sane default if the preview hasn't been measured yet. */
+  private safeAspectRatio(width: number, height: number): number {
+    const ratio = width / height;
+    return Number.isFinite(ratio) && ratio > 0 ? ratio : DEFAULT_ASPECT_RATIO;
   }
 
-  private parseHeight(rawValue: string, fallback: number): number {
+  private parseDimension(rawValue: string, fallback: number): number {
     const parsed = Number.parseInt(rawValue, 10);
 
     if (!Number.isFinite(parsed)) {
       return fallback;
     }
 
-    return parsed;
+    return this.clampDimension(parsed);
+  }
+
+  private clampDimension(value: number): number {
+    return Math.min(MAX_EXPORT_DIMENSION, Math.max(MIN_EXPORT_DIMENSION, value));
   }
 
   private slugify(value: string): string {

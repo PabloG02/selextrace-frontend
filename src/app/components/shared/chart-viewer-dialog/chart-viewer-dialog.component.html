@@ -49,6 +49,7 @@
         [value]="exportWidth()"
         (input)="updateWidth($any($event.target).value)"
         aria-describedby="chart-export-size-summary" />
+      <span matTextSuffix>px</span>
     </mat-form-field>
 
     <mat-form-field appearance="outline">
@@ -60,8 +61,31 @@
         [value]="exportHeight()"
         (input)="updateHeight($any($event.target).value)"
         aria-describedby="chart-export-size-summary" />
+      <span matTextSuffix>px</span>
     </mat-form-field>
+
+    <mat-slide-toggle
+      [checked]="transparentBackground()"
+      (change)="updateTransparentBackground($event.checked)"
+      aria-label="Export with a transparent background">
+      Transparent background
+    </mat-slide-toggle>
+
+    @if (!transparentBackground()) {
+      <label class="background-color-picker">
+        <span>Background color</span>
+        <input
+          type="color"
+          [value]="backgroundColor()"
+          (input)="updateBackgroundColor($any($event.target).value)"
+          aria-label="Background color" />
+      </label>
+    }
   </section>
+
+  @if (exportError()) {
+    <p class="error" role="alert">{{ exportError() }}</p>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

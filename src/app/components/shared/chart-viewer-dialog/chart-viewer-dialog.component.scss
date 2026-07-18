@@ -44,6 +44,24 @@ mat-dialog-content {
   font: var(--mat-sys-body-small);
 }
 
+.background-color-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface);
+
+  input[type='color'] {
+    inline-size: 40px;
+    block-size: 32px;
+    padding: 2px;
+    border: 1px solid var(--mat-sys-outline-variant);
+    border-radius: var(--mat-sys-corner-small);
+    background: none;
+    cursor: pointer;
+  }
+}
+
 mat-dialog-actions {
   padding-top: 8px;
 }
