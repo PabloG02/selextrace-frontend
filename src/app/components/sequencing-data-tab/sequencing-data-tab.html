@@ -19,7 +19,7 @@
         <p class="settings-label">
           Select which selection cycle to inspect in the charts below.
         </p>
-        <mat-form-field appearance="outline" class="size-select">
+        <mat-form-field appearance="outline" class="size-select" subscriptSizing="dynamic">
           <mat-label>Selection Cycle</mat-label>
           <mat-select [formField]="sequencingForm.selectedCycleName">
             @for (cycle of selectionCycles(); track cycle.name) {
@@ -35,7 +35,7 @@
           To view the randomized region size distribution for different lengths, select the desired value below.
           By default, the randomized region size with the most reads is displayed.
         </p>
-        <mat-form-field appearance="outline" class="size-select">
+        <mat-form-field appearance="outline" class="size-select" subscriptSizing="dynamic">
           <mat-label>Randomized Region Size</mat-label>
           <mat-select [formField]="sequencingForm.selectedRegionSize">
             @for (size of randomizedRegionSizes(); track size) {
