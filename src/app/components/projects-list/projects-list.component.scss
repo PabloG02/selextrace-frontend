@@ -4,6 +4,10 @@
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
+mat-card-content {
+  flex: 1;
+}
+
 .meta {
   color: var(--mat-sys-on-surface-variant);
 }
