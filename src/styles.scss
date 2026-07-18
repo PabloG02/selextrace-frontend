@@ -178,3 +178,11 @@ body {
   resize: both;
   overflow: auto;
 }
+
+/* TODO: Remove this when upgrading to Angular 22, which adds support for progress indicators inside buttons. */
+.mdc-button__label:has(> mat-spinner) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: -8px;
+}

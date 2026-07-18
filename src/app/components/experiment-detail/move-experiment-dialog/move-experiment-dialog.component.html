@@ -4,7 +4,7 @@
 
   <mat-form-field appearance="outline" class="project-field">
     <mat-label>Destination project</mat-label>
-    <mat-select [value]="selectedProjectId()" (selectionChange)="selectedProjectId.set($event.value)">
+    <mat-select [value]="selectedProjectId()" [disabled]="isSaving()" (selectionChange)="selectedProjectId.set($event.value)">
       @for (project of data.projects; track project.id) {
         <mat-option [value]="project.id">{{ project.name }}</mat-option>
       }
@@ -13,8 +13,13 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button matButton="text" type="button" (click)="close()">Cancel</button>
+  <button matButton="text" type="button" (click)="close()" [disabled]="isSaving()">Cancel</button>
   <button matButton="filled" type="button" [disabled]="!canMove() || isSaving()" (click)="confirmMove()">
-    Move
+    @if (isSaving()) {
+      <mat-spinner diameter="14"></mat-spinner>
+      Moving...
+    } @else {
+      Move
+    }
   </button>
 </mat-dialog-actions>

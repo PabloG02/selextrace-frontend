@@ -448,11 +448,12 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button matButton="text" type="button" mat-dialog-close>
+    <button matButton="text" type="button" mat-dialog-close [disabled]="isSubmitting()">
       Cancel
     </button>
     <button matButton="filled" type="button" (click)="runFsbcAnalysis()" [disabled]="fsbcRunInvalid() || isSubmitting()">
       @if (isSubmitting()) {
+        <mat-spinner diameter="14"></mat-spinner>
         Running FSBC...
       } @else {
         Run FSBC

@@ -38,8 +38,9 @@ import {
   MatExpansionPanelTitle
 } from '@angular/material/expansion';
 import {Listbox, Option} from '@angular/aria/listbox';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {ChartDialogTriggerComponent} from '../shared/chart-dialog-trigger/chart-dialog-trigger.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 type RankedMotifProfile = {
   rank: number;
@@ -81,7 +82,9 @@ export class MotifAnalysisTabComponent {
   readonly themeService = inject(ThemeService);
   private readonly motifsApi = inject(MotifsApiService);
   private readonly chartService = inject(ExperimentChartService);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
+  private motifDialogRef: MatDialogRef<unknown> | null = null;
 
   /* Inputs */
   readonly experimentId = input.required<number>();
@@ -381,9 +384,11 @@ export class MotifAnalysisTabComponent {
           this.selectedMotifRank.set(null);
           this.selectedAptamerRows.set([]);
           this.analysesRes.reload();
+          this.motifDialogRef?.close();
         },
         error: (error) => {
           console.error('Failed to run AptaTRACE', error);
+          this.snackBar.open(error?.error?.message ?? 'Unable to run AptaTRACE. Please review the settings and try again.', 'Close', { duration: 5000 });
         }
       });
   }
@@ -408,14 +413,16 @@ export class MotifAnalysisTabComponent {
         },
         error: (error) => {
           console.error('Failed to delete motif analysis', error);
+          this.snackBar.open(error?.error?.message ?? 'Unable to delete motif analysis. Please try again.', 'Close', { duration: 5000 });
         }
       });
   }
 
   openAptaTraceDialog(): void {
-    this.dialog.open(this.motifDialog(), {
+    this.motifDialogRef = this.dialog.open(this.motifDialog(), {
       autoFocus: false
     });
+    this.motifDialogRef.afterClosed().subscribe(() => this.motifDialogRef = null);
   }
 
   formatAnalysisMeta(analysis: MotifAnalysis) {

@@ -349,9 +349,11 @@
             <button mat-button type="button" matStepperPrevious>Back</button>
             <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="isSubmitting()">
               @if (isSubmitting()) {
-                <mat-icon class="spin">refresh</mat-icon>
+                <mat-spinner diameter="14"></mat-spinner>
+                Creating Experiment...
+              } @else {
+                Create Experiment
               }
-              Create Experiment
             </button>
           </footer>
         </div>

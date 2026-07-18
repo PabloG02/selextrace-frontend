@@ -17,7 +17,7 @@ import { Listbox, Option } from '@angular/aria/listbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import {
   MatAccordion,
   MatExpansionPanel,
@@ -31,6 +31,7 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
 import { MatTableModule } from '@angular/material/table';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import { AptamerTableComponent, AptamerTableRow, SelectionCycleMetrics } from '../shared/aptamer-table/aptamer-table.component';
 import { ChartDialogTriggerComponent } from '../shared/chart-dialog-trigger/chart-dialog-trigger.component';
@@ -42,6 +43,7 @@ import { ExperimentChartService } from '../../services/experiment-chart.service'
 import { FsbcApiService } from '../../services/fsbc-api.service';
 import { PredictionsApiService } from '../../services/predictions-api.service';
 import { ThemeService } from '../../services/theme.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 type FsbcClusterRow = FsbcClusterSeed & {
   aptamerIds: number[];
@@ -74,7 +76,8 @@ type FsbcClusterRow = FsbcClusterSeed & {
     Listbox,
     Option,
     FornacVisualizationComponent,
-    ChartDialogTriggerComponent
+    ChartDialogTriggerComponent,
+    MatProgressSpinnerModule
   ],
   templateUrl: './fsbc-analysis-tab.component.html',
   styleUrl: './fsbc-analysis-tab.component.scss'
@@ -84,7 +87,9 @@ export class FsbcAnalysisTabComponent {
   private readonly fsbcApi = inject(FsbcApiService);
   private readonly chartService = inject(ExperimentChartService);
   private readonly predictionsApiService = inject(PredictionsApiService);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
+  private fsbcDialogRef: MatDialogRef<unknown> | null = null;
 
   readonly experimentId = input.required<number>();
   readonly experimentReport = input.required<ExperimentReport>();
@@ -344,9 +349,11 @@ export class FsbcAnalysisTabComponent {
           this.selectedString.set(null);
           this.selectedAptamerRows.set([]);
           this.analysesRes.reload();
+          this.fsbcDialogRef?.close();
         },
         error: (error) => {
           console.error('Failed to run FSBC', error);
+          this.snackBar.open(error?.error?.message ?? 'Unable to run FSBC. Please review the settings and try again.', 'Close', { duration: 5000 });
         }
       });
   }
@@ -372,16 +379,18 @@ export class FsbcAnalysisTabComponent {
         },
         error: (error) => {
           console.error('Failed to delete FSBC analysis', error);
+          this.snackBar.open(error?.error?.message ?? 'Unable to delete FSBC analysis. Please try again.', 'Close', { duration: 5000 });
         }
       });
   }
 
   openFsbcDialog() {
-    this.dialog.open(this.fsbcDialog(), {
+    this.fsbcDialogRef = this.dialog.open(this.fsbcDialog(), {
       autoFocus: false,
       width: '720px',
       maxWidth: 'calc(100vw - 32px)'
     });
+    this.fsbcDialogRef.afterClosed().subscribe(() => this.fsbcDialogRef = null);
   }
 
   formatAnalysisMeta(analysis: FsbcAnalysis) {

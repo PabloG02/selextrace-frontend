@@ -14,6 +14,13 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button matButton="text" type="button" (click)="close()">Cancel</button>
-  <button matButton="filled" type="button" (click)="create()">Create</button>
+  <button matButton="text" type="button" (click)="close()" [disabled]="isSaving()">Cancel</button>
+  <button matButton="filled" type="button" (click)="create()" [disabled]="isSaving()">
+    @if (isSaving()) {
+      <mat-spinner diameter="14"></mat-spinner>
+      Creating...
+    } @else {
+      Create
+    }
+  </button>
 </mat-dialog-actions>

@@ -6,6 +6,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { ProjectSummary } from '../../../models/project';
 import {ExperimentsApiService} from '../../../services/experiments-api.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 export interface MoveExperimentDialogData {
   experimentId: number;
@@ -16,7 +17,7 @@ export interface MoveExperimentDialogData {
 
 @Component({
   selector: 'app-move-experiment-dialog',
-  imports: [MatDialogModule, MatButtonModule, MatFormFieldModule, MatSelectModule],
+  imports: [MatDialogModule, MatButtonModule, MatFormFieldModule, MatSelectModule, MatProgressSpinnerModule],
   templateUrl: './move-experiment-dialog.component.html',
   styleUrl: './move-experiment-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,7 +42,7 @@ export class MoveExperimentDialogComponent {
 
   confirmMove(): void {
     const targetProjectId = this.selectedProjectId();
-    if (!this.canMove() || !targetProjectId) return;
+    if (this.isSaving() || !this.canMove() || !targetProjectId) return;
 
     this.isSaving.set(true);
 

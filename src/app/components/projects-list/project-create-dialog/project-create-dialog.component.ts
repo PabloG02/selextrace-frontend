@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import {ProjectsApiService} from '../../../services/projects-api.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ProjectDetail} from '../../../models/project';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 export interface ProjectCreateDialogResult {
   name: string;
@@ -21,6 +22,7 @@ export interface ProjectCreateDialogResult {
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './project-create-dialog.component.html',
   styleUrl: './project-create-dialog.component.scss',
@@ -44,6 +46,10 @@ export class ProjectCreateDialogComponent {
   }
 
   create(): void {
+    if (this.isSaving()) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

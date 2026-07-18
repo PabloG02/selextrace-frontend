@@ -36,6 +36,7 @@ import { CreateExperimentDto, SelectionCycle } from '../../models/create-experim
 import { ExperimentCreationParams } from '../../models/experiment-creation-params';
 import {ExperimentCreationParamsSchema} from '../../models/experiment-creation.schema';
 import {ProjectStore} from '../../stores/project.store';
+import {MatProgressSpinner} from '@angular/material/progress-spinner';
 
 type CycleFormGroup = FormGroup<{
   roundNumber: FormControl<number>;
@@ -72,6 +73,7 @@ type CycleFormGroup = FormGroup<{
     TitleCasePipe,
     FileUploadDropzoneComponent,
     FormsModule,
+    MatProgressSpinner,
   ],
   templateUrl: './new-experiment-wizard.component.html',
   styleUrl: './new-experiment-wizard.component.scss',

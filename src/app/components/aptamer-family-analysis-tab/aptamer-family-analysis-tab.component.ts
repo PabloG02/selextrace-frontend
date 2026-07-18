@@ -42,8 +42,10 @@ import {ThemeService} from '../../services/theme.service';
 import {FormsModule} from '@angular/forms';
 import {Listbox, Option} from '@angular/aria/listbox';
 import {MatRipple} from '@angular/material/core';
-import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import {MatDialog, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
 import {ChartDialogTriggerComponent} from '../shared/chart-dialog-trigger/chart-dialog-trigger.component';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-aptamer-family-analysis-tab',
@@ -74,7 +76,8 @@ import {ChartDialogTriggerComponent} from '../shared/chart-dialog-trigger/chart-
     MatRipple,
     Option,
     MatDialogModule,
-    ChartDialogTriggerComponent
+    ChartDialogTriggerComponent,
+    MatProgressSpinnerModule
   ],
   templateUrl: './aptamer-family-analysis-tab.component.html',
   styleUrl: './aptamer-family-analysis-tab.component.scss',
@@ -83,7 +86,9 @@ export class AptamerFamilyAnalysisTab {
   readonly themeService = inject(ThemeService);
   private readonly clustersApi = inject(ClustersApiService);
   private readonly chartService = inject(ExperimentChartService);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
+  private clusteringDialogRef: MatDialogRef<unknown> | null = null;
 
   /* Inputs */
   readonly experimentId = input.required<number>();
@@ -390,9 +395,11 @@ export class AptamerFamilyAnalysisTab {
           this.selectedClusterId.set(NaN);
           this.selectedAptamerRows.set([]);
           this.clusterAnalysesRes.reload();
+          this.clusteringDialogRef?.close();
         },
         error: (error) => {
           console.error('Failed to run clustering', error);
+          this.snackBar.open(error?.error?.message ?? 'Unable to run AptaCluster. Please review the settings and try again.', 'Close', { duration: 5000 });
         }
       });
   }
@@ -417,15 +424,17 @@ export class AptamerFamilyAnalysisTab {
         },
         error: (error) => {
           console.error('Failed to delete clustering analysis', error);
+          this.snackBar.open(error?.error?.message ?? 'Unable to delete clustering analysis. Please try again.', 'Close', { duration: 5000 });
         }
       });
   }
 
   openClusteringDialog(): void {
-    this.dialog.open(this.clusteringDialog(), {
+    this.clusteringDialogRef = this.dialog.open(this.clusteringDialog(), {
       autoFocus: false,
       width: '720px',
       maxWidth: 'calc(100vw - 32px)'
     });
+    this.clusteringDialogRef.afterClosed().subscribe(() => this.clusteringDialogRef = null);
   }
 }
