@@ -27,6 +27,10 @@ export class ProjectsApiService {
     return this.http.patch<ProjectDetail>(`${this.baseUrl()}/${projectId}`, payload);
   }
 
+  deleteProject(projectId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl()}/${projectId}`);
+  }
+
   upsertMembership(
     projectId: number,
     payload: { userId?: string; email?: string; accessLevel: ResourceAccessLevel },

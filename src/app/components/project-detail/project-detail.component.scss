@@ -2,6 +2,15 @@ mat-card-header {
   padding: 16px;
 }
 
+.project-form-actions {
+  display: flex;
+  gap: 8px;
+
+  > :first-child {
+    flex: 1;
+  }
+}
+
 .members-card {
   margin-top: 24px;
 }

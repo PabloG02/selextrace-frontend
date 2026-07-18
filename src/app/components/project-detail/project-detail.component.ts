@@ -2,6 +2,8 @@ import {ChangeDetectionStrategy, Component, computed, effect, inject, input, lin
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,13 +11,16 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ProjectsApiService } from '../../services/projects-api.service';
 import { ProjectDetail } from '../../models/project';
 import { ResourceAccessLevel } from '../../models/auth';
 import {email, form, FormField, FormRoot, required} from '@angular/forms/signals';
 import {firstValueFrom} from 'rxjs';
+import {filter} from 'rxjs/operators';
 import {MatTooltip} from '@angular/material/tooltip';
+import {ProjectStore} from '../../stores/project.store';
+import {ConfirmDialogComponent} from '../shared/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-project-detail',
@@ -24,6 +29,7 @@ import {MatTooltip} from '@angular/material/tooltip';
     MatButtonModule,
     MatCardModule,
     MatDividerModule,
+    MatDialogModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
@@ -39,8 +45,11 @@ import {MatTooltip} from '@angular/material/tooltip';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectDetailComponent {
-  private readonly projectsApi = inject(ProjectsApiService);
+private readonly projectsApi = inject(ProjectsApiService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
+  private readonly projectStore = inject(ProjectStore);
+  private readonly dialog = inject(MatDialog);
 
   readonly projectId = input.required<number>();
   readonly projectRes = this.projectsApi.getProjectRes(this.projectId);
@@ -144,6 +153,35 @@ export class ProjectDetailComponent {
         this.snackBar.open(message, 'Dismiss', { duration: 3500 });
       },
     });
+  }
+
+deleteProject(): void {
+    this.dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'Delete Project',
+          message: 'Delete this project? This is only possible when it contains no experiments.',
+          confirmLabel: 'Delete',
+          variant: 'warning',
+        },
+        autoFocus: false,
+      })
+      .afterClosed()
+      .pipe(filter(Boolean))
+      .subscribe({
+        next: () => {
+          this.projectsApi.deleteProject(this.projectId()).subscribe({
+            next: () => {
+              this.projectStore.reloadProjects();
+              this.router.navigate(['/projects']);
+            },
+            error: (error) => {
+              const message = error?.error?.message ?? 'Unable to delete the project.';
+              this.snackBar.open(message, 'Dismiss', { duration: 3500 });
+            },
+          });
+        },
+      });
   }
 
   canManageMembers(project: ProjectDetail): boolean {
