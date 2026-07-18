@@ -2,7 +2,7 @@
   <mat-card-content>
     <div class="header-grid">
       <!-- Show/Hide Primers -->
-      <div class="header-column">
+      <div class="header-column primers-column">
         <p class="header-label">To show or hide the primer regions in the table:</p>
         <mat-slide-toggle [formField]="poolForm.showPrimers" labelPosition="before">
           Show Primers
@@ -12,7 +12,7 @@
       <mat-divider vertical/>
 
       <!-- Use CPM -->
-      <div class="header-column">
+      <div class="header-column cpm-column">
         <p class="header-label">Toggle between counts per million (CPM) and raw counts</p>
         <mat-button-toggle-group aria-label="Count format" [formField]="poolForm.useCPM" hideSingleSelectionIndicator>
           <mat-button-toggle [value]="true">CPM</mat-button-toggle>
@@ -23,10 +23,10 @@
       <mat-divider vertical/>
 
       <!-- Items per Page -->
-      <div class="header-column">
+      <div class="header-column page-size-column">
         <p class="header-label">Change number of items per page</p>
-        <mat-form-field appearance="outline">
-          <mat-label>Items per page:</mat-label>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Items per page</mat-label>
           <input matInput type="number" [formField]="poolForm.itemsPerPage" />
         </mat-form-field>
       </div>
@@ -37,7 +37,7 @@
       <div class="header-column search-column">
         <p class="header-label">Search the pool (regex supported). For IDs, check the box and use comma-separated ids.</p>
         <div class="search-row">
-          <mat-form-field appearance="outline" class="search-field">
+          <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
             <input matInput placeholder="Query" [formField]="poolForm.query" />
           </mat-form-field>
           <mat-checkbox [formField]="poolForm.searchIds">Search IDs</mat-checkbox>
