@@ -99,7 +99,7 @@ export class NewExperimentWizardComponent {
     description: this.fb.nonNullable.control(''),
     projectId: this.fb.control<number | null>(null),
     isDemultiplexed: this.fb.nonNullable.control(true),
-    readType: this.fb.nonNullable.control<ReadType>('single-end'),
+    readType: this.fb.nonNullable.control<ReadType>('paired-end'),
     fileFormat: this.fb.nonNullable.control<FileFormat>('fastq'),
   });
 

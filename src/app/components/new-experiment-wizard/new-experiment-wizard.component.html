@@ -62,7 +62,7 @@
                 </p>
                 <mat-radio-group [formControl]="generalForm.controls.isDemultiplexed" class="radio-row">
                   <mat-radio-button [value]="true">IS Demultiplexed</mat-radio-button>
-                  <mat-radio-button [value]="false">IS NOT Demultiplexed</mat-radio-button>
+                  <mat-radio-button [value]="false" disabled>IS NOT Demultiplexed</mat-radio-button>
                 </mat-radio-group>
               </div>
 
@@ -73,7 +73,7 @@
                 </p>
                 <div class="input-row">
                   <mat-radio-group [formControl]="generalForm.controls.readType" class="radio-row">
-                    <mat-radio-button value="single-end">Single End</mat-radio-button>
+                    <mat-radio-button value="single-end" disabled>Single End</mat-radio-button>
                     <mat-radio-button value="paired-end">Paired End</mat-radio-button>
                   </mat-radio-group>
 
@@ -244,8 +244,8 @@
                     }
 
                     <div class="radio-row">
-                      <mat-checkbox [formControl]="cycle.controls.isControl">Is control?</mat-checkbox>
-                      <mat-checkbox [formControl]="cycle.controls.isCounterSelection">Counter-selection?</mat-checkbox>
+<!--                      <mat-checkbox [formControl]="cycle.controls.isControl">Is control?</mat-checkbox>-->
+<!--                      <mat-checkbox [formControl]="cycle.controls.isCounterSelection">Counter-selection?</mat-checkbox>-->
                     </div>
                   </section>
                 }
