@@ -27,9 +27,15 @@
 
 .workspace-grid {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 16px;
   align-items: start;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.aptamers-card {
+  flex: 1;
 }
 
 .state-block {

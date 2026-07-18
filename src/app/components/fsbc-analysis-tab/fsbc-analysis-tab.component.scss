@@ -6,13 +6,23 @@
 
 .workspace-grid {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 16px;
   align-items: start;
+  width: 100%;
+  overflow-x: auto;
 }
 
 .summary-card {
   width: 100%;
+
+  mat-card-header {
+    margin-bottom: 8px;
+  }
+}
+
+.cluster-aptamers-card {
+  flex: 1;
 }
 
 .dialog-control-grid {
@@ -89,7 +99,7 @@
 }
 
 .table-scroll {
-  max-height: 360px;
+  max-height: 690px;
   overflow: auto;
 }
 

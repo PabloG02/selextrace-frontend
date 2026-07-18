@@ -17,9 +17,19 @@
 
 .workspace-grid {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 16px;
   align-items: start;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.clusters-card {
+  min-width: 540px;
+}
+
+.cluster-aptamers-card {
+  flex: 1;
 }
 
 .no-padding {

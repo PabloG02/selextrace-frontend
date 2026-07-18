@@ -42,7 +42,7 @@
   </mat-card>
 
   <div class="workspace-grid">
-    <mat-card appearance="outlined">
+    <mat-card appearance="outlined" class="clusters-card">
       <mat-card-header>
         <mat-card-title-group>
           <mat-card-title>Clusters</mat-card-title>
@@ -54,7 +54,7 @@
             }
           </mat-card-subtitle>
           <div class="mat-card-header-actions">
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
               <mat-label>Reference cycle</mat-label>
               <mat-select [formField]="clusterTableForm.referenceCycleRound">
                 @for (cycle of experimentReport().selectionCycles; track cycle.name) {
@@ -79,7 +79,7 @@
       </mat-card-content>
     </mat-card>
 
-    <mat-card appearance="outlined">
+    <mat-card appearance="outlined" class="cluster-aptamers-card">
       <mat-card-header>
         <mat-card-title-group>
           <mat-card-title>Cluster Aptamers</mat-card-title>

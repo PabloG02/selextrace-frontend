@@ -14,8 +14,8 @@ import {MatSortModule, Sort} from '@angular/material/sort';
 export class ClusterTableComponent {
   readonly rows = input.required<ClusterTableRow[]>();
   readonly selectedClusterId = input<number | null>(null);
-  readonly pageSize = input<number>(15);
-  readonly pageSizeOptions = input<number[]>([15, 25, 50, 100]);
+  readonly pageSize = input<number>(10);
+  readonly pageSizeOptions = input<number[]>([10, 25, 50, 100]);
 
   readonly clusterSelected = output<number>();
 
