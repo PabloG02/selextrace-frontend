@@ -107,7 +107,7 @@ export class AptamerPoolTabComponent {
   // 2. Pipeline: Filtering (Search)
   readonly filteredData = linkedSignal(() => {
     const data = this.totalAptamerData();
-    const query = this.poolForm.query().value()?.trim().toLowerCase();
+    const query = this.poolForm.query().value()?.trim();
     const searchIds = this.poolForm.searchIds().value();
 
     if (!query) return data;
@@ -117,8 +117,15 @@ export class AptamerPoolTabComponent {
       const ids = query.split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
       return data.filter(row => ids.includes(row.id));
     } else {
-      // Sequence Search
-      return data.filter(row => row.sequence?.toLowerCase().includes(query));
+      // Sequence Search (regex supported)
+      try {
+        const regex = new RegExp(query, 'i');
+        return data.filter(row => row.sequence && regex.test(row.sequence));
+      } catch (e) {
+        // Fallback to substring search (case-insensitive) if regex compilation fails
+        const queryLower = query.toLowerCase();
+        return data.filter(row => row.sequence?.toLowerCase().includes(queryLower));
+      }
     }
   });
 
