@@ -126,7 +126,7 @@ export class NewExperimentWizardComponent {
   readonly acceptedFileExtensions = computed(() =>
     this.generalForm.controls.fileFormat.value === 'fastq'
       ? '.fastq,.fq,.fastq.gz,.fq.gz'
-      : '.fasta,.fa,.fna,.fasta.gz,.fa.gz',
+      : '',
   );
 
   constructor() {

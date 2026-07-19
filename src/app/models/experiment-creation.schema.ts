@@ -16,7 +16,7 @@ export const RangeRandomizedRegionSchema = z.object({
 /* Sequencing */
 
 export const ReadTypeSchema = z.enum(['single-end', 'paired-end']);
-export const FileFormatSchema = z.enum(['fastq', 'fasta']);
+export const FileFormatSchema = z.literal('fastq');
 
 export const ExperimentSequencingSchema = z.object({
   isDemultiplexed: z.boolean(),
