@@ -112,8 +112,8 @@ export class SequencingDataTab {
 
   /* State */
   readonly sequencingFormModel = signal({
-    axisUnit: 'count',
-    axisScale: 'linear',
+    axisUnit: 'count' as 'count' | 'percentage',
+    axisScale: 'linear' as 'linear' | 'logarithmic',
     selectedRegionSize: 0,
     selectedCycleName: null as string | null,
   });

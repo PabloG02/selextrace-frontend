@@ -139,14 +139,19 @@ export class ExperimentChartService {
       const allKeys = Array.from({ length: maxKey + 5 }, (_, i) => i);
 
       const isPercentage = axisUnit() === 'percentage';
+      const isLog = axisScale() === 'logarithmic';
 
       const values = allKeys.map(k => {
         // Map values, defaulting to 0 for missing keys.
         const rawValue = distribution[k] ?? 0;
-        return isPercentage && total > 0 ? (rawValue / total) * 100 : rawValue;
+        const baseValue = isPercentage && total > 0 ? (rawValue / total) * 100 : rawValue;
+        return isLog ? Math.log(baseValue + 1) : baseValue;
       });
 
-      const yAxisName = isPercentage ? 'Percentage of Occurrence' : 'Frequency of Occurrence';
+      let yAxisName = isPercentage ? 'Percentage of Occurrence' : 'Frequency of Occurrence';
+      if (isLog) {
+        yAxisName += ' ( log(x + 1) )';
+      }
 
       return {
         grid: {
@@ -161,6 +166,7 @@ export class ExperimentChartService {
           type: 'category',
           name: 'Randomized Region Size',
           nameLocation: 'middle',
+          nameGap: 30,
           data: allKeys
         },
         yAxis: {
@@ -168,6 +174,7 @@ export class ExperimentChartService {
           name: yAxisName,
           nameLocation: 'middle',
           nameRotate: 90,
+          nameGap: 50,
         },
         series: [{
           type: 'bar',
@@ -1392,20 +1399,27 @@ export class ExperimentChartService {
       }
 
       const isLog = scale() === 'logarithmic';
-      const points = aptamers.map(row => {
-        const referenceCpm = row.cycles[reference.round].cpm;
-        const compareCpm = row.cycles[compareTo.round].cpm;
-        const x = isLog ? Math.log(referenceCpm): referenceCpm;
-        const y = isLog ? Math.log(compareCpm) : compareCpm;
+      const points = aptamers
+        .map(row => {
+          const referenceCpm = row.cycles[reference.round].cpm;
+          const compareCpm = row.cycles[compareTo.round].cpm;
 
-        return {
-          id: row.id,
-          x,
-          y,
-          referenceCpm,
-          compareCpm
-        };
-      });
+          if (isLog && (referenceCpm <= 0 || compareCpm <= 0)) {
+            return null;
+          }
+
+          const x = isLog ? Math.log(referenceCpm) : referenceCpm;
+          const y = isLog ? Math.log(compareCpm) : compareCpm;
+
+          return {
+            id: row.id,
+            x,
+            y,
+            referenceCpm,
+            compareCpm
+          };
+        })
+        .filter((p): p is NonNullable<typeof p> => p !== null);
 
       return {
         grid: {
@@ -1423,18 +1437,19 @@ export class ExperimentChartService {
           }
         },
         xAxis: {
-          type: isLog? 'log' : 'value',
-          name: `${reference.name} (CPM)`,
-          min: 0,
+          type: 'value',
+          name: `${reference.name} (CPM)${isLog ? ' (log)' : ''}`,
+          min: isLog ? undefined : 0,
           nameLocation: 'middle',
           nameGap: 30
         },
         yAxis: {
-          type: isLog? 'log' : 'value',
-          name: `${compareTo.name} (CPM)`,
-          min: 0,
+          type: 'value',
+          name: `${compareTo.name} (CPM)${isLog ? ' (log)' : ''}`,
+          min: isLog ? undefined : 0,
           nameLocation: 'middle',
           nameRotate: 90,
+          nameGap: 30
         },
         series: [
           {
